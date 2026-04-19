@@ -280,3 +280,54 @@ Para dos monedas, renderizar dos cards:
 - [ ] ToastService conectado al shell
 - [ ] JSON-server + HttpClient real
 - [ ] Optimistic updates en Effects
+
+## Flujo de aprendizaje
+
+Este repo se usa como ejercicio iterativo. El commit con la UI completa (sin lógica) se marca como tag inmutable para poder rehacer la capa de estado varias veces desde el mismo punto de partida.
+
+### Checkpoint inicial
+
+```bash
+# Marcar el estado "UI completa, sin lógica" como punto de partida
+git tag -a ui-complete -m "UI completa: shell, dashboard, form create/edit, lista con filtros, primitivas UI"
+```
+
+### Iteración 1 — con ayuda de Claude
+
+```bash
+git checkout -b learn/ngrx-guided
+# ... trabajar store, effects, services con Claude como apoyo ...
+git push -u origin learn/ngrx-guided   # opcional, backup remoto
+```
+
+### Iteración 2 — solo, partiendo del mismo checkpoint
+
+```bash
+# Arrancar desde el tag, NO desde la rama guiada
+git checkout -b learn/ngrx-solo ui-complete
+# ... implementar sin mirar learn/ngrx-guided ...
+```
+
+### Comparar ambas versiones
+
+```bash
+# Diff completo entre las dos tentativas
+git diff learn/ngrx-guided learn/ngrx-solo
+
+# Solo la capa de store/effects
+git diff learn/ngrx-guided learn/ngrx-solo -- 'src/app/features/*/store'
+
+# Ver qué archivos difieren sin el contenido
+git diff --stat learn/ngrx-guided learn/ngrx-solo
+```
+
+### Limpieza opcional
+
+Cuando quieras conservar solo el tag histórico y descartar las ramas de experimento:
+
+```bash
+git branch -D learn/ngrx-guided learn/ngrx-solo
+git push origin --delete learn/ngrx-guided learn/ngrx-solo   # si las pusheaste
+```
+
+El tag `ui-complete` queda como referencia permanente para futuras iteraciones.
