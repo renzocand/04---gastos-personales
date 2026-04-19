@@ -1,0 +1,166 @@
+<div class="mx-auto max-w-xl">
+  <div class="mb-4">
+    <button
+      type="button"
+      (click)="location.back()"
+      class="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-sm font-medium text-slate-600 transition hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
+    >
+      <lucide-angular [img]="ArrowLeftIcon" class="size-4"></lucide-angular>
+      <span>Volver</span>
+    </button>
+  </div>
+
+  <ui-card>
+    <form class="space-y-5 p-5 sm:space-y-6 sm:p-6">
+      <header>
+        <h1 class="text-xl font-semibold tracking-tight text-slate-900">
+          {{ pageTitle() }}
+        </h1>
+        <p class="mt-1 text-sm text-slate-500">
+          {{ isEdit() ? 'Modificá los datos del movimiento' : 'Registrá un movimiento' }}
+        </p>
+      </header>
+
+      <fieldset>
+        <legend class="block text-sm font-medium text-slate-700">Moneda</legend>
+        <div class="mt-1.5 grid grid-cols-2 gap-2">
+          @for (cur of currencies; track cur.id) {
+            <label class="relative cursor-pointer">
+              <input
+                type="radio"
+                name="currency"
+                [value]="cur.id"
+                [checked]="cur.default"
+                class="peer sr-only"
+              />
+              <div
+                class="flex items-center justify-center gap-2 rounded-lg border-2 border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:border-slate-300 peer-checked:border-violet-600 peer-checked:bg-violet-50 peer-checked:text-violet-700 peer-focus-visible:ring-2 peer-focus-visible:ring-violet-500 peer-focus-visible:ring-offset-2"
+              >
+                <span class="font-semibold tabular-nums">{{ cur.symbol }}</span>
+                <span>{{ cur.label }}</span>
+              </div>
+            </label>
+          }
+        </div>
+      </fieldset>
+
+      <div>
+        <label for="amount" class="block text-sm font-medium text-slate-700">
+          Monto
+        </label>
+        <input
+          id="amount"
+          name="amount"
+          type="number"
+          inputmode="decimal"
+          min="0"
+          step="0.01"
+          placeholder="0,00"
+          required
+          class="mt-1.5 block w-full rounded-lg border border-slate-300 bg-white px-3 py-3 text-2xl font-semibold tabular-nums text-slate-900 placeholder:text-slate-300 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20"
+        />
+      </div>
+
+      <div>
+        <label
+          for="description"
+          class="block text-sm font-medium text-slate-700"
+        >
+          Descripción
+        </label>
+        <input
+          id="description"
+          name="description"
+          type="text"
+          maxlength="80"
+          placeholder="Ej: Almuerzo en Wong"
+          autocomplete="off"
+          required
+          class="mt-1.5 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20"
+        />
+      </div>
+
+      <fieldset>
+        <legend class="block text-sm font-medium text-slate-700">
+          Categoría
+        </legend>
+        <div class="mt-1.5 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+          @for (cat of categories; track cat.id) {
+            <label class="relative cursor-pointer">
+              <input
+                type="radio"
+                name="category"
+                [value]="cat.id"
+                required
+                class="peer sr-only"
+              />
+              <div
+                class="flex h-full flex-col items-center gap-2 rounded-xl border-2 border-slate-200 bg-white px-3 py-3.5 transition hover:border-slate-300 peer-checked:border-violet-600 peer-checked:bg-violet-50 peer-focus-visible:ring-2 peer-focus-visible:ring-violet-500 peer-focus-visible:ring-offset-2"
+              >
+                <span
+                  class="flex size-9 items-center justify-center rounded-lg"
+                  [class]="cat.iconClass"
+                  aria-hidden="true"
+                >
+                  <lucide-angular [img]="cat.icon" class="size-4"></lucide-angular>
+                </span>
+                <span class="text-xs font-medium text-slate-700">
+                  {{ cat.label }}
+                </span>
+              </div>
+            </label>
+          }
+        </div>
+      </fieldset>
+
+      <div>
+        <label for="date" class="block text-sm font-medium text-slate-700">
+          Fecha
+        </label>
+        <input
+          id="date"
+          name="date"
+          type="date"
+          required
+          class="mt-1.5 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20"
+        />
+      </div>
+
+      <div
+        class="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:items-center sm:justify-end"
+      >
+        @if (isEdit()) {
+          <button
+            type="button"
+            (click)="confirmDialogRef.open()"
+            class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-rose-200 bg-white px-4 py-2.5 text-sm font-medium text-rose-700 transition hover:bg-rose-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2 sm:mr-auto"
+          >
+            <lucide-angular [img]="TrashIcon" class="size-4"></lucide-angular>
+            Eliminar
+          </button>
+        }
+        <a
+          routerLink="/expenses"
+          class="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
+        >
+          Cancelar
+        </a>
+        <button
+          type="submit"
+          class="inline-flex items-center justify-center rounded-lg bg-violet-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-violet-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
+        >
+          {{ submitLabel() }}
+        </button>
+      </div>
+    </form>
+  </ui-card>
+</div>
+
+<ui-confirm-dialog
+  #confirmDialogRef
+  title="Eliminar gasto"
+  message="Esta acción no se puede deshacer. El gasto se eliminará permanentemente."
+  confirmLabel="Eliminar"
+  confirmVariant="danger"
+  (confirmed)="onDeleteConfirmed()"
+/>

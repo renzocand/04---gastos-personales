@@ -1,0 +1,50 @@
+<div class="min-h-dvh bg-slate-50 text-slate-900 antialiased">
+  <header class="sticky top-0 z-10 border-b border-slate-200 bg-white/85 backdrop-blur">
+    <div class="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-6">
+      <a routerLink="/dashboard" class="flex items-center gap-2.5">
+        <span
+          class="flex size-9 items-center justify-center rounded-xl bg-violet-600 text-white shadow-sm"
+          aria-hidden="true"
+        >
+          <lucide-angular [img]="ReceiptIcon" class="size-4"></lucide-angular>
+        </span>
+        <span class="text-base font-semibold tracking-tight">Gastos</span>
+      </a>
+
+      <a
+        routerLink="/expenses/new"
+        class="inline-flex items-center gap-1.5 rounded-lg bg-violet-600 px-3 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-violet-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
+      >
+        <lucide-angular [img]="PlusIcon" class="size-4"></lucide-angular>
+        <span class="hidden sm:inline">Nuevo gasto</span>
+        <span class="sr-only sm:hidden">Nuevo gasto</span>
+      </a>
+    </div>
+
+    <nav class="mx-auto flex max-w-5xl gap-1 px-4 sm:px-6" aria-label="Secciones">
+      <a
+        routerLink="/dashboard"
+        routerLinkActive="border-violet-600 text-violet-700"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="flex items-center gap-2 border-b-2 border-transparent px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:text-slate-900"
+      >
+        <lucide-angular [img]="DashboardIcon" class="size-4"></lucide-angular>
+        <span>Dashboard</span>
+      </a>
+      <a
+        routerLink="/expenses"
+        routerLinkActive="border-violet-600 text-violet-700"
+        class="flex items-center gap-2 border-b-2 border-transparent px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:text-slate-900"
+      >
+        <lucide-angular [img]="ReceiptIcon" class="size-4"></lucide-angular>
+        <span>Gastos</span>
+      </a>
+    </nav>
+  </header>
+
+  <main class="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8">
+    <router-outlet />
+  </main>
+
+  <ui-toast-container [toasts]="[]" />
+</div>

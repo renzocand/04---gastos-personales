@@ -1,0 +1,22 @@
+<div class="flex items-center gap-3">
+  <span
+    class="flex size-10 flex-none items-center justify-center rounded-lg"
+    [class]="meta().iconClass"
+    aria-hidden="true"
+  >
+    <lucide-angular [img]="meta().icon" class="size-5"></lucide-angular>
+  </span>
+  <div class="min-w-0 flex-1">
+    <p class="truncate text-sm font-medium text-slate-900">
+      {{ description() }}
+    </p>
+    <p class="text-xs text-slate-500">
+      <span>{{ category() }}</span>
+      <span class="mx-1.5 text-slate-300" aria-hidden="true">•</span>
+      <span>{{ date() }}</span>
+    </p>
+  </div>
+  <p class="flex-none text-sm font-semibold text-slate-900">
+    −{{ amount() }}
+  </p>
+</div>

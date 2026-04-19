@@ -1,0 +1,104 @@
+<div class="flex flex-col gap-5 sm:gap-6">
+  <section>
+    <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">
+      Abril 2026
+    </h1>
+    <p class="mt-1 text-sm text-slate-500">Resumen del mes</p>
+  </section>
+
+  @if (loading()) {
+    <div class="grid gap-4 sm:grid-cols-2">
+      <ui-card>
+        <div class="p-5 sm:p-6">
+          <ui-skeleton class="h-4 w-28" />
+          <ui-skeleton class="mt-4 h-9 w-40" />
+          <ui-skeleton class="mt-2 h-3 w-24" />
+        </div>
+      </ui-card>
+      <ui-card>
+        <div class="p-5 sm:p-6">
+          <ui-skeleton class="h-4 w-28" />
+          <ui-skeleton class="mt-4 h-9 w-40" />
+          <ui-skeleton class="mt-2 h-3 w-24" />
+        </div>
+      </ui-card>
+    </div>
+    <div class="grid gap-5 sm:gap-6 lg:grid-cols-5">
+      <ui-card class="lg:col-span-2">
+        <div class="space-y-4 p-5 sm:p-6">
+          <ui-skeleton class="h-4 w-32" />
+          @for (i of [1, 2, 3, 4]; track i) {
+            <div>
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <ui-skeleton class="h-9 w-9 rounded-lg" />
+                  <ui-skeleton class="h-4 w-20" />
+                </div>
+                <ui-skeleton class="h-4 w-14" />
+              </div>
+              <ui-skeleton class="mt-2 h-2 w-full" />
+            </div>
+          }
+        </div>
+      </ui-card>
+      <ui-card class="lg:col-span-3">
+        <div class="space-y-3 p-5 sm:p-6">
+          @for (i of [1, 2, 3, 4, 5]; track i) {
+            <div class="flex items-center gap-3">
+              <ui-skeleton class="h-10 w-10 rounded-lg" />
+              <div class="flex-1 space-y-2">
+                <ui-skeleton class="h-4 w-40" />
+                <ui-skeleton class="h-3 w-24" />
+              </div>
+              <ui-skeleton class="h-4 w-16" />
+            </div>
+          }
+        </div>
+      </ui-card>
+    </div>
+  } @else if (error(); as errorMsg) {
+    <ui-card>
+      <ui-error-state
+        title="No pudimos cargar el dashboard"
+        [message]="errorMsg"
+      />
+    </ui-card>
+  } @else if (!hasExpenses()) {
+    <ui-card>
+      <ui-empty-state
+        [icon]="ReceiptIcon"
+        title="Todavía no hay gastos"
+        message="Empezá registrando tu primer movimiento para ver tu resumen."
+      >
+        <a
+          routerLink="/expenses/new"
+          class="inline-flex items-center rounded-lg bg-violet-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-violet-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
+        >
+          Registrar primer gasto
+        </a>
+      </ui-empty-state>
+    </ui-card>
+  } @else {
+    <div class="grid gap-4 sm:grid-cols-2">
+      <app-total-card
+        total="S/ 1.248,50"
+        [variation]="-8"
+        previousLabel="vs. marzo"
+      />
+      <app-total-card
+        total="US$ 180,40"
+        [variation]="12"
+        previousLabel="vs. marzo"
+      />
+    </div>
+
+    <div class="grid gap-5 sm:gap-6 lg:grid-cols-5">
+      <div class="lg:col-span-2">
+        <app-category-breakdown />
+      </div>
+      <div class="lg:col-span-3">
+        <app-recent-expenses />
+      </div>
+    </div>
+  }
+</div>

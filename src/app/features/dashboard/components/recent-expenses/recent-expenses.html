@@ -1,0 +1,36 @@
+<ui-card>
+  <div class="flex items-center justify-between border-b border-slate-100 p-5 sm:p-6">
+    <div>
+      <h2 class="text-sm font-semibold text-slate-900">Últimos gastos</h2>
+      <p class="mt-0.5 text-xs text-slate-500">Movimientos recientes</p>
+    </div>
+    <a
+      routerLink="/expenses"
+      class="text-sm font-medium text-violet-700 transition hover:text-violet-900"
+    >
+      Ver todos
+    </a>
+  </div>
+
+  <ul class="divide-y divide-slate-100">
+    @for (item of items; track item.id) {
+      <li>
+        <a
+          [routerLink]="['/expenses', item.id, 'edit']"
+          class="block px-5 py-3 transition hover:bg-slate-50 focus:outline-none focus-visible:bg-violet-50 sm:px-6"
+        >
+          <app-expense-card
+            [description]="item.description"
+            [category]="item.category"
+            [amount]="item.amount"
+            [date]="item.date"
+          />
+        </a>
+      </li>
+    } @empty {
+      <li class="px-5 py-12 text-center text-sm text-slate-500 sm:px-6">
+        Todavía no cargaste ningún gasto.
+      </li>
+    }
+  </ul>
+</ui-card>

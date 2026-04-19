@@ -1,0 +1,24 @@
+<ui-card>
+  <div class="p-5 sm:p-6">
+    <div class="flex items-center justify-between gap-3">
+      <p class="text-sm font-medium text-slate-500">Total del mes</p>
+      @if (variation() !== 0) {
+        <span
+          class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium"
+          [class]="
+            isIncrease()
+              ? 'bg-rose-50 text-rose-700'
+              : 'bg-emerald-50 text-emerald-700'
+          "
+        >
+          <lucide-angular [img]="trendIcon()" class="size-3.5"></lucide-angular>
+          {{ isIncrease() ? '+' : '' }}{{ variation() }}%
+        </span>
+      }
+    </div>
+    <p class="mt-3 text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
+      {{ total() }}
+    </p>
+    <p class="mt-1 text-xs text-slate-500">{{ previousLabel() }}</p>
+  </div>
+</ui-card>
