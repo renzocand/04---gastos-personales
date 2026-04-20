@@ -1,24 +1,11 @@
 import { Location } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import {
-  ArrowLeft,
-  Bus,
-  Gamepad2,
-  LucideAngularModule,
-  Package,
-  Trash2,
-  UtensilsCrossed,
-} from 'lucide-angular';
+import { ArrowLeft, LucideAngularModule, Trash2 } from 'lucide-angular';
 import { Card } from '../../../../shared/ui/card/card';
 import { ConfirmDialog } from '../../../../shared/ui/confirm-dialog/confirm-dialog';
-
-type CategoryOption = {
-  id: 'comida' | 'transporte' | 'ocio' | 'otro';
-  label: string;
-  icon: typeof UtensilsCrossed;
-  iconClass: string;
-};
+import { CATEGORIES } from '../../../categories/models/category';
+import { CATEGORY_OPTIONS } from '../../../categories/ui/category-meta';
 
 type CurrencyOption = {
   id: 'PEN' | 'USD';
@@ -55,12 +42,8 @@ export class ExpenseForm {
     { id: 'USD', symbol: 'US$', label: 'Dólares' },
   ];
 
-  protected readonly categories: CategoryOption[] = [
-    { id: 'comida', label: 'Comida', icon: UtensilsCrossed, iconClass: 'bg-violet-100 text-violet-700' },
-    { id: 'transporte', label: 'Transporte', icon: Bus, iconClass: 'bg-indigo-100 text-indigo-700' },
-    { id: 'ocio', label: 'Ocio', icon: Gamepad2, iconClass: 'bg-amber-100 text-amber-700' },
-    { id: 'otro', label: 'Otro', icon: Package, iconClass: 'bg-rose-100 text-rose-700' },
-  ];
+  protected readonly categories = CATEGORY_OPTIONS;
+
 
   protected onDeleteConfirmed(): void {
     // Renzo

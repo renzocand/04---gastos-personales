@@ -84,4 +84,9 @@ export class ExpensesService {
     return of(MOCK_EXPENSES).pipe(delay(500))
   }
 
+  create(payload:Omit<Expense,'id'>):Observable<Expense>{
+      const created: Expense = { ...payload, id: crypto.randomUUID() };
+      return of(created).pipe(delay(500));
+  }
+
 }

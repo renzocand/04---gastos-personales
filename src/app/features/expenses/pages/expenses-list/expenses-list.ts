@@ -92,7 +92,6 @@ export class ExpensesList implements OnInit{
   protected readonly groups = toSignal(this.store.select(selectExpensesGroupedByDay), {requireSync:true})
 // ExpenseDayGroup[]
   ngOnInit(): void {
-    console.log("cargando");
     this.store.dispatch(ExpensesActions.load())
   }
 }

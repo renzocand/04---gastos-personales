@@ -12,7 +12,7 @@ export const ExpensesActions = createActionGroup({
       'Load Failure': props<{error:string}>(),
 
       // Add
-      'Add': props<{expense:Omit<Expense, 'id'>}>(),
+      'Add': props<{payload:Omit<Expense, 'id'>}>(),
       'Add Success': props<{expense:Expense}>(),
       'Add Failure': props<{error:string}>(),
 
