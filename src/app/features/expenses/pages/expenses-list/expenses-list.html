@@ -152,7 +152,7 @@
     </ui-card>
   } @else {
     <ui-card>
-      @for (group of groups; track group.label; let first = $first) {
+      @for (group of groups(); track group.label; let first = $first) {
         <section [class.border-t]="!first" [class.border-slate-100]="!first">
           <header
             class="flex items-center justify-between border-b border-slate-100 bg-slate-50/60 px-5 py-2 sm:px-6"
@@ -172,10 +172,7 @@
                   class="block px-5 py-3 transition hover:bg-slate-50 focus:outline-none focus-visible:bg-violet-50 sm:px-6"
                 >
                   <app-expense-card
-                    [description]="item.description"
-                    [category]="item.category"
-                    [amount]="item.amount"
-                    [date]="item.date"
+                    [expense]="item"
                   />
                 </a>
               </li>

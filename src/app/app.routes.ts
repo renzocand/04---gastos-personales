@@ -1,11 +1,13 @@
 import { Routes } from '@angular/router';
 import { expensesFeature } from './features/expenses/store/expenses.feature';
 import { provideState } from '@ngrx/store';
+import { provideEffects } from '@ngrx/effects';
+import { ExpensesEffects } from './features/expenses/store/expenses.effects';
 
 export const routes: Routes = [
   {
     path: '',
-    providers:[provideState(expensesFeature)],
+    providers:[provideState(expensesFeature), provideEffects(ExpensesEffects)],
     loadComponent: () =>
       import('./core/layout/app-shell/app-shell').then((m) => m.AppShell),
     children: [

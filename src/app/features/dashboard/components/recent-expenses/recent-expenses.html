@@ -19,12 +19,7 @@
           [routerLink]="['/expenses', item.id, 'edit']"
           class="block px-5 py-3 transition hover:bg-slate-50 focus:outline-none focus-visible:bg-violet-50 sm:px-6"
         >
-          <app-expense-card
-            [description]="item.description"
-            [category]="item.category"
-            [amount]="item.amount"
-            [date]="item.date"
-          />
+          <app-expense-card [expense]="item" />
         </a>
       </li>
     } @empty {

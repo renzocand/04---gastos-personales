@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, Signal, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import {
   Bus,
@@ -14,6 +14,11 @@ import { EmptyState } from '../../../../shared/ui/empty-state/empty-state';
 import { ErrorState } from '../../../../shared/ui/error-state/error-state';
 import { Skeleton } from '../../../../shared/ui/skeleton/skeleton';
 import { ExpenseCard } from '../../components/expense-card/expense-card';
+import { Store } from '@ngrx/store';
+import { expensesFeature, ExpensesState } from '../../store/expenses.feature';
+import { ExpensesActions } from '../../store/expenses.actions';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { ExpenseDayGroup, selectExpensesGroupedByDay } from '../../store/expenses.selectors';
 
 type CategoryFilter = {
   id: 'all' | 'comida' | 'transporte' | 'ocio' | 'otro';
@@ -56,13 +61,19 @@ type ExpenseGroup = {
   templateUrl: './expenses-list.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ExpensesList {
+export class ExpensesList implements OnInit{
+
+
+  private store:Store<ExpensesState> = inject(Store);
+
   protected readonly FilterIcon = SlidersHorizontal;
   protected readonly ReceiptIcon = Receipt;
 
-  protected readonly loading = signal(false);
-  protected readonly error = signal<string | null>(null);
+  protected readonly expenses = toSignal(this.store.select(expensesFeature.selectExpenses), {requireSync:true})
+  protected readonly loading = toSignal(this.store.select(expensesFeature.selectLoading), {requireSync:true});
+  protected readonly error = toSignal(this.store.select(expensesFeature.selectError), {requireSync:true});
   protected readonly hasExpenses = signal(true);
+
 
   protected readonly categoryFilters: CategoryFilter[] = [
     { id: 'all', label: 'Todas', default: true },
@@ -78,39 +89,10 @@ export class ExpensesList {
     { id: 'USD', label: 'US$ Dólares' },
   ];
 
-  protected readonly groups: ExpenseGroup[] = [
-    {
-      label: 'Hoy',
-      count: 2,
-      items: [
-        { id: '1', description: 'Wong San Isidro', category: 'Comida', amount: 'S/ 158,40', date: '14:20' },
-        { id: '2', description: 'Uber a Miraflores', category: 'Transporte', amount: 'S/ 22,00', date: '09:10' },
-      ],
-    },
-    {
-      label: 'Ayer',
-      count: 2,
-      items: [
-        { id: '3', description: 'Netflix', category: 'Ocio', amount: 'US$ 15,99', date: '21:00' },
-        { id: '4', description: 'Menú del día', category: 'Comida', amount: 'S/ 18,00', date: '13:00' },
-      ],
-    },
-    {
-      label: 'Martes, 15 abr',
-      count: 3,
-      items: [
-        { id: '5', description: 'Spotify', category: 'Ocio', amount: 'US$ 10,99', date: '09:00' },
-        { id: '6', description: 'Taxi aeropuerto', category: 'Transporte', amount: 'S/ 65,00', date: '19:30' },
-        { id: '7', description: 'Farmacia Inkafarma', category: 'Otro', amount: 'S/ 42,50', date: '12:15' },
-      ],
-    },
-    {
-      label: 'Lunes, 14 abr',
-      count: 2,
-      items: [
-        { id: '8', description: 'Almuerzo en el trabajo', category: 'Comida', amount: 'S/ 35,00', date: '13:30' },
-        { id: '9', description: 'Cineplanet', category: 'Ocio', amount: 'S/ 28,00', date: '20:00' },
-      ],
-    },
-  ];
+  protected readonly groups = toSignal(this.store.select(selectExpensesGroupedByDay), {requireSync:true})
+// ExpenseDayGroup[]
+  ngOnInit(): void {
+    console.log("cargando");
+    this.store.dispatch(ExpensesActions.load())
+  }
 }

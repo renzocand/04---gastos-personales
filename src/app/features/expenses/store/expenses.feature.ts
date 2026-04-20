@@ -2,7 +2,7 @@ import { createFeature, createReducer, on } from "@ngrx/store";
 import { ExpensesActions } from "./expenses.actions";
 import { Expense } from "../models/expense";
 
-interface ExpensesState { expenses: Expense[]; loading: boolean; error: string | null }
+export interface ExpensesState { expenses: Expense[]; loading: boolean; error: string | null }
 
 const initialState:ExpensesState  = { expenses: [], loading: false, error: null };
 
