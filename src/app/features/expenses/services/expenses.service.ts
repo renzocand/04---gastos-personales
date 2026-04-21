@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { delay, Observable, of } from 'rxjs';
 import { Expense } from '../models/expense';
 
-const MOCK_EXPENSES: Expense[] = [
+const INITIAL_EXPENSES: Expense[] = [
   {
     id: 'e1',
     description: 'Wong San Isidro',
@@ -75,17 +75,20 @@ const MOCK_EXPENSES: Expense[] = [
 })
 export class ExpensesService {
 
+  private expenses: Expense[] = [...INITIAL_EXPENSES];
 
 
   constructor() { }
 
 
   getAll():Observable<Expense[]>{
-    return of(MOCK_EXPENSES).pipe(delay(500))
+    return of(this.expenses).pipe(delay(500))
   }
 
   create(payload:Omit<Expense,'id'>):Observable<Expense>{
-      const created: Expense = { ...payload, id: crypto.randomUUID() };
+      const created: Expense = { ...payload, id: crypto.randomUUID() }
+      this.expenses = [created, ...this.expenses];
+;
       return of(created).pipe(delay(500));
   }
 

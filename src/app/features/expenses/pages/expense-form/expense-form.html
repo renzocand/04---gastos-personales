@@ -11,7 +11,7 @@
   </div>
 
   <ui-card>
-    <form class="space-y-5 p-5 sm:space-y-6 sm:p-6">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-5 p-5 sm:space-y-6 sm:p-6" novalidate>
       <header>
         <h1 class="text-xl font-semibold tracking-tight text-slate-900">
           {{ pageTitle() }}
@@ -28,9 +28,8 @@
             <label class="relative cursor-pointer">
               <input
                 type="radio"
-                name="currency"
+                formControlName="currency"
                 [value]="cur.id"
-                [checked]="cur.default"
                 class="peer sr-only"
               />
               <div
@@ -50,15 +49,23 @@
         </label>
         <input
           id="amount"
-          name="amount"
           type="number"
           inputmode="decimal"
           min="0"
-          step="0.01"
+          step="0.1"
+          formControlName="amount"
           placeholder="0,00"
-          required
           class="mt-1.5 block w-full rounded-lg border border-slate-300 bg-white px-3 py-3 text-2xl font-semibold tabular-nums text-slate-900 placeholder:text-slate-300 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20"
         />
+        @if (form.controls.amount.touched && form.controls.amount.invalid) {
+          <p class="mt-1.5 text-xs font-medium text-rose-600">
+            @if (form.controls.amount.errors?.['required']) {
+              El monto es obligatorio.
+            } @else if (form.controls.amount.errors?.['min']) {
+              El monto debe ser mayor a 0.
+            }
+          </p>
+        }
       </div>
 
       <div>
@@ -70,14 +77,22 @@
         </label>
         <input
           id="description"
-          name="description"
           type="text"
           maxlength="80"
+          formControlName="description"
           placeholder="Ej: Almuerzo en Wong"
           autocomplete="off"
-          required
           class="mt-1.5 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20"
         />
+        @if (form.controls.description.touched && form.controls.description.invalid) {
+          <p class="mt-1.5 text-xs font-medium text-rose-600">
+            @if (form.controls.description.errors?.['required']) {
+              La descripción es obligatoria.
+            } @else if (form.controls.description.errors?.['maxlength']) {
+              Máximo 80 caracteres.
+            }
+          </p>
+        }
       </div>
 
       <fieldset>
@@ -89,9 +104,8 @@
             <label class="relative cursor-pointer">
               <input
                 type="radio"
-                name="category"
                 [value]="cat.id"
-                required
+                formControlName="category"
                 class="peer sr-only"
               />
               <div
@@ -111,6 +125,13 @@
             </label>
           }
         </div>
+        @if (form.controls.category.touched && form.controls.category.invalid) {
+          <p class="mt-1.5 text-xs font-medium text-rose-600">
+            @if (form.controls.category.errors?.['required']) {
+              Elegí una categoría.
+            }
+          </p>
+        }
       </fieldset>
 
       <div>
@@ -119,11 +140,18 @@
         </label>
         <input
           id="date"
-          name="date"
           type="date"
-          required
+          formControlName="date"
+          [max]="today"
           class="mt-1.5 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20"
         />
+        @if (form.controls.date.touched && form.controls.date.invalid) {
+          <p class="mt-1.5 text-xs font-medium text-rose-600">
+            @if (form.controls.date.errors?.['required']) {
+              La fecha es obligatoria.
+            }
+          </p>
+        }
       </div>
 
       <div
@@ -147,7 +175,7 @@
         </a>
         <button
           type="submit"
-          class="inline-flex items-center justify-center rounded-lg bg-violet-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-violet-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
+          class="inline-flex items-center justify-center rounded-lg bg-violet-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-violet-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 cursor-pointer"
         >
           {{ submitLabel() }}
         </button>
