@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, Signal, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit, Signal, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import {
   Bus,
@@ -18,7 +18,8 @@ import { Store } from '@ngrx/store';
 import { expensesFeature, ExpensesState } from '../../store/expenses.feature';
 import { ExpensesActions } from '../../store/expenses.actions';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ExpenseDayGroup, selectExpensesGroupedByDay } from '../../store/expenses.selectors';
+import { ExpenseDayGroup, selectExpensesGroupedByDay, selectHasExpenses } from '../../store/expenses.selectors';
+import { CATEGORY_OPTIONS } from '../../../categories/ui/category-meta';
 
 type CategoryFilter = {
   id: 'all' | 'comida' | 'transporte' | 'ocio' | 'otro';
@@ -72,8 +73,10 @@ export class ExpensesList implements OnInit{
   protected readonly expenses = toSignal(this.store.select(expensesFeature.selectExpenses), {requireSync:true})
   protected readonly loading = toSignal(this.store.select(expensesFeature.selectLoading), {requireSync:true});
   protected readonly error = toSignal(this.store.select(expensesFeature.selectError), {requireSync:true});
-  protected readonly hasExpenses = signal(true);
+  // protected readonly hasExpenses = signal(true);
+  protected readonly hasExpenses = toSignal(this.store.select(selectHasExpenses), {requireSync:true});
 
+  // protected readonly hasExpenses2 = computed(()=>this.expenses().length?true:false);
 
   protected readonly categoryFilters: CategoryFilter[] = [
     { id: 'all', label: 'Todas', default: true },
@@ -82,6 +85,8 @@ export class ExpensesList implements OnInit{
     { id: 'ocio', label: 'Ocio', icon: Gamepad2 },
     { id: 'otro', label: 'Otro', icon: Package },
   ];
+
+  // protected readonly categoryFilters = CATEGORY_OPTIONS
 
   protected readonly currencyFilters: CurrencyFilter[] = [
     { id: 'all', label: 'Todas', default: true },

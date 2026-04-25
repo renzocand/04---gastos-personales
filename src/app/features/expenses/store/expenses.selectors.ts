@@ -46,3 +46,5 @@ export const selectExpensesGroupedByDay = createSelector(
 
   }
 )
+
+export const selectHasExpenses = createSelector(expensesFeature.selectExpenses, expenses=>expenses.length>0?true:false);
