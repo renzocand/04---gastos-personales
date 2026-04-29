@@ -15,7 +15,7 @@ export type ConfirmVariant = 'default' | 'danger';
   template: `
     <dialog
       #dialogRef
-      class="w-full max-w-md rounded-2xl p-0 backdrop:bg-slate-900/40 backdrop:backdrop-blur-sm"
+      class="m-auto w-full max-w-md rounded-2xl p-0 backdrop:bg-slate-900/40 backdrop:backdrop-blur-sm"
       (close)="onNativeClose()"
     >
       <div class="p-5 sm:p-6">

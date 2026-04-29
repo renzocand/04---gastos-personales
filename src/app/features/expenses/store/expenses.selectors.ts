@@ -48,3 +48,10 @@ export const selectExpensesGroupedByDay = createSelector(
 )
 
 export const selectHasExpenses = createSelector(expensesFeature.selectExpenses, expenses=>expenses.length>0?true:false);
+
+
+export const selectExpenseById = (id:string)=> createSelector(
+  expensesFeature.selectExpenses,
+  (expenses) => expenses.find(t=>t.id === id) ?? undefined
+)
+

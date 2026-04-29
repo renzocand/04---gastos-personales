@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { delay, Observable, of } from 'rxjs';
+import { delay, Observable, of, throwError } from 'rxjs';
 import { Expense } from '../models/expense';
 
 const INITIAL_EXPENSES: Expense[] = [
@@ -70,26 +70,60 @@ const INITIAL_EXPENSES: Expense[] = [
 ];
 
 
+const STORAGE_KEY = 'gastos-personales:expenses';
+
 @Injectable({
   providedIn: 'root'
 })
 export class ExpensesService {
 
-  private expenses: Expense[] = [...INITIAL_EXPENSES];
+  private expenses: Expense[] = this.hydrate();
 
-
-  constructor() { }
-
-
-  getAll():Observable<Expense[]>{
-    return of(this.expenses).pipe(delay(500))
+  private hydrate(): Expense[] {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return [...INITIAL_EXPENSES];
+      const parsed = JSON.parse(raw) as Expense[];
+      return Array.isArray(parsed) ? parsed : [...INITIAL_EXPENSES];
+    } catch {
+      return [...INITIAL_EXPENSES];
+    }
   }
 
-  create(payload:Omit<Expense,'id'>):Observable<Expense>{
-      const created: Expense = { ...payload, id: crypto.randomUUID() }
-      this.expenses = [created, ...this.expenses];
-;
-      return of(created).pipe(delay(500));
+  private persist(): void {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(this.expenses));
+  }
+
+  getAll(): Observable<Expense[]> {
+    return of(this.expenses).pipe(delay(500));
+  }
+
+  create(payload: Omit<Expense, 'id'>): Observable<Expense> {
+    const created: Expense = { ...payload, id: crypto.randomUUID() };
+    this.expenses = [created, ...this.expenses];
+    this.persist();
+    return of(created).pipe(delay(500));
+  }
+
+  update(id: string, changes: Partial<Omit<Expense, 'id'>>): Observable<Expense> {
+    const current = this.expenses.find(e => e.id === id);
+    if (!current) {
+      return throwError(() => new Error(`Expense ${id} no encontrado`));
+    }
+    const updated: Expense = { ...current, ...changes };
+    this.expenses = this.expenses.map(e => e.id === id ? updated : e);
+    this.persist();
+    return of(updated).pipe(delay(500));
+  }
+
+  delete(id: string): Observable<string> {
+    const exists = this.expenses.some(e => e.id === id);
+    if (!exists) {
+      return throwError(() => new Error(`Expense ${id} no encontrado`));
+    }
+    this.expenses = this.expenses.filter(e => e.id !== id);
+    this.persist();
+    return of(id).pipe(delay(500));
   }
 
 }
