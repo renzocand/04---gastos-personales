@@ -24,6 +24,12 @@ export const ExpensesActions = createActionGroup({
       //Delete
       'Delete': props<{id:string}>(),
       'Delete Success': props<{ id: string }>(),
-      'Delete Failure': props<{error:string}>()
+      'Delete Failure': props<{error:string}>(),
+
+      'Category Filter Changed': props<{categoryId:string | null}>(),
+      'Currency Filter Changed': props<{currency:'PEN' | 'USD' | null}>(),
+      'Date From Changed': props<{dateFrom:string | null}>(),
+      'Date To Changed': props<{dateTo:string | null}>(),
+      'Filters Cleared': emptyProps()
     }
 })

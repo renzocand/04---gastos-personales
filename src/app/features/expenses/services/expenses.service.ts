@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { delay, Observable, of, throwError } from 'rxjs';
 import { Expense } from '../models/expense';
+import { ExpenseFilters } from '../models/expense-filters';
 
 const INITIAL_EXPENSES: Expense[] = [
   {
@@ -69,6 +70,20 @@ const INITIAL_EXPENSES: Expense[] = [
   },
 ];
 
+function applyFilters(expenses: Expense[], filters?: ExpenseFilters):Expense[]{
+
+  if(!filters) return expenses;
+
+   return expenses.filter(expense=>{
+
+      const okCategory = filters.categoryId === null || expense.categoryId === filters.categoryId;
+      const okCurrency = filters.currency === null || expense.currency === filters.currency;
+      const okDateFrom = filters.dateFrom === null || expense.date >= filters.dateFrom;
+      const okDateTo = filters.dateTo === null || expense.date <= filters.dateTo;
+
+    return okCategory && okCurrency && okDateFrom && okDateTo
+    })
+}
 
 const STORAGE_KEY = 'gastos-personales:expenses';
 
@@ -94,8 +109,9 @@ export class ExpensesService {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(this.expenses));
   }
 
-  getAll(): Observable<Expense[]> {
-    return of(this.expenses).pipe(delay(500));
+  getAll(filters?:ExpenseFilters): Observable<Expense[]> {
+    const expensesFiltered = applyFilters(this.expenses,filters)
+    return of(expensesFiltered).pipe(delay(500));
   }
 
   create(payload: Omit<Expense, 'id'>): Observable<Expense> {
@@ -126,4 +142,9 @@ export class ExpensesService {
     return of(id).pipe(delay(500));
   }
 
+
+
 }
+
+
+

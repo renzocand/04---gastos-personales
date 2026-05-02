@@ -1,10 +1,11 @@
 import { createFeature, createReducer, on } from "@ngrx/store";
 import { ExpensesActions } from "./expenses.actions";
 import { Expense } from "../models/expense";
+import { ExpenseFilters } from "../models/expense-filters";
 
-export interface ExpensesState { expenses: Expense[]; loading: boolean; error: string | null }
+export interface ExpensesState { expenses: Expense[]; loading: boolean; error: string | null, filters:ExpenseFilters }
 
-const initialState:ExpensesState  = { expenses: [], loading: false, error: null };
+const initialState:ExpensesState  = { expenses: [], loading: false, error: null, filters:{categoryId:null,currency:null,dateFrom:null,dateTo:null} };
 
 
 export const expensesFeature = createFeature({
@@ -31,12 +32,15 @@ export const expensesFeature = createFeature({
 
    on(ExpensesActions.delete, state=>({...state,loading:true,error:null})),
    on(ExpensesActions.deleteSuccess, (state, {id})=> ({...state, expenses: state.expenses.filter(t=>t.id!==id)  ,loading:false, error:null }) ),
-   on(ExpensesActions.deleteFailure, (state,{error})=> ({...state,loading:false, error}))
+   on(ExpensesActions.deleteFailure, (state,{error})=> ({...state,loading:false, error})),
 
 
+   on(ExpensesActions.categoryFilterChanged, (state, {categoryId})=> ({...state, filters:{...state.filters, categoryId} })),
+   on(ExpensesActions.currencyFilterChanged, (state,{currency})=> ({...state, filters:{...state.filters,currency} }) )  ,
+   on(ExpensesActions.dateFromChanged, (state,{dateFrom}) =>  ({...state, filters:{...state.filters,dateFrom} }) ),
+   on(ExpensesActions.dateToChanged, (state,{dateTo}) =>  ({...state, filters:{...state.filters,dateTo} }) ),
 
-
-
+  on(ExpensesActions.filtersCleared, state=> ({...state, filters:initialState.filters }))
 
 
 

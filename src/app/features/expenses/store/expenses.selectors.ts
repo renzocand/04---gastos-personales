@@ -55,3 +55,24 @@ export const selectExpenseById = (id:string)=> createSelector(
   (expenses) => expenses.find(t=>t.id === id) ?? undefined
 )
 
+export type ExpenseSummary = {
+  count:number,
+  totalPEN:number,
+  totalUSD:number
+}
+
+export const selectExpensesSummary = createSelector(
+  expensesFeature.selectExpenses,
+  (expenses)=> expenses.reduce<ExpenseSummary>((acc,exp)=> {
+    acc.count++;
+    if(exp.currency === 'PEN') acc.totalPEN+=exp.amount;
+    else if(exp.currency === 'USD') acc.totalUSD+=exp.amount;
+    return acc;
+  } ,{
+      count:0,
+      totalPEN:0,
+      totalUSD:0
+  })
+)
+
+export const selectFilters = expensesFeature.selectFilters;

@@ -18,35 +18,11 @@ import { Store } from '@ngrx/store';
 import { expensesFeature, ExpensesState } from '../../store/expenses.feature';
 import { ExpensesActions } from '../../store/expenses.actions';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ExpenseDayGroup, selectExpensesGroupedByDay, selectHasExpenses } from '../../store/expenses.selectors';
+import { ExpenseDayGroup, selectExpensesGroupedByDay, selectExpensesSummary, selectFilters, selectHasExpenses } from '../../store/expenses.selectors';
 import { CATEGORY_OPTIONS } from '../../../categories/ui/category-meta';
+import { AppCurrencyPipe } from '../../../../shared/pipes/app-currency';
+import { Currency } from '../../models/expense';
 
-type CategoryFilter = {
-  id: 'all' | 'comida' | 'transporte' | 'ocio' | 'otro';
-  label: string;
-  icon?: typeof UtensilsCrossed;
-  default?: boolean;
-};
-
-type CurrencyFilter = {
-  id: 'all' | 'PEN' | 'USD';
-  label: string;
-  default?: boolean;
-};
-
-type ExpenseItem = {
-  id: string;
-  description: string;
-  category: 'Comida' | 'Transporte' | 'Ocio' | 'Otro';
-  amount: string;
-  date: string;
-};
-
-type ExpenseGroup = {
-  label: string;
-  count: number;
-  items: ExpenseItem[];
-};
 
 @Component({
   selector: 'app-expenses-list',
@@ -58,6 +34,7 @@ type ExpenseGroup = {
     Skeleton,
     RouterLink,
     LucideAngularModule,
+    AppCurrencyPipe,
   ],
   templateUrl: './expenses-list.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -76,27 +53,47 @@ export class ExpensesList implements OnInit{
   // protected readonly hasExpenses = signal(true);
   protected readonly hasExpenses = toSignal(this.store.select(selectHasExpenses), {requireSync:true});
 
+  protected readonly summary = this.store.selectSignal(selectExpensesSummary);
+
+  protected readonly filters = this.store.selectSignal(selectFilters);
+
   // protected readonly hasExpenses2 = computed(()=>this.expenses().length?true:false);
 
-  protected readonly categoryFilters: CategoryFilter[] = [
-    { id: 'all', label: 'Todas', default: true },
-    { id: 'comida', label: 'Comida', icon: UtensilsCrossed },
-    { id: 'transporte', label: 'Transporte', icon: Bus },
-    { id: 'ocio', label: 'Ocio', icon: Gamepad2 },
-    { id: 'otro', label: 'Otro', icon: Package },
+  protected readonly categoryFilters = [
+    { id: null, name: 'Todas', icon:null, iconClass:null },
+    ...CATEGORY_OPTIONS
   ];
 
   // protected readonly categoryFilters = CATEGORY_OPTIONS
 
-  protected readonly currencyFilters: CurrencyFilter[] = [
-    { id: 'all', label: 'Todas', default: true },
+  protected readonly currencyFilters = [
+    { id: null, label: 'Todas', default: true },
     { id: 'PEN', label: 'S/ Soles' },
     { id: 'USD', label: 'US$ Dólares' },
-  ];
+  ] as const;
 
   protected readonly groups = toSignal(this.store.select(selectExpensesGroupedByDay), {requireSync:true})
 // ExpenseDayGroup[]
   ngOnInit(): void {
     this.store.dispatch(ExpensesActions.load())
+  }
+  protected onCategoryChange(categoryId:string | null){
+    this.store.dispatch(ExpensesActions.categoryFilterChanged({categoryId}));
+  }
+
+  protected onCurrencyChange(currency:Currency | null){
+    this.store.dispatch(ExpensesActions.currencyFilterChanged({currency}))
+  }
+
+  protected onDateFromChange(value: string) {
+    this.store.dispatch(ExpensesActions.dateFromChanged({ dateFrom: value || null }));
+  }
+
+  protected onDateToChange(value: string) {
+    this.store.dispatch(ExpensesActions.dateToChanged({ dateTo: value || null }));
+  }
+
+  protected clearFilters(){
+    this.store.dispatch(ExpensesActions.filtersCleared());
   }
 }

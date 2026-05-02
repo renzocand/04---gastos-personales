@@ -1,21 +1,27 @@
 import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { catchError, concatMap, map, merge, mergeMap, of, switchMap, tap } from 'rxjs';
+import { catchError, concatMap, debounceTime, map, merge, mergeMap, of, switchMap, tap } from 'rxjs';
 import { ExpensesService } from '../services/expenses.service';
 import { ExpensesActions } from './expenses.actions';
 import { Router } from '@angular/router';
+import { concatLatestFrom } from '@ngrx/operators';
+import { Store } from '@ngrx/store';
+import { selectFilters } from './expenses.selectors';
+
 
 @Injectable()
 export class ExpensesEffects {
   private actions$ = inject(Actions);
   private service = inject(ExpensesService);
   private router = inject(Router)
+  private store = inject(Store)
 
   load$ = createEffect(() =>
     this.actions$.pipe(
       ofType(ExpensesActions.load),
-      switchMap(() =>
-        this.service.getAll().pipe(
+      concatLatestFrom(()=>this.store.select(selectFilters)),
+      switchMap(([_,filters]) =>
+        this.service.getAll(filters).pipe(
           map(expenses => ExpensesActions.loadSuccess({ expenses })),
           catchError(err => of(ExpensesActions.loadFailure({ error: err.message }))),
         ),
@@ -70,7 +76,17 @@ navigateAfterDelete$ = createEffect(()=>this.actions$.pipe(
 ),{dispatch:false})
 
 
-
+triggerLoadOnFiltersChange$ = createEffect(()=>this.actions$.pipe(
+  ofType(
+    ExpensesActions.categoryFilterChanged,
+    ExpensesActions.currencyFilterChanged,
+    ExpensesActions.dateFromChanged,
+    ExpensesActions.dateToChanged,
+    ExpensesActions.filtersCleared
+  ),
+  debounceTime(300),
+  map(()=>ExpensesActions.load())
+))
 
 
 
