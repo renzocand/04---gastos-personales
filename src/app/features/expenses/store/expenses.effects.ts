@@ -4,7 +4,7 @@ import { catchError, concatMap, debounceTime, map, merge, mergeMap, of, switchMa
 import { ExpensesService } from '../services/expenses.service';
 import { ExpensesActions } from './expenses.actions';
 import { Router } from '@angular/router';
-import { concatLatestFrom } from '@ngrx/operators';
+import { concatLatestFrom, mapResponse } from '@ngrx/operators';
 import { Store } from '@ngrx/store';
 import { selectFilters } from './expenses.selectors';
 
@@ -22,8 +22,10 @@ export class ExpensesEffects {
       concatLatestFrom(()=>this.store.select(selectFilters)),
       switchMap(([_,filters]) =>
         this.service.getAll(filters).pipe(
-          map(expenses => ExpensesActions.loadSuccess({ expenses })),
-          catchError(err => of(ExpensesActions.loadFailure({ error: err.message }))),
+          mapResponse({
+            next: (expenses) => ExpensesActions.loadSuccess({expenses}),
+            error:(err:Error) => ExpensesActions.loadFailure({error:err.message})
+          })
         ),
       ),
     ),

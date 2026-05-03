@@ -14,7 +14,7 @@
     </div>
 
     <ul class="mt-5 flex flex-col gap-4">
-      @for (row of rows; track row.id) {
+      @for (row of displayRows(); track row.id) {
         <li>
           <div class="flex items-center justify-between gap-3">
             <div class="flex min-w-0 items-center gap-3">
@@ -29,11 +29,13 @@
                 <p class="truncate text-sm font-medium text-slate-900">
                   {{ row.label }}
                 </p>
-                <p class="text-xs text-slate-500">{{ row.percent }}% del total</p>
+                <p class="text-xs text-slate-500">
+                  {{ row.percent | number:'1.0-0' }}% del total
+                </p>
               </div>
             </div>
-            <p class="flex-none text-sm font-semibold text-slate-900">
-              {{ row.amount }}
+            <p class="flex-none text-sm font-semibold tabular-nums text-slate-900">
+              {{ row.totalPEN | appCurrency:'PEN' }}
             </p>
           </div>
           <div class="mt-2">

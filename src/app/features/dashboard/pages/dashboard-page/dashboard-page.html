@@ -80,24 +80,16 @@
     </ui-card>
   } @else {
     <div class="grid gap-4 sm:grid-cols-2">
-      <app-total-card
-        total="S/ 1.248,50"
-        [variation]="-8"
-        previousLabel="vs. marzo"
-      />
-      <app-total-card
-        total="US$ 180,40"
-        [variation]="12"
-        previousLabel="vs. marzo"
-      />
+      <app-total-card [total]="summary().totalPEN | appCurrency:'PEN'" />
+      <app-total-card [total]="summary().totalUSD | appCurrency:'USD'" />
     </div>
 
     <div class="grid gap-5 sm:gap-6 lg:grid-cols-5">
       <div class="lg:col-span-2">
-        <app-category-breakdown />
+        <app-category-breakdown [rows]="categoryBreakdown()" />
       </div>
       <div class="lg:col-span-3">
-        <app-recent-expenses />
+        <app-recent-expenses [items]="recentExpenses()" />
       </div>
     </div>
   }

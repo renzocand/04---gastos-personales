@@ -33,6 +33,12 @@ export const selectExpensesGroupedByDay = createSelector(
       grouped[key].push(item)
     }
 
+    // for(const item of expenses){
+    //   const key = item.date;
+    //   grouped[key] =  [...(grouped[key] ?? []), item]
+    // }
+
+
       // luego transformás el Record en un array de ExpenseDayGroup
     const groups: ExpenseDayGroup[] = Object.entries(grouped)
       .sort((a, b) => b[0].localeCompare(a[0]))

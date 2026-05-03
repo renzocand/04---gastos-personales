@@ -3,11 +3,17 @@ import { expensesFeature } from './features/expenses/store/expenses.feature';
 import { provideState } from '@ngrx/store';
 import { provideEffects } from '@ngrx/effects';
 import { ExpensesEffects } from './features/expenses/store/expenses.effects';
+import { exchangeRateFeature } from './features/exchange-rate/store/exchange-rate.feature';
+import { ExchangeRateEffects } from './features/exchange-rate/store/exchange-rate.effects';
 
 export const routes: Routes = [
   {
     path: '',
-    providers:[provideState(expensesFeature), provideEffects(ExpensesEffects)],
+    providers:[
+      provideState(expensesFeature),
+      provideState(exchangeRateFeature),
+      provideEffects(ExpensesEffects,ExchangeRateEffects)
+    ],
     loadComponent: () =>
       import('./core/layout/app-shell/app-shell').then((m) => m.AppShell),
     children: [
