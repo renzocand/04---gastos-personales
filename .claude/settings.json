@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell($deadline = \\(Get-Date\\).AddSeconds\\(90\\); $ok=$false; do { Start-Sleep -Seconds 5; try { Invoke-RestMethod -Uri \"http://localhost:8080/api/categories\" -TimeoutSec 3 -ErrorAction Stop | Out-Null; $ok=$true } catch {} } while \\(-not $ok -and \\(Get-Date\\) -lt $deadline\\); if \\($ok\\) { \"BACKEND OK \\(8080\\)\" } else { \"backend no responde aun:\"; Get-Content \"$env:TEMP\\\\gastos-backend.log\" -Tail 15 })"
+    ]
+  }
+}

@@ -1,0 +1,22 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: gastos-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: gastos
+      MYSQL_USER: gastos
+      MYSQL_PASSWORD: gastos
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3307:3306"
+    volumes:
+      - gastos-mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  gastos-mysql-data:

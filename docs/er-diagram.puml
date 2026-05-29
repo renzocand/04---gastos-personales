@@ -1,0 +1,29 @@
+@startuml er-diagram
+title Diagrama Entidad-Relación - Base de Datos "gastos" (MySQL)
+
+skinparam linetype ortho
+hide circle
+
+entity "category" as category {
+    * id : VARCHAR(20) <<PK>>
+    --
+    * name : VARCHAR(50)
+      icon : VARCHAR(50)
+}
+
+entity "expense" as expense {
+    * id : VARCHAR(36) <<PK>>
+    --
+    * amount : DECIMAL(12,2)
+    * currency : VARCHAR(3)  '' PEN | USD
+    * description : VARCHAR(80)
+    * category_id : VARCHAR(20) <<FK>>
+    * date : DATE
+      created_at : TIMESTAMP
+      updated_at : TIMESTAMP
+}
+
+' Relación 1 categoría -- N gastos
+category ||--o{ expense : "1 .. N"
+
+@enduml

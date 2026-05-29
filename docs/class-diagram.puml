@@ -1,0 +1,131 @@
+@startuml class-diagram
+title Diagrama de Clases - Backend Gastos Personales
+
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+' ===== Capa model (dominio / entidades JPA) =====
+package "model" {
+    enum Currency {
+        PEN
+        USD
+    }
+
+    class Category {
+        - id : String
+        - name : String
+        - icon : String
+    }
+
+    class Expense {
+        - id : String
+        - amount : BigDecimal
+        - currency : Currency
+        - description : String
+        - date : LocalDate
+        - createdAt : Instant
+        - updatedAt : Instant
+        + assignId() : void
+    }
+}
+
+' ===== Capa dto (contratos de la API) =====
+package "dto" {
+    class ExpenseRequest <<record>> {
+        + amount : BigDecimal
+        + currency : Currency
+        + description : String
+        + categoryId : String
+        + date : LocalDate
+    }
+    class ExpenseUpdateRequest <<record>> {
+        + amount : BigDecimal
+        + currency : Currency
+        + description : String
+        + categoryId : String
+        + date : LocalDate
+    }
+    class ExpenseResponse <<record>> {
+        + id : String
+        + currency : Currency
+        + amount : BigDecimal
+        + description : String
+        + categoryId : String
+        + date : LocalDate
+        + createdAt : Instant
+        + updatedAt : Instant
+    }
+    class CategoryResponse <<record>> {
+        + id : String
+        + name : String
+        + icon : String
+    }
+}
+
+' ===== Capa mapper =====
+package "mapper" {
+    class ExpenseMapper {
+        + toResponse(e : Expense) : ExpenseResponse
+        + toEntity(req : ExpenseRequest, category : Category) : Expense
+        + toResponse(c : Category) : CategoryResponse
+    }
+}
+
+' ===== Capa repository =====
+package "repository" {
+    interface ExpenseRepository {
+        + findFiltered(categoryId, currency, dateFrom, dateTo) : List<Expense>
+    }
+    interface CategoryRepository
+}
+
+' ===== Capa service =====
+package "service" {
+    class ExpenseService {
+        + findAll(categoryId, currency, dateFrom, dateTo) : List<ExpenseResponse>
+        + create(req : ExpenseRequest) : ExpenseResponse
+        + update(id : String, req : ExpenseUpdateRequest) : ExpenseResponse
+        + delete(id : String) : void
+    }
+    class CategoryService {
+        + findAll() : List<CategoryResponse>
+    }
+}
+
+' ===== Capa controller =====
+package "controller" {
+    class ExpenseController {
+        + list(...) : List<ExpenseResponse>
+        + create(req : ExpenseRequest) : ExpenseResponse
+        + update(id, req : ExpenseUpdateRequest) : ExpenseResponse
+        + delete(id : String) : void
+    }
+    class CategoryController {
+        + list() : List<CategoryResponse>
+    }
+}
+
+' ===== Capa exception =====
+package "exception" {
+    class NotFoundException
+    class GlobalExceptionHandler
+}
+
+' ===== Relaciones de dominio =====
+Expense "*" --> "1" Category : category
+Expense ..> Currency
+
+' ===== Relaciones entre capas =====
+ExpenseController --> ExpenseService
+CategoryController --> CategoryService
+ExpenseService --> ExpenseRepository
+ExpenseService --> CategoryRepository
+ExpenseService --> ExpenseMapper
+CategoryService --> CategoryRepository
+CategoryService --> ExpenseMapper
+ExpenseRepository ..> Expense
+CategoryRepository ..> Category
+ExpenseService ..> NotFoundException
+GlobalExceptionHandler ..> NotFoundException
+
+@enduml

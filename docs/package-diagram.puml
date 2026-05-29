@@ -1,0 +1,36 @@
+@startuml package-diagram
+title Diagrama de Paquetes - Backend Gastos Personales (com.gastos)
+
+skinparam packageStyle rectangle
+left to right direction
+
+package "com.gastos" {
+    package "controller" as controller
+    package "service" as service
+    package "repository" as repository
+    package "model" as model
+    package "dto" as dto
+    package "mapper" as mapper
+    package "exception" as exception
+    package "config" as config
+}
+
+database "MySQL" as db
+
+' Dependencias entre capas (flujo de la petición: arriba -> abajo)
+controller ..> service
+controller ..> dto
+service ..> repository
+service ..> mapper
+service ..> dto
+service ..> exception
+repository ..> model
+mapper ..> model
+mapper ..> dto
+controller ..> exception : @RestControllerAdvice
+
+' Infraestructura
+repository ..> db : JPA / Hibernate
+config ..> controller : CORS
+
+@enduml

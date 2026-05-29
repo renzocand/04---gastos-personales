@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: gastos-backend
+
+  datasource:
+    url: jdbc:mysql://localhost:3307/gastos?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/Lima
+    username: gastos
+    password: gastos
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      # Hibernate crea/actualiza el esquema a partir de las entidades.
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+    show-sql: true
+    # Permite que data.sql se ejecute DESPUÉS de que Hibernate cree las tablas.
+    defer-datasource-initialization: true
+
+  sql:
+    init:
+      # Ejecuta siempre data.sql (seed de categorías).
+      mode: always
+
+server:
+  port: 8080
