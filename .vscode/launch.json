@@ -3,6 +3,13 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "type": "java",
+      "name": "GastosApplication",
+      "request": "launch",
+      "mainClass": "com.gastos.GastosApplication",
+      "projectName": "gastos-backend"
+    },
+    {
       "name": "ng serve",
       "type": "chrome",
       "request": "launch",

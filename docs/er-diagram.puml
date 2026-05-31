@@ -11,6 +11,19 @@ entity "category" as category {
       icon : VARCHAR(50)
 }
 
+entity "app_user" as app_user {
+    * id : VARCHAR(36) <<PK>>
+    --
+    * dni : VARCHAR(8) <<UNIQUE>>
+    * password : VARCHAR(100)  '' hash BCrypt
+    * first_name : VARCHAR(60)
+    * last_name : VARCHAR(60)
+      second_last_name : VARCHAR(60)
+      email : VARCHAR(120)
+    * role : VARCHAR(20)
+      created_at : TIMESTAMP
+}
+
 entity "expense" as expense {
     * id : VARCHAR(36) <<PK>>
     --
@@ -18,6 +31,7 @@ entity "expense" as expense {
     * currency : VARCHAR(3)  '' PEN | USD
     * description : VARCHAR(80)
     * category_id : VARCHAR(20) <<FK>>
+    * user_id : VARCHAR(36) <<FK>>
     * date : DATE
       created_at : TIMESTAMP
       updated_at : TIMESTAMP
@@ -25,5 +39,7 @@ entity "expense" as expense {
 
 ' Relación 1 categoría -- N gastos
 category ||--o{ expense : "1 .. N"
+' Relación 1 usuario -- N gastos
+app_user ||--o{ expense : "1 .. N"
 
 @enduml

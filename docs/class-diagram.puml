@@ -27,6 +27,19 @@ package "model" {
         - updatedAt : Instant
         + assignId() : void
     }
+
+    class User {
+        - id : String
+        - dni : String
+        - password : String
+        - firstName : String
+        - lastName : String
+        - secondLastName : String
+        - email : String
+        - role : String
+        - createdAt : Instant
+        + assignId() : void
+    }
 }
 
 ' ===== Capa dto (contratos de la API) =====
@@ -60,13 +73,40 @@ package "dto" {
         + name : String
         + icon : String
     }
+    class RegisterRequest <<record>> {
+        + dni : String
+        + password : String
+        + firstName : String
+        + lastName : String
+        + secondLastName : String
+        + email : String
+    }
+    class LoginRequest <<record>> {
+        + dni : String
+        + password : String
+    }
+    class AuthResponse <<record>> {
+        + token : String
+        + tokenType : String
+        + dni : String
+        + firstName : String
+        + lastName : String
+    }
+    class UserResponse <<record>> {
+        + dni : String
+        + firstName : String
+        + lastName : String
+        + secondLastName : String
+        + email : String
+        + role : String
+    }
 }
 
 ' ===== Capa mapper =====
 package "mapper" {
     class ExpenseMapper {
         + toResponse(e : Expense) : ExpenseResponse
-        + toEntity(req : ExpenseRequest, category : Category) : Expense
+        + toEntity(req : ExpenseRequest, category : Category, user : User) : Expense
         + toResponse(c : Category) : CategoryResponse
     }
 }
@@ -74,58 +114,126 @@ package "mapper" {
 ' ===== Capa repository =====
 package "repository" {
     interface ExpenseRepository {
-        + findFiltered(categoryId, currency, dateFrom, dateTo) : List<Expense>
+        + findFiltered(dni, categoryId, currency, dateFrom, dateTo) : List<Expense>
+        + findByIdAndUser_Dni(id, dni) : Optional<Expense>
     }
     interface CategoryRepository
+    interface UserRepository {
+        + findByDni(dni) : Optional<User>
+        + existsByDni(dni) : boolean
+    }
 }
 
 ' ===== Capa service =====
 package "service" {
     class ExpenseService {
-        + findAll(categoryId, currency, dateFrom, dateTo) : List<ExpenseResponse>
-        + create(req : ExpenseRequest) : ExpenseResponse
-        + update(id : String, req : ExpenseUpdateRequest) : ExpenseResponse
-        + delete(id : String) : void
+        + findAll(dni, categoryId, currency, dateFrom, dateTo) : List<ExpenseResponse>
+        + create(dni : String, req : ExpenseRequest) : ExpenseResponse
+        + update(dni : String, id : String, req : ExpenseUpdateRequest) : ExpenseResponse
+        + delete(dni : String, id : String) : void
     }
     class CategoryService {
         + findAll() : List<CategoryResponse>
+    }
+    class AuthService {
+        + register(req : RegisterRequest) : AuthResponse
+        + login(req : LoginRequest) : AuthResponse
+        + me(dni : String) : UserResponse
     }
 }
 
 ' ===== Capa controller =====
 package "controller" {
     class ExpenseController {
-        + list(...) : List<ExpenseResponse>
-        + create(req : ExpenseRequest) : ExpenseResponse
-        + update(id, req : ExpenseUpdateRequest) : ExpenseResponse
-        + delete(id : String) : void
+        + list(auth, ...) : List<ExpenseResponse>
+        + create(auth, req : ExpenseRequest) : ExpenseResponse
+        + update(auth, id, req : ExpenseUpdateRequest) : ExpenseResponse
+        + delete(auth, id : String) : void
     }
     class CategoryController {
         + list() : List<CategoryResponse>
+    }
+    class AuthController {
+        + register(req : RegisterRequest) : AuthResponse
+        + login(req : LoginRequest) : AuthResponse
+        + me(auth) : UserResponse
+    }
+}
+
+' ===== Capa security (autenticación JWT) =====
+package "security" {
+    class JwtService {
+        + generateToken(dni : String) : String
+        + extractDni(token : String) : String
+        + isTokenValid(token : String, dni : String) : boolean
+    }
+    class JwtAuthenticationFilter {
+        # doFilterInternal(req, res, chain) : void
+    }
+    class CustomUserDetailsService {
+        + loadUserByUsername(dni : String) : UserDetails
+    }
+    class JsonAuthenticationEntryPoint {
+        + commence(req, res, ex) : void
+    }
+}
+
+' ===== Capa config =====
+package "config" {
+    class SecurityConfig {
+        + securityFilterChain(http) : SecurityFilterChain
+        + authenticationProvider() : DaoAuthenticationProvider
+        + passwordEncoder() : PasswordEncoder
+        + corsConfigurationSource() : CorsConfigurationSource
+    }
+    class DemoDataSeeder {
+        + run(args) : void
     }
 }
 
 ' ===== Capa exception =====
 package "exception" {
     class NotFoundException
+    class ConflictException
     class GlobalExceptionHandler
 }
 
 ' ===== Relaciones de dominio =====
 Expense "*" --> "1" Category : category
+Expense "*" --> "1" User : user
 Expense ..> Currency
 
 ' ===== Relaciones entre capas =====
 ExpenseController --> ExpenseService
 CategoryController --> CategoryService
+AuthController --> AuthService
 ExpenseService --> ExpenseRepository
 ExpenseService --> CategoryRepository
+ExpenseService --> UserRepository
 ExpenseService --> ExpenseMapper
 CategoryService --> CategoryRepository
 CategoryService --> ExpenseMapper
+AuthService --> UserRepository
+AuthService --> JwtService
 ExpenseRepository ..> Expense
 CategoryRepository ..> Category
+UserRepository ..> User
+
+' ===== Relaciones de seguridad =====
+JwtAuthenticationFilter --> JwtService
+JwtAuthenticationFilter --> CustomUserDetailsService
+CustomUserDetailsService --> UserRepository
+SecurityConfig --> JwtAuthenticationFilter
+SecurityConfig --> JsonAuthenticationEntryPoint
+DemoDataSeeder --> UserRepository
+DemoDataSeeder --> ExpenseRepository
+DemoDataSeeder --> CategoryRepository
+
+' ===== Excepciones =====
 ExpenseService ..> NotFoundException
+AuthService ..> ConflictException
+AuthService ..> NotFoundException
 GlobalExceptionHandler ..> NotFoundException
+GlobalExceptionHandler ..> ConflictException
 
 @enduml

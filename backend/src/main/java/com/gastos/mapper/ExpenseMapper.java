@@ -5,6 +5,7 @@ import com.gastos.dto.ExpenseRequest;
 import com.gastos.dto.ExpenseResponse;
 import com.gastos.model.Category;
 import com.gastos.model.Expense;
+import com.gastos.model.User;
 import org.springframework.stereotype.Component;
 
 /**
@@ -27,13 +28,14 @@ public class ExpenseMapper {
                 e.getUpdatedAt());
     }
 
-    /** Request de creación + categoría ya resuelta → nueva entidad Expense. */
-    public Expense toEntity(ExpenseRequest req, Category category) {
+    /** Request de creación + categoría y dueño ya resueltos → nueva entidad Expense. */
+    public Expense toEntity(ExpenseRequest req, Category category, User user) {
         Expense e = new Expense();
         e.setAmount(req.amount());
         e.setCurrency(req.currency());
         e.setDescription(req.description());
         e.setCategory(category);
+        e.setUser(user);
         e.setDate(req.date());
         return e;
     }

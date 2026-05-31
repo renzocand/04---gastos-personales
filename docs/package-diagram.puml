@@ -12,6 +12,7 @@ package "com.gastos" {
     package "dto" as dto
     package "mapper" as mapper
     package "exception" as exception
+    package "security" as security
     package "config" as config
 }
 
@@ -29,8 +30,14 @@ mapper ..> model
 mapper ..> dto
 controller ..> exception : @RestControllerAdvice
 
+' Seguridad: filtro JWT delante de los controllers, valida el token por petición
+security ..> service
+security ..> repository
+security ..> model
+config ..> security : SecurityFilterChain + CORS
+config ..> repository : DemoDataSeeder
+
 ' Infraestructura
 repository ..> db : JPA / Hibernate
-config ..> controller : CORS
 
 @enduml

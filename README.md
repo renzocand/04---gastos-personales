@@ -27,8 +27,10 @@ cd backend
 mvn spring-boot:run
 ```
 
-La BD `gastos` se crea sola; las tablas las genera Hibernate (`ddl-auto=update`) y las
-4 categorías se siembran con `src/main/resources/data.sql`.
+La BD `gastos` se crea sola; las tablas las genera Hibernate (`ddl-auto=update`), las
+4 categorías se siembran con `src/main/resources/data.sql`, y un usuario demo con sus
+gastos se crea en `DemoDataSeeder` (**DNI `00000000` / contraseña `demo1234`**).
+
 
 ## Levantar el frontend
 
