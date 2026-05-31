@@ -11,14 +11,32 @@
         <span class="text-base font-semibold tracking-tight">Gastos</span>
       </a>
 
-      <a
-        routerLink="/expenses/new"
-        class="inline-flex items-center gap-1.5 rounded-lg bg-violet-600 px-3 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-violet-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
-      >
-        <lucide-angular [img]="PlusIcon" class="size-4"></lucide-angular>
-        <span class="hidden sm:inline">Nuevo gasto</span>
-        <span class="sr-only sm:hidden">Nuevo gasto</span>
-      </a>
+      <div class="flex items-center gap-2 sm:gap-3">
+        <a
+          routerLink="/expenses/new"
+          class="inline-flex items-center gap-1.5 rounded-lg bg-violet-600 px-3 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-violet-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
+        >
+          <lucide-angular [img]="PlusIcon" class="size-4"></lucide-angular>
+          <span class="hidden sm:inline">Nuevo gasto</span>
+          <span class="sr-only sm:hidden">Nuevo gasto</span>
+        </a>
+
+        @if (user(); as currentUser) {
+          <span class="hidden text-sm font-medium text-slate-600 sm:inline">
+            Hola, {{ currentUser.firstName }}
+          </span>
+        }
+
+        <button
+          type="button"
+          (click)="logout()"
+          class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
+        >
+          <lucide-angular [img]="LogOutIcon" class="size-4"></lucide-angular>
+          <span class="hidden sm:inline">Salir</span>
+          <span class="sr-only sm:hidden">Cerrar sesión</span>
+        </button>
+      </div>
     </div>
 
     <nav class="mx-auto flex max-w-5xl gap-1 px-4 sm:px-6" aria-label="Secciones">

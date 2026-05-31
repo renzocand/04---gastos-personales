@@ -2,10 +2,13 @@ import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 
 import { routes } from './app.routes';
-import { provideStore } from '@ngrx/store';
+import { provideState, provideStore } from '@ngrx/store';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
 import { provideEffects } from '@ngrx/effects';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { authInterceptor } from './core/interceptors/auth-interceptor';
+import { authFeature } from './features/auth/store/auth.feature';
+import { AuthEffects } from './features/auth/store/auth.effects';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -13,8 +16,11 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes, withComponentInputBinding()),
     provideStore(),
     provideEffects(),
+    // La sesión es global (login, registro y shell la comparten).
+    provideState(authFeature),
+    provideEffects(AuthEffects),
     provideStoreDevtools({ maxAge: 25, logOnly: false }),
-    provideHttpClient()
+    provideHttpClient(withInterceptors([authInterceptor])),
     // provideStore({ [expensesFeature.name]: expensesFeature.reducer })
   ],
 };

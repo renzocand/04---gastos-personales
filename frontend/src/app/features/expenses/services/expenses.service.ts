@@ -3,8 +3,9 @@ import { inject, Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { Expense } from '../models/expense';
 import { ExpenseFilters } from '../models/expense-filters';
+import { environment } from '../../../../environments/environment';
 
-const API_URL = 'http://localhost:8080/api/expenses';
+const API_URL = `${environment.apiUrl}/expenses`;
 
 @Injectable({
   providedIn: 'root',

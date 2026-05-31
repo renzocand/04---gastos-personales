@@ -5,10 +5,24 @@ import { provideEffects } from '@ngrx/effects';
 import { ExpensesEffects } from './features/expenses/store/expenses.effects';
 import { exchangeRateFeature } from './features/exchange-rate/store/exchange-rate.feature';
 import { ExchangeRateEffects } from './features/exchange-rate/store/exchange-rate.effects';
+import { authGuard, guestGuard } from './core/guards/auth-guard';
 
 export const routes: Routes = [
   {
+    path: 'login',
+    canActivate: [guestGuard],
+    loadComponent: () =>
+      import('./features/auth/pages/login/login').then((m) => m.LoginPage),
+  },
+  {
+    path: 'register',
+    canActivate: [guestGuard],
+    loadComponent: () =>
+      import('./features/auth/pages/register/register').then((m) => m.RegisterPage),
+  },
+  {
     path: '',
+    canActivate: [authGuard],
     providers:[
       provideState(expensesFeature),
       provideState(exchangeRateFeature),
