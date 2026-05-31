@@ -1,0 +1,78 @@
+<ui-card>
+  @if (hasIncome()) {
+    <div class="p-5 sm:p-6">
+      <div class="flex items-center justify-between gap-3">
+        <p class="text-sm font-medium text-slate-500">Gasto del mes vs. ingreso</p>
+        <span
+          class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold tabular-nums"
+          [class]="
+            status().level === 'ok'
+              ? 'bg-emerald-50 text-emerald-700'
+              : status().level === 'info'
+                ? 'bg-amber-50 text-amber-700'
+                : 'bg-rose-50 text-rose-700'
+          "
+        >
+          {{ percentRounded() }}%
+        </span>
+      </div>
+
+      <p class="mt-3 text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
+        {{ status().spentPEN | appCurrency: 'PEN' }}
+      </p>
+      <p class="mt-1 text-xs text-slate-500">
+        de {{ status().income | appCurrency: 'PEN' }} de ingreso
+      </p>
+
+      <div class="mt-4">
+        <ui-progress-bar [percent]="status().percent" [color]="barColor()" />
+      </div>
+
+      <div class="mt-3 flex items-center justify-between text-xs">
+        <span
+          [class]="status().remaining < 0 ? 'font-medium text-rose-600' : 'text-slate-500'"
+        >
+          @if (status().remaining < 0) {
+            Excedido por {{ -status().remaining | appCurrency: 'PEN' }}
+          } @else {
+            Disponible {{ status().remaining | appCurrency: 'PEN' }}
+          }
+        </span>
+        <span
+          [class]="
+            status().level === 'ok'
+              ? 'text-emerald-700'
+              : status().level === 'info'
+                ? 'text-amber-700'
+                : 'text-rose-700'
+          "
+        >
+          {{ message() }}
+        </span>
+      </div>
+    </div>
+  } @else {
+    <div class="flex flex-col items-start gap-3 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+      <div class="flex items-start gap-3">
+        <span
+          class="flex size-10 flex-none items-center justify-center rounded-xl bg-violet-50 text-violet-600"
+          aria-hidden="true"
+        >
+          <lucide-angular [img]="WalletIcon" class="size-5"></lucide-angular>
+        </span>
+        <div>
+          <p class="text-sm font-medium text-slate-900">Activá el control de gastos</p>
+          <p class="mt-0.5 text-sm text-slate-500">
+            Configurá tu ingreso mensual y te avisamos cuando gastes de más.
+          </p>
+        </div>
+      </div>
+      <a
+        routerLink="/settings"
+        class="inline-flex flex-none items-center justify-center rounded-lg bg-violet-600 px-3.5 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-violet-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
+      >
+        Configurar ingreso
+      </a>
+    </div>
+  }
+</ui-card>

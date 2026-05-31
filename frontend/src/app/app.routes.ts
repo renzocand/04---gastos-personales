@@ -63,6 +63,13 @@ export const routes: Routes = [
           ).then((m) => m.ExpenseForm),
       },
       {
+        path: 'settings',
+        loadComponent: () =>
+          import(
+            './features/settings/pages/settings-page/settings-page'
+          ).then((m) => m.SettingsPage),
+      },
+      {
         path: '**',
         loadComponent: () =>
           import('./core/layout/not-found/not-found').then((m) => m.NotFound),

@@ -1,7 +1,7 @@
 import { createSelector } from "@ngrx/store";
 import { expensesFeature } from "./expenses.feature";
 import { Expense } from "../models/expense";
-import { isToday, isYesterday, format, parseISO } from 'date-fns';
+import { isToday, isYesterday, isThisMonth, format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 function labelForDate(isoDate: string): string {
@@ -67,9 +67,10 @@ export type ExpenseSummary = {
   totalUSD:number
 }
 
+// Resumen del MES en curso (el dashboard muestra "Resumen del mes").
 export const selectExpensesSummary = createSelector(
   expensesFeature.selectExpenses,
-  (expenses)=> expenses.reduce<ExpenseSummary>((acc,exp)=> {
+  (expenses)=> expenses.filter(exp=>isThisMonth(parseISO(exp.date))).reduce<ExpenseSummary>((acc,exp)=> {
     acc.count++;
     if(exp.currency === 'PEN') acc.totalPEN+=exp.amount;
     else if(exp.currency === 'USD') acc.totalUSD+=exp.amount;

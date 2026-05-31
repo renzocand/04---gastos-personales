@@ -37,9 +37,19 @@ entity "expense" as expense {
       updated_at : TIMESTAMP
 }
 
+entity "user_settings" as user_settings {
+    * user_id : VARCHAR(36) <<PK>> <<FK>>
+    --
+      monthly_income : DECIMAL(12,2)  '' ingreso mensual de referencia (PEN)
+    * alerts_enabled : BIT
+      updated_at : TIMESTAMP
+}
+
 ' Relación 1 categoría -- N gastos
 category ||--o{ expense : "1 .. N"
 ' Relación 1 usuario -- N gastos
 app_user ||--o{ expense : "1 .. N"
+' Relación 1 usuario -- 0..1 configuración (PK compartida)
+app_user ||--o| user_settings : "1 .. 0..1"
 
 @enduml

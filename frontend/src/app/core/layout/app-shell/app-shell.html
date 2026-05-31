@@ -57,6 +57,14 @@
         <lucide-angular [img]="ReceiptIcon" class="size-4"></lucide-angular>
         <span>Gastos</span>
       </a>
+      <a
+        routerLink="/settings"
+        routerLinkActive="border-violet-600 text-violet-700"
+        class="flex items-center gap-2 border-b-2 border-transparent px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:text-slate-900"
+      >
+        <lucide-angular [img]="SettingsIcon" class="size-4"></lucide-angular>
+        <span>Configuración</span>
+      </a>
     </nav>
   </header>
 
@@ -64,5 +72,5 @@
     <router-outlet />
   </main>
 
-  <ui-toast-container [toasts]="[]" />
+  <ui-toast-container [toasts]="toast.toasts()" (dismiss)="toast.dismiss($event)" />
 </div>

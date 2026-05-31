@@ -1,7 +1,7 @@
 <div class="flex flex-col gap-5 sm:gap-6">
   <section>
     <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">
-      Abril 2026
+      {{ monthLabel }}
     </h1>
     <p class="mt-1 text-sm text-slate-500">Resumen del mes</p>
   </section>
@@ -79,6 +79,8 @@
       </ui-empty-state>
     </ui-card>
   } @else {
+    <app-budget-card [status]="budgetStatus()" />
+
     <div class="grid gap-4 sm:grid-cols-2">
       <app-total-card [total]="summary().totalPEN | appCurrency:'PEN'" />
       <app-total-card [total]="summary().totalUSD | appCurrency:'USD'" />

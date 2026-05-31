@@ -40,6 +40,13 @@ package "model" {
         - createdAt : Instant
         + assignId() : void
     }
+
+    class UserSettings {
+        - id : String
+        - monthlyIncome : BigDecimal
+        - alertsEnabled : boolean
+        - updatedAt : Instant
+    }
 }
 
 ' ===== Capa dto (contratos de la API) =====
@@ -100,6 +107,14 @@ package "dto" {
         + email : String
         + role : String
     }
+    class SettingsResponse <<record>> {
+        + monthlyIncome : BigDecimal
+        + alertsEnabled : boolean
+    }
+    class SettingsUpdateRequest <<record>> {
+        + monthlyIncome : BigDecimal
+        + alertsEnabled : boolean
+    }
 }
 
 ' ===== Capa mapper =====
@@ -122,6 +137,9 @@ package "repository" {
         + findByDni(dni) : Optional<User>
         + existsByDni(dni) : boolean
     }
+    interface UserSettingsRepository {
+        + findByUser_Dni(dni) : Optional<UserSettings>
+    }
 }
 
 ' ===== Capa service =====
@@ -140,6 +158,10 @@ package "service" {
         + login(req : LoginRequest) : AuthResponse
         + me(dni : String) : UserResponse
     }
+    class SettingsService {
+        + get(dni : String) : SettingsResponse
+        + update(dni : String, req : SettingsUpdateRequest) : SettingsResponse
+    }
 }
 
 ' ===== Capa controller =====
@@ -157,6 +179,10 @@ package "controller" {
         + register(req : RegisterRequest) : AuthResponse
         + login(req : LoginRequest) : AuthResponse
         + me(auth) : UserResponse
+    }
+    class SettingsController {
+        + get(auth) : SettingsResponse
+        + update(auth, req : SettingsUpdateRequest) : SettingsResponse
     }
 }
 
@@ -202,11 +228,13 @@ package "exception" {
 Expense "*" --> "1" Category : category
 Expense "*" --> "1" User : user
 Expense ..> Currency
+User "1" --> "0..1" UserSettings : settings
 
 ' ===== Relaciones entre capas =====
 ExpenseController --> ExpenseService
 CategoryController --> CategoryService
 AuthController --> AuthService
+SettingsController --> SettingsService
 ExpenseService --> ExpenseRepository
 ExpenseService --> CategoryRepository
 ExpenseService --> UserRepository
@@ -215,9 +243,12 @@ CategoryService --> CategoryRepository
 CategoryService --> ExpenseMapper
 AuthService --> UserRepository
 AuthService --> JwtService
+SettingsService --> UserSettingsRepository
+SettingsService --> UserRepository
 ExpenseRepository ..> Expense
 CategoryRepository ..> Category
 UserRepository ..> User
+UserSettingsRepository ..> UserSettings
 
 ' ===== Relaciones de seguridad =====
 JwtAuthenticationFilter --> JwtService
@@ -233,6 +264,7 @@ DemoDataSeeder --> CategoryRepository
 ExpenseService ..> NotFoundException
 AuthService ..> ConflictException
 AuthService ..> NotFoundException
+SettingsService ..> NotFoundException
 GlobalExceptionHandler ..> NotFoundException
 GlobalExceptionHandler ..> ConflictException
 

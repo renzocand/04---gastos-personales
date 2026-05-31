@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Receipt } from 'lucide-angular';
 import { RouterLink } from '@angular/router';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 import { Card } from '../../../../shared/ui/card/card';
 import { EmptyState } from '../../../../shared/ui/empty-state/empty-state';
 import { ErrorState } from '../../../../shared/ui/error-state/error-state';
@@ -8,10 +10,12 @@ import { Skeleton } from '../../../../shared/ui/skeleton/skeleton';
 import { CategoryBreakdown } from '../../components/category-breakdown/category-breakdown';
 import { RecentExpenses } from '../../components/recent-expenses/recent-expenses';
 import { TotalCard } from '../../components/total-card/total-card';
+import { BudgetCard } from '../../components/budget-card/budget-card';
 import { AppCurrencyPipe } from '../../../../shared/pipes/app-currency';
 import { Store } from '@ngrx/store';
 import { selectExpensesSummary, selectHasExpenses } from '../../../expenses/store/expenses.selectors';
 import { selectCategoryBreakdown, selectRecentExpenses } from '../../store/dashboard.selectors';
+import { selectBudgetStatus } from '../../store/budget.selectors';
 import { expensesFeature } from '../../../expenses/store/expenses.feature';
 import { exchangeRateFeature } from '../../../exchange-rate/store/exchange-rate.feature';
 import { ExpensesActions } from '../../../expenses/store/expenses.actions';
@@ -21,6 +25,7 @@ import { ExchangeRateActions } from '../../../exchange-rate/store/exchange-rate.
   selector: 'app-dashboard-page',
   imports: [
     TotalCard,
+    BudgetCard,
     CategoryBreakdown,
     RecentExpenses,
     Card,
@@ -40,8 +45,15 @@ export class DashboardPage {
 
   protected readonly ReceiptIcon = Receipt;
 
+  // Mes en curso capitalizado, ej. "Mayo 2026".
+  protected readonly monthLabel = (() => {
+    const raw = format(new Date(), 'LLLL yyyy', { locale: es });
+    return raw.charAt(0).toUpperCase() + raw.slice(1);
+  })();
+
   protected readonly summary = this.store.selectSignal(selectExpensesSummary);
   protected readonly hasExpenses = this.store.selectSignal(selectHasExpenses);
+  protected readonly budgetStatus = this.store.selectSignal(selectBudgetStatus);
   protected readonly categoryBreakdown = this.store.selectSignal(selectCategoryBreakdown);
   protected readonly recentExpenses = this.store.selectSignal(selectRecentExpenses);
 
