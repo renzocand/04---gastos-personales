@@ -5,6 +5,7 @@ import {
   Receipt,
   SlidersHorizontal,
 } from 'lucide-angular';
+import { TranslocoModule } from '@jsverse/transloco';
 import { Card } from '../../../../shared/ui/card/card';
 import { EmptyState } from '../../../../shared/ui/empty-state/empty-state';
 import { ErrorState } from '../../../../shared/ui/error-state/error-state';
@@ -31,6 +32,7 @@ import { Currency } from '../../models/expense';
     RouterLink,
     LucideAngularModule,
     AppCurrencyPipe,
+    TranslocoModule,
   ],
   templateUrl: './expenses-list.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -57,15 +59,18 @@ export class ExpensesList implements OnInit{
 
   private readonly categoryOptions = this.store.selectSignal(selectCategoryOptions);
 
+  // El filtro "Todas" no tiene id; el resto lleva su id de categoría para
+  // resolver el nombre traducido en la plantilla (categories.<id>.name).
   protected readonly categoryFilters = computed(() => [
-    { id: null as string | null, name: 'Todas', icon: null, iconClass: null },
+    { id: null as string | null, icon: null, iconClass: null },
     ...this.categoryOptions(),
   ]);
 
+  // El símbolo es estable; el nombre se traduce con la clave currency.<id>.
   protected readonly currencyFilters = [
-    { id: null, label: 'Todas', default: true },
-    { id: 'PEN', label: 'S/ Soles' },
-    { id: 'USD', label: 'US$ Dólares' },
+    { id: null, symbol: '' },
+    { id: 'PEN', symbol: 'S/' },
+    { id: 'USD', symbol: 'US$' },
   ] as const;
 
   protected readonly groups = toSignal(this.store.select(selectExpensesGroupedByDay), {requireSync:true})

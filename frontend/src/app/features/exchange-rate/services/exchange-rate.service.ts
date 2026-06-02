@@ -1,11 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
-
-type ExchangeRateResponse = {
-  result: 'success' | 'error';
-  rates: Record<string, number>;
-};
+import { environment } from '../../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -14,13 +10,11 @@ export class ExchangeRateService {
 
   private http = inject(HttpClient);
 
-
-  getRate():Observable<number>{
-    return this.http.get<ExchangeRateResponse>('https://open.er-api.com/v6/latest/USD').pipe(
-      map(resp=>resp.rates['PEN'])
-    )
+  // El tipo de cambio ahora lo sirve nuestro backend (que lo cachea), no la
+  // API pública directamente desde el navegador.
+  getRate(): Observable<number> {
+    return this.http.get<{ rate: number }>(`${environment.apiUrl}/exchange-rate`).pipe(
+      map(resp => resp.rate)
+    );
   }
-
-
-
 }

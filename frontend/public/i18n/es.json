@@ -1,0 +1,213 @@
+{
+  "common": {
+    "language": "Idioma",
+    "save": "Guardar",
+    "saving": "Guardando…",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "back": "Volver",
+    "optional": "(opcional)"
+  },
+  "currency": {
+    "PEN": "Soles",
+    "USD": "Dólares"
+  },
+  "nav": {
+    "brand": "Gastos",
+    "dashboard": "Dashboard",
+    "expenses": "Gastos",
+    "settings": "Configuración",
+    "newExpense": "Nuevo gasto",
+    "logout": "Salir",
+    "logoutFull": "Cerrar sesión",
+    "greeting": "Hola, {{ name }}",
+    "sections": "Secciones"
+  },
+  "auth": {
+    "dni": "DNI",
+    "dniPlaceholder": "8 dígitos",
+    "password": "Contraseña",
+    "errors": {
+      "dniRequired": "El DNI es obligatorio.",
+      "dniPattern": "El DNI debe tener exactamente 8 dígitos.",
+      "passwordRequired": "La contraseña es obligatoria.",
+      "passwordMinlength": "La contraseña debe tener al menos 6 caracteres.",
+      "firstNameRequired": "El nombre es obligatorio.",
+      "lastNameRequired": "El apellido paterno es obligatorio.",
+      "emailInvalid": "El email no tiene un formato válido."
+    },
+    "login": {
+      "title": "Iniciar sesión",
+      "subtitle": "Ingresá con tu DNI y contraseña",
+      "submit": "Ingresar",
+      "submitting": "Ingresando…",
+      "noAccount": "¿No tenés cuenta?",
+      "createOne": "Creá una"
+    },
+    "register": {
+      "title": "Crear cuenta",
+      "subtitle": "Registrate con tu DNI para empezar a controlar tus gastos",
+      "firstName": "Nombre",
+      "lastName": "Apellido paterno",
+      "secondLastName": "Apellido materno",
+      "email": "Email",
+      "emailPlaceholder": "tu@correo.com",
+      "passwordPlaceholder": "Mínimo 6 caracteres",
+      "submit": "Crear cuenta",
+      "submitting": "Creando cuenta…",
+      "haveAccount": "¿Ya tenés cuenta?",
+      "signIn": "Iniciá sesión"
+    }
+  },
+  "dashboard": {
+    "summary": "Resumen del mes",
+    "loadError": "No pudimos cargar el dashboard",
+    "empty": {
+      "title": "Todavía no hay gastos",
+      "message": "Empezá registrando tu primer movimiento para ver tu resumen.",
+      "cta": "Registrar primer gasto"
+    },
+    "total": {
+      "label": "Total del mes",
+      "previousLabel": "vs. mes anterior"
+    },
+    "budget": {
+      "label": "Gasto del mes vs. ingreso",
+      "of": "de {{ income }} de ingreso",
+      "exceededBy": "Excedido por {{ amount }}",
+      "available": "Disponible {{ amount }}",
+      "msg": {
+        "danger": "Superaste tu ingreso de este mes.",
+        "warning": "Vas muy cerca de tu ingreso mensual.",
+        "info": "Llevas más de la mitad de tu ingreso.",
+        "ok": "Vas bien con tus gastos este mes."
+      },
+      "empty": {
+        "title": "Activá el control de gastos",
+        "message": "Configurá tu ingreso mensual y te avisamos cuando gastes de más.",
+        "cta": "Configurar ingreso"
+      }
+    },
+    "breakdown": {
+      "title": "Por categoría",
+      "subtitle": "Distribución del mes",
+      "percentOfTotal": "{{ percent }}% del total"
+    },
+    "recent": {
+      "title": "Últimos gastos",
+      "subtitle": "Movimientos recientes",
+      "seeAll": "Ver todos",
+      "empty": "Todavía no cargaste ningún gasto."
+    }
+  },
+  "expenses": {
+    "list": {
+      "title": "Gastos",
+      "movement": "movimiento",
+      "movements": "movimientos",
+      "filters": "Filtros",
+      "clear": "Limpiar",
+      "all": "Todas",
+      "category": "Categoría",
+      "currency": "Moneda",
+      "from": "Desde",
+      "to": "Hasta",
+      "loadError": "No pudimos cargar los gastos",
+      "expense": "gasto",
+      "expenses": "gastos",
+      "empty": {
+        "title": "Todavía no hay gastos",
+        "message": "Cuando registres movimientos vas a verlos listados acá.",
+        "cta": "Registrar primer gasto"
+      },
+      "noResults": {
+        "title": "No encontramos gastos",
+        "message": "Probá ajustar los filtros o limpiarlos."
+      }
+    },
+    "form": {
+      "titleNew": "Nuevo gasto",
+      "titleEdit": "Editar gasto",
+      "subtitleNew": "Registrá un movimiento",
+      "subtitleEdit": "Modificá los datos del movimiento",
+      "currency": "Moneda",
+      "amount": "Monto",
+      "description": "Descripción",
+      "descriptionPlaceholder": "Ej: Almuerzo en Wong",
+      "category": "Categoría",
+      "date": "Fecha",
+      "submitNew": "Guardar gasto",
+      "submitEdit": "Actualizar",
+      "deleteDialog": {
+        "title": "Eliminar gasto",
+        "message": "Esta acción no se puede deshacer. El gasto se eliminará permanentemente."
+      },
+      "errors": {
+        "amountRequired": "El monto es obligatorio.",
+        "amountMin": "El monto debe ser mayor a 0.",
+        "descriptionRequired": "La descripción es obligatoria.",
+        "descriptionMaxlength": "Máximo 80 caracteres.",
+        "categoryRequired": "Elegí una categoría.",
+        "dateRequired": "La fecha es obligatoria."
+      }
+    }
+  },
+  "settings": {
+    "title": "Configuración",
+    "subtitle": "Definí tu ingreso mensual para que la app te ayude a controlar cuánto vas gastando.",
+    "monthlyIncome": "Ingreso mensual",
+    "monthlyIncomeHint": "Es solo una referencia, no contabilidad. Podés dejarlo vacío si no querés usar alertas.",
+    "incomeNegative": "El ingreso no puede ser negativo.",
+    "alertsTitle": "Alertas de gasto",
+    "alertsHint": "Avisarme al llegar al 50%, 80% y 100% de mi ingreso este mes.",
+    "languageTitle": "Idioma",
+    "languageHint": "Elegí el idioma de la aplicación."
+  },
+  "alerts": {
+    "tier1": "Llevas gastado más del 50% de tu ingreso este mes.",
+    "tier2": "Cuidado: ya gastaste el 80% de tu ingreso este mes.",
+    "tier3": "Superaste tu ingreso mensual. Revisá tus gastos."
+  },
+  "notFound": {
+    "message": "La página que buscás no existe o fue movida.",
+    "home": "Volver al inicio"
+  },
+  "categories": {
+    "food": {
+      "name": "Comida",
+      "description": "Mercado, restaurantes, delivery y todo lo que comés o bebés."
+    },
+    "transport": {
+      "name": "Transporte",
+      "description": "Pasajes, combustible, taxis y apps de viaje."
+    },
+    "housing": {
+      "name": "Vivienda",
+      "description": "Alquiler, hipoteca y mantenimiento de tu casa."
+    },
+    "services": {
+      "name": "Servicios",
+      "description": "Cuentas recurrentes: luz, agua, gas, internet y celular."
+    },
+    "health": {
+      "name": "Salud",
+      "description": "Farmacia, consultas médicas, seguros y exámenes."
+    },
+    "education": {
+      "name": "Educación",
+      "description": "Pensiones, matrículas, cursos y materiales de estudio."
+    },
+    "leisure": {
+      "name": "Ocio",
+      "description": "Salidas, streaming, juegos y pasatiempos."
+    },
+    "shopping": {
+      "name": "Compras",
+      "description": "Ropa, tecnología y antojos que no son de primera necesidad."
+    },
+    "other": {
+      "name": "Otro",
+      "description": "Gastos que no encajan en las demás categorías."
+    }
+  }
+}

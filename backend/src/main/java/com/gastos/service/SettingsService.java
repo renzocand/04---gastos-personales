@@ -3,6 +3,7 @@ package com.gastos.service;
 import com.gastos.dto.SettingsResponse;
 import com.gastos.dto.SettingsUpdateRequest;
 import com.gastos.exception.NotFoundException;
+import com.gastos.i18n.Messages;
 import com.gastos.model.User;
 import com.gastos.model.UserSettings;
 import com.gastos.repository.UserRepository;
@@ -21,10 +22,13 @@ public class SettingsService {
 
     private final UserSettingsRepository settingsRepository;
     private final UserRepository userRepository;
+    private final Messages messages;
 
-    public SettingsService(UserSettingsRepository settingsRepository, UserRepository userRepository) {
+    public SettingsService(UserSettingsRepository settingsRepository, UserRepository userRepository,
+                           Messages messages) {
         this.settingsRepository = settingsRepository;
         this.userRepository = userRepository;
+        this.messages = messages;
     }
 
     /** Configuración del usuario; si no tiene fila aún, devuelve los defaults. */
@@ -40,7 +44,7 @@ public class SettingsService {
         UserSettings settings = settingsRepository.findByUser_Dni(dni)
                 .orElseGet(() -> {
                     User user = userRepository.findByDni(dni)
-                            .orElseThrow(() -> new NotFoundException("Usuario no encontrado: " + dni));
+                            .orElseThrow(() -> new NotFoundException(messages.get("error.userNotFound", dni)));
                     return new UserSettings(user);
                 });
 

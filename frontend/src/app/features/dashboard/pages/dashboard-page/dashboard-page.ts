@@ -1,8 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Receipt } from 'lucide-angular';
 import { RouterLink } from '@angular/router';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { TranslocoModule } from '@jsverse/transloco';
+import { format, Locale } from 'date-fns';
+import { enUS, es } from 'date-fns/locale';
+import { LanguageService } from '../../../../core/i18n/language.service';
 import { Card } from '../../../../shared/ui/card/card';
 import { EmptyState } from '../../../../shared/ui/empty-state/empty-state';
 import { ErrorState } from '../../../../shared/ui/error-state/error-state';
@@ -34,6 +36,7 @@ import { ExchangeRateActions } from '../../../exchange-rate/store/exchange-rate.
     Skeleton,
     RouterLink,
     AppCurrencyPipe,
+    TranslocoModule,
   ],
   templateUrl: './dashboard-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -42,14 +45,19 @@ export class DashboardPage {
 
 
   private store = inject(Store);
+  private readonly lang = inject(LanguageService);
 
   protected readonly ReceiptIcon = Receipt;
 
-  // Mes en curso capitalizado, ej. "Mayo 2026".
-  protected readonly monthLabel = (() => {
-    const raw = format(new Date(), 'LLLL yyyy', { locale: es });
+  // Locale de date-fns por idioma activo (quechua cae a español).
+  private readonly DATE_LOCALES: Record<string, Locale> = { es, en: enUS, qu: es };
+
+  // Mes en curso capitalizado, ej. "Mayo 2026" / "May 2026". Reacciona al idioma.
+  protected readonly monthLabel = computed(() => {
+    const locale = this.DATE_LOCALES[this.lang.current()] ?? es;
+    const raw = format(new Date(), 'LLLL yyyy', { locale });
     return raw.charAt(0).toUpperCase() + raw.slice(1);
-  })();
+  });
 
   protected readonly summary = this.store.selectSignal(selectExpensesSummary);
   protected readonly hasExpenses = this.store.selectSignal(selectHasExpenses);

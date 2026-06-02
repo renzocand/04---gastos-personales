@@ -6,6 +6,7 @@ import com.gastos.dto.RegisterRequest;
 import com.gastos.dto.UserResponse;
 import com.gastos.exception.ConflictException;
 import com.gastos.exception.NotFoundException;
+import com.gastos.i18n.Messages;
 import com.gastos.model.User;
 import com.gastos.repository.UserRepository;
 import com.gastos.security.JwtService;
@@ -30,22 +31,25 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final Messages messages;
 
     public AuthService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
                        JwtService jwtService,
-                       AuthenticationManager authenticationManager) {
+                       AuthenticationManager authenticationManager,
+                       Messages messages) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
+        this.messages = messages;
     }
 
     /** Registra un usuario nuevo y devuelve su token. Falla si el DNI ya existe. */
     @Transactional
     public AuthResponse register(RegisterRequest req) {
         if (userRepository.existsByDni(req.dni())) {
-            throw new ConflictException("El DNI ya está registrado: " + req.dni());
+            throw new ConflictException(messages.get("error.dniTaken", req.dni()));
         }
 
         User user = new User();
@@ -71,7 +75,7 @@ public class AuthService {
                 new UsernamePasswordAuthenticationToken(req.dni(), req.password()));
 
         User user = userRepository.findByDni(req.dni())
-                .orElseThrow(() -> new NotFoundException("Usuario no encontrado: " + req.dni()));
+                .orElseThrow(() -> new NotFoundException(messages.get("error.userNotFound", req.dni())));
 
         String token = jwtService.generateToken(user.getDni());
         return new AuthResponse(token, BEARER, user.getDni(), user.getFirstName(), user.getLastName());
@@ -80,7 +84,7 @@ public class AuthService {
     /** Datos del usuario autenticado (para GET /api/auth/me). */
     public UserResponse me(String dni) {
         User user = userRepository.findByDni(dni)
-                .orElseThrow(() -> new NotFoundException("Usuario no encontrado: " + dni));
+                .orElseThrow(() -> new NotFoundException(messages.get("error.userNotFound", dni)));
         return new UserResponse(
                 user.getDni(),
                 user.getFirstName(),

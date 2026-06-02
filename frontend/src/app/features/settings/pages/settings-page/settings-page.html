@@ -1,10 +1,20 @@
 <div class="mx-auto max-w-xl">
   <header class="mb-6">
-    <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">Configuración</h1>
+    <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">{{ 'settings.title' | transloco }}</h1>
     <p class="mt-1 text-sm text-slate-500">
-      Definí tu ingreso mensual para que la app te ayude a controlar cuánto vas gastando.
+      {{ 'settings.subtitle' | transloco }}
     </p>
   </header>
+
+  <ui-card class="mb-5 block sm:mb-6">
+    <div class="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+      <div>
+        <p class="text-sm font-medium text-slate-700">{{ 'settings.languageTitle' | transloco }}</p>
+        <p class="mt-0.5 text-xs text-slate-500">{{ 'settings.languageHint' | transloco }}</p>
+      </div>
+      <ui-language-selector />
+    </div>
+  </ui-card>
 
   <ui-card>
     <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6 p-5 sm:p-6" novalidate>
@@ -17,7 +27,7 @@
       <div>
         <label for="monthlyIncome" class="flex items-center gap-2 text-sm font-medium text-slate-700">
           <lucide-angular [img]="WalletIcon" class="size-4 text-violet-600"></lucide-angular>
-          Ingreso mensual
+          {{ 'settings.monthlyIncome' | transloco }}
         </label>
         <div class="relative mt-1.5">
           <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-sm font-medium text-slate-400">
@@ -35,18 +45,18 @@
           />
         </div>
         <p class="mt-1.5 text-xs text-slate-500">
-          Es solo una referencia, no contabilidad. Podés dejarlo vacío si no querés usar alertas.
+          {{ 'settings.monthlyIncomeHint' | transloco }}
         </p>
         @if (form.controls.monthlyIncome.touched && form.controls.monthlyIncome.errors?.['min']) {
-          <p class="mt-1.5 text-xs font-medium text-rose-600">El ingreso no puede ser negativo.</p>
+          <p class="mt-1.5 text-xs font-medium text-rose-600">{{ 'settings.incomeNegative' | transloco }}</p>
         }
       </div>
 
       <label class="flex items-center justify-between gap-4">
         <span>
-          <span class="block text-sm font-medium text-slate-700">Alertas de gasto</span>
+          <span class="block text-sm font-medium text-slate-700">{{ 'settings.alertsTitle' | transloco }}</span>
           <span class="mt-0.5 block text-xs text-slate-500">
-            Avisarme al llegar al 50%, 80% y 100% de mi ingreso este mes.
+            {{ 'settings.alertsHint' | transloco }}
           </span>
         </span>
         <input
@@ -62,7 +72,7 @@
           [disabled]="loading()"
           class="inline-flex items-center justify-center rounded-lg bg-violet-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-violet-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {{ loading() ? 'Guardando…' : 'Guardar' }}
+          {{ (loading() ? 'common.saving' : 'common.save') | transloco }}
         </button>
       </div>
     </form>

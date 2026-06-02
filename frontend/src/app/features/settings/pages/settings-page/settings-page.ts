@@ -2,14 +2,16 @@ import { ChangeDetectionStrategy, Component, effect, inject } from '@angular/cor
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { LucideAngularModule, Wallet } from 'lucide-angular';
+import { TranslocoModule } from '@jsverse/transloco';
 import { Card } from '../../../../shared/ui/card/card';
+import { LanguageSelector } from '../../../../shared/ui/language-selector/language-selector';
 import { SettingsActions } from '../../store/settings.actions';
 import { settingsFeature } from '../../store/settings.feature';
 import { UserSettings } from '../../models/settings';
 
 @Component({
   selector: 'app-settings-page',
-  imports: [ReactiveFormsModule, LucideAngularModule, Card],
+  imports: [ReactiveFormsModule, LucideAngularModule, Card, TranslocoModule, LanguageSelector],
   templateUrl: './settings-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

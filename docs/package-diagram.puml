@@ -14,6 +14,7 @@ package "com.gastos" {
     package "exception" as exception
     package "security" as security
     package "config" as config
+    package "i18n" as i18n
 }
 
 database "MySQL" as db
@@ -35,9 +36,16 @@ security ..> service
 security ..> repository
 security ..> model
 config ..> security : SecurityFilterChain + CORS
-config ..> repository : DemoDataSeeder
 
 ' Infraestructura
 repository ..> db : JPA / Hibernate
+
+' Internacionalización (i18n): el idioma se decide por el header Accept-Language.
+' MessageSource + LocaleResolver se configuran en config; Messages resuelve textos
+' traducidos para services, handler de excepciones y entry point de seguridad.
+config ..> i18n : MessageSource + LocaleResolver\n(es / en / qu)
+service ..> i18n : Messages (errores de dominio)
+exception ..> i18n : Messages (handler global)
+security ..> i18n : MessageSource (entry point 401)
 
 @enduml

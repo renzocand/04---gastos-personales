@@ -6,7 +6,7 @@
       class="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-sm font-medium text-slate-600 transition hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
     >
       <lucide-angular [img]="ArrowLeftIcon" class="size-4"></lucide-angular>
-      <span>Volver</span>
+      <span>{{ 'common.back' | transloco }}</span>
     </button>
   </div>
 
@@ -14,15 +14,15 @@
     <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-5 p-5 sm:space-y-6 sm:p-6" novalidate>
       <header>
         <h1 class="text-xl font-semibold tracking-tight text-slate-900">
-          {{ pageTitle() }}
+          {{ (isEdit() ? 'expenses.form.titleEdit' : 'expenses.form.titleNew') | transloco }}
         </h1>
         <p class="mt-1 text-sm text-slate-500">
-          {{ isEdit() ? 'Modificá los datos del movimiento' : 'Registrá un movimiento' }}
+          {{ (isEdit() ? 'expenses.form.subtitleEdit' : 'expenses.form.subtitleNew') | transloco }}
         </p>
       </header>
 
       <fieldset>
-        <legend class="block text-sm font-medium text-slate-700">Moneda</legend>
+        <legend class="block text-sm font-medium text-slate-700">{{ 'expenses.form.currency' | transloco }}</legend>
         <div class="mt-1.5 grid grid-cols-2 gap-2">
           @for (cur of currencies; track cur.id) {
             <label class="relative cursor-pointer">
@@ -36,7 +36,7 @@
                 class="flex items-center justify-center gap-2 rounded-lg border-2 border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:border-slate-300 peer-checked:border-violet-600 peer-checked:bg-violet-50 peer-checked:text-violet-700 peer-focus-visible:ring-2 peer-focus-visible:ring-violet-500 peer-focus-visible:ring-offset-2"
               >
                 <span class="font-semibold tabular-nums">{{ cur.symbol }}</span>
-                <span>{{ cur.label }}</span>
+                <span>{{ ('currency.' + cur.id) | transloco }}</span>
               </div>
             </label>
           }
@@ -45,7 +45,7 @@
 
       <div>
         <label for="amount" class="block text-sm font-medium text-slate-700">
-          Monto
+          {{ 'expenses.form.amount' | transloco }}
         </label>
         <input
           id="amount"
@@ -60,9 +60,9 @@
         @if (form.controls.amount.touched && form.controls.amount.invalid) {
           <p class="mt-1.5 text-xs font-medium text-rose-600">
             @if (form.controls.amount.errors?.['required']) {
-              El monto es obligatorio.
+              {{ 'expenses.form.errors.amountRequired' | transloco }}
             } @else if (form.controls.amount.errors?.['min']) {
-              El monto debe ser mayor a 0.
+              {{ 'expenses.form.errors.amountMin' | transloco }}
             }
           </p>
         }
@@ -73,23 +73,23 @@
           for="description"
           class="block text-sm font-medium text-slate-700"
         >
-          Descripción
+          {{ 'expenses.form.description' | transloco }}
         </label>
         <input
           id="description"
           type="text"
           maxlength="80"
           formControlName="description"
-          placeholder="Ej: Almuerzo en Wong"
+          [placeholder]="'expenses.form.descriptionPlaceholder' | transloco"
           autocomplete="off"
           class="mt-1.5 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20"
         />
         @if (form.controls.description.touched && form.controls.description.invalid) {
           <p class="mt-1.5 text-xs font-medium text-rose-600">
             @if (form.controls.description.errors?.['required']) {
-              La descripción es obligatoria.
+              {{ 'expenses.form.errors.descriptionRequired' | transloco }}
             } @else if (form.controls.description.errors?.['maxlength']) {
-              Máximo 80 caracteres.
+              {{ 'expenses.form.errors.descriptionMaxlength' | transloco }}
             }
           </p>
         }
@@ -97,11 +97,11 @@
 
       <fieldset>
         <legend class="block text-sm font-medium text-slate-700">
-          Categoría
+          {{ 'expenses.form.category' | transloco }}
         </legend>
         <div class="mt-1.5 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
           @for (cat of categories(); track cat.id) {
-            <label class="relative cursor-pointer" [title]="cat.description">
+            <label class="relative cursor-pointer" [title]="('categories.' + cat.id + '.description') | transloco">
               <input
                 type="radio"
                 [value]="cat.id"
@@ -119,22 +119,22 @@
                   <lucide-angular [img]="cat.icon" class="size-4"></lucide-angular>
                 </span>
                 <span class="text-xs font-medium text-slate-700">
-                  {{ cat.name }}
+                  {{ ('categories.' + cat.id + '.name') | transloco }}
                 </span>
               </div>
             </label>
           }
         </div>
-        @if (selectedCategory()?.description; as hint) {
+        @if (selectedCategory(); as sel) {
           <p class="mt-2 flex items-start gap-1.5 rounded-lg bg-violet-50 px-3 py-2 text-xs text-violet-800">
             <lucide-angular [img]="InfoIcon" class="mt-0.5 size-3.5 flex-none"></lucide-angular>
-            <span>{{ hint }}</span>
+            <span>{{ ('categories.' + sel.id + '.description') | transloco }}</span>
           </p>
         }
         @if (form.controls.category.touched && form.controls.category.invalid) {
           <p class="mt-1.5 text-xs font-medium text-rose-600">
             @if (form.controls.category.errors?.['required']) {
-              Elegí una categoría.
+              {{ 'expenses.form.errors.categoryRequired' | transloco }}
             }
           </p>
         }
@@ -142,7 +142,7 @@
 
       <div>
         <label for="date" class="block text-sm font-medium text-slate-700">
-          Fecha
+          {{ 'expenses.form.date' | transloco }}
         </label>
         <input
           id="date"
@@ -154,7 +154,7 @@
         @if (form.controls.date.touched && form.controls.date.invalid) {
           <p class="mt-1.5 text-xs font-medium text-rose-600">
             @if (form.controls.date.errors?.['required']) {
-              La fecha es obligatoria.
+              {{ 'expenses.form.errors.dateRequired' | transloco }}
             }
           </p>
         }
@@ -170,20 +170,20 @@
             class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-rose-200 bg-white px-4 py-2.5 text-sm font-medium text-rose-700 transition hover:bg-rose-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2 sm:mr-auto"
           >
             <lucide-angular [img]="TrashIcon" class="size-4"></lucide-angular>
-            Eliminar
+            {{ 'common.delete' | transloco }}
           </button>
         }
         <a
           routerLink="/expenses"
           class="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
         >
-          Cancelar
+          {{ 'common.cancel' | transloco }}
         </a>
         <button
           type="submit"
           class="inline-flex items-center justify-center rounded-lg bg-violet-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-violet-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 cursor-pointer"
         >
-          {{ submitLabel() }}
+          {{ (isEdit() ? 'expenses.form.submitEdit' : 'expenses.form.submitNew') | transloco }}
         </button>
       </div>
     </form>
@@ -192,9 +192,9 @@
 
 <ui-confirm-dialog
   #confirmDialogRef
-  title="Eliminar gasto"
-  message="Esta acción no se puede deshacer. El gasto se eliminará permanentemente."
-  confirmLabel="Eliminar"
+  [title]="'expenses.form.deleteDialog.title' | transloco"
+  [message]="'expenses.form.deleteDialog.message' | transloco"
+  [confirmLabel]="'common.delete' | transloco"
   confirmVariant="danger"
   (confirmed)="onDeleteConfirmed()"
 />

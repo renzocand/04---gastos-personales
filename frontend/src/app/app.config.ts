@@ -1,7 +1,15 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import {
+  ApplicationConfig,
+  inject,
+  provideAppInitializer,
+  provideBrowserGlobalErrorListeners,
+} from '@angular/core';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
+import { TranslocoService } from '@jsverse/transloco';
 
 import { routes } from './app.routes';
+import { provideAppTransloco } from './core/i18n/transloco.providers';
+import { readStoredLang } from './core/i18n/i18n.config';
 import { provideState, provideStore } from '@ngrx/store';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
 import { provideEffects } from '@ngrx/effects';
@@ -27,6 +35,11 @@ export const appConfig: ApplicationConfig = {
     provideEffects(SettingsEffects, AlertsEffects),
     provideStoreDevtools({ maxAge: 25, logOnly: false }),
     provideHttpClient(withInterceptors([authInterceptor])),
+    // i18n: Transloco + idioma activo según lo guardado por el usuario.
+    provideAppTransloco(),
+    provideAppInitializer(() => {
+      inject(TranslocoService).setActiveLang(readStoredLang());
+    }),
     // provideStore({ [expensesFeature.name]: expensesFeature.reducer })
   ],
 };

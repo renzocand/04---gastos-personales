@@ -1,0 +1,54 @@
+@startuml deployment-diagram
+title Diagrama de Despliegue - Gastos Personales (Docker en Oracle Cloud)
+
+skinparam linetype ortho
+skinparam nodesep 20
+skinparam ranksep 40
+
+actor "Usuario" as user
+
+node "Navegador web" as browser {
+    artifact "App Angular (SPA)" as spa
+}
+
+cloud "Internet" {
+    component "open.er-api.com\nTipo de cambio USD -> PEN" as fx
+}
+
+cloud "Oracle Cloud — VM 'Always Free'" as oracle {
+
+    node "Docker Engine  ·  docker compose" as docker {
+
+        node "gastos-frontend\nnginx:alpine  ·  :80" as fe
+        node "gastos-backend\nSpring Boot / JRE 17  ·  :8080" as be
+        database "gastos-mysql\nMySQL 8.4  ·  :3306" as db
+
+        folder "volumen\ngastos-mysql-data" as vol
+        artifact ".env\nAPP_JWT_SECRET" as env
+    }
+}
+
+user --> fe : **HTTP :80**\n(única URL pública)
+fe ..> be : proxy **/api** -> :8080\n(red interna de docker)\nreenvía **Accept-Language** (es / en / qu)
+be --> db : JDBC :3306\n(SPRING_DATASOURCE_URL)
+db --> vol : persistencia
+env ..> be : variables de entorno
+be ..> fx : HTTPS (tipo de cambio,\ncacheado en el backend)
+
+note bottom of fe
+  nginx sirve los estáticos de Angular
+  y proxea /api al backend.
+  Mismo origen => sin CORS.
+  i18n: Transloco carga /i18n/{es,en,qu}.json
+  y el idioma elegido viaja en Accept-Language.
+end note
+
+note right of be
+  JWT (Spring Security).
+  Seed de categorías vía data.sql.
+  Proxy del tipo de cambio (con caché).
+  i18n: MessageSource + LocaleResolver
+  traducen validaciones y errores por idioma.
+end note
+
+@enduml

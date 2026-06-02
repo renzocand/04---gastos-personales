@@ -16,6 +16,9 @@ backend/.mvn/wrapper/maven-wrapper.jar
 .classpath
 .settings/
 
+# Variables de entorno (secretos). Se versiona solo .env.example.
+.env
+
 # Sistema
 .DS_Store
 Thumbs.db

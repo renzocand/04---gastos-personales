@@ -1,0 +1,13 @@
+<label class="inline-flex items-center gap-2">
+  <span class="sr-only">{{ 'common.language' | transloco }}</span>
+  <select
+    [value]="lang.current()"
+    (change)="onChange($any($event.target).value)"
+    class="rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
+    [attr.aria-label]="'common.language' | transloco"
+  >
+    @for (code of lang.available; track code) {
+      <option [value]="code">{{ lang.labels[code] }}</option>
+    }
+  </select>
+</label>

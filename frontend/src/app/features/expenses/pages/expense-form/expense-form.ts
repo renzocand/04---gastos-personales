@@ -7,6 +7,7 @@ import { RouterLink } from '@angular/router';
 // Terceros
 import { Store } from '@ngrx/store';
 import { ArrowLeft, Info, LucideAngularModule, Trash2 } from 'lucide-angular';
+import { TranslocoModule } from '@jsverse/transloco';
 
 // Internos (alfabético por path)
 import { selectCategoryOptions } from '../../../categories/store/category.selectors';
@@ -27,7 +28,7 @@ export type ExpenseFormMode = 'create' | 'edit';
 
 @Component({
   selector: 'app-expense-form',
-  imports: [Card, RouterLink, LucideAngularModule, ConfirmDialog, ReactiveFormsModule],
+  imports: [Card, RouterLink, LucideAngularModule, ConfirmDialog, ReactiveFormsModule, TranslocoModule],
   templateUrl: './expense-form.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -50,12 +51,6 @@ export class ExpenseForm {
 
 
   protected readonly isEdit = computed(() => this.mode() === 'edit');
-  protected readonly pageTitle = computed(() =>
-    this.isEdit() ? 'Editar gasto' : 'Nuevo gasto',
-  );
-  protected readonly submitLabel = computed(() =>
-    this.isEdit() ? 'Actualizar' : 'Guardar gasto',
-  );
 
 
   private readonly expenses = this.store.selectSignal(expensesFeature.selectExpenses);

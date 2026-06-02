@@ -37,3 +37,7 @@ app:
     secret: ${APP_JWT_SECRET:gastos-personales-clave-secreta-de-desarrollo-cambiar-en-produccion}
     # Vigencia del token en milisegundos (24 horas).
     expiration-ms: ${APP_JWT_EXPIRATION_MS:86400000}
+  cors:
+    # Orígenes permitidos (CSV). En local: el dev server de Angular. En Docker
+    # con nginx (mismo origen) no se usa, pero se deja configurable por entorno.
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:4200}

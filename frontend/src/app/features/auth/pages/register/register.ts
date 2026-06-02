@@ -3,13 +3,14 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angula
 import { RouterLink } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { LucideAngularModule, Receipt, UserPlus } from 'lucide-angular';
+import { TranslocoModule } from '@jsverse/transloco';
 import { RegisterRequest } from '../../models/auth';
 import { AuthActions } from '../../store/auth.actions';
 import { authFeature } from '../../store/auth.feature';
 
 @Component({
   selector: 'app-register',
-  imports: [ReactiveFormsModule, RouterLink, LucideAngularModule],
+  imports: [ReactiveFormsModule, RouterLink, LucideAngularModule, TranslocoModule],
   templateUrl: './register.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

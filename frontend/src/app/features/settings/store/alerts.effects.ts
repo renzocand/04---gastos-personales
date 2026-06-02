@@ -2,6 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { concatLatestFrom } from '@ngrx/operators';
 import { Store } from '@ngrx/store';
+import { TranslocoService } from '@jsverse/transloco';
 import { isThisMonth, parseISO } from 'date-fns';
 import { tap } from 'rxjs';
 import { ExpensesActions } from '../../expenses/store/expenses.actions';
@@ -12,11 +13,11 @@ import { settingsFeature } from './settings.feature';
 import { ToastService } from '../../../shared/ui/toast/toast.service';
 import { ToastVariant } from '../../../shared/ui/toast/toast';
 
-/** Mensaje y estilo del toast por escalón de alerta (1=50%, 2=80%, 3=100%). */
-const ALERTS: Record<number, { message: string; variant: ToastVariant }> = {
-  1: { message: 'Llevas gastado más del 50% de tu ingreso este mes.', variant: 'info' },
-  2: { message: 'Cuidado: ya gastaste el 80% de tu ingreso este mes.', variant: 'error' },
-  3: { message: 'Superaste tu ingreso mensual. Revisá tus gastos.', variant: 'error' },
+/** Clave i18n y estilo del toast por escalón de alerta (1=50%, 2=80%, 3=100%). */
+const ALERTS: Record<number, { key: string; variant: ToastVariant }> = {
+  1: { key: 'alerts.tier1', variant: 'info' },
+  2: { key: 'alerts.tier2', variant: 'error' },
+  3: { key: 'alerts.tier3', variant: 'error' },
 };
 
 /**
@@ -29,6 +30,7 @@ export class AlertsEffects {
   private actions$ = inject(Actions);
   private store = inject(Store);
   private toast = inject(ToastService);
+  private transloco = inject(TranslocoService);
 
   notifyThreshold$ = createEffect(
     () =>
@@ -51,7 +53,7 @@ export class AlertsEffects {
           if (nowTier <= prevTier) return; // no cruzó hacia un nivel mayor
 
           const alert = ALERTS[nowTier];
-          if (alert) this.toast.show(alert.message, alert.variant);
+          if (alert) this.toast.show(this.transloco.translate(alert.key), alert.variant);
         }),
       ),
     { dispatch: false },

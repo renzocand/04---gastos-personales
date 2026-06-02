@@ -8,7 +8,7 @@
         >
           <lucide-angular [img]="ReceiptIcon" class="size-4"></lucide-angular>
         </span>
-        <span class="text-base font-semibold tracking-tight">Gastos</span>
+        <span class="text-base font-semibold tracking-tight">{{ 'nav.brand' | transloco }}</span>
       </a>
 
       <div class="flex items-center gap-2 sm:gap-3">
@@ -17,13 +17,15 @@
           class="inline-flex items-center gap-1.5 rounded-lg bg-violet-600 px-3 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-violet-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
         >
           <lucide-angular [img]="PlusIcon" class="size-4"></lucide-angular>
-          <span class="hidden sm:inline">Nuevo gasto</span>
-          <span class="sr-only sm:hidden">Nuevo gasto</span>
+          <span class="hidden sm:inline">{{ 'nav.newExpense' | transloco }}</span>
+          <span class="sr-only sm:hidden">{{ 'nav.newExpense' | transloco }}</span>
         </a>
+
+        <ui-language-selector />
 
         @if (user(); as currentUser) {
           <span class="hidden text-sm font-medium text-slate-600 sm:inline">
-            Hola, {{ currentUser.firstName }}
+            {{ 'nav.greeting' | transloco: { name: currentUser.firstName } }}
           </span>
         }
 
@@ -33,13 +35,13 @@
           class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
         >
           <lucide-angular [img]="LogOutIcon" class="size-4"></lucide-angular>
-          <span class="hidden sm:inline">Salir</span>
-          <span class="sr-only sm:hidden">Cerrar sesión</span>
+          <span class="hidden sm:inline">{{ 'nav.logout' | transloco }}</span>
+          <span class="sr-only sm:hidden">{{ 'nav.logoutFull' | transloco }}</span>
         </button>
       </div>
     </div>
 
-    <nav class="mx-auto flex max-w-5xl gap-1 px-4 sm:px-6" aria-label="Secciones">
+    <nav class="mx-auto flex max-w-5xl gap-1 px-4 sm:px-6" [attr.aria-label]="'nav.sections' | transloco">
       <a
         routerLink="/dashboard"
         routerLinkActive="border-violet-600 text-violet-700"
@@ -47,7 +49,7 @@
         class="flex items-center gap-2 border-b-2 border-transparent px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:text-slate-900"
       >
         <lucide-angular [img]="DashboardIcon" class="size-4"></lucide-angular>
-        <span>Dashboard</span>
+        <span>{{ 'nav.dashboard' | transloco }}</span>
       </a>
       <a
         routerLink="/expenses"
@@ -55,7 +57,7 @@
         class="flex items-center gap-2 border-b-2 border-transparent px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:text-slate-900"
       >
         <lucide-angular [img]="ReceiptIcon" class="size-4"></lucide-angular>
-        <span>Gastos</span>
+        <span>{{ 'nav.expenses' | transloco }}</span>
       </a>
       <a
         routerLink="/settings"
@@ -63,7 +65,7 @@
         class="flex items-center gap-2 border-b-2 border-transparent px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:text-slate-900"
       >
         <lucide-angular [img]="SettingsIcon" class="size-4"></lucide-angular>
-        <span>Configuración</span>
+        <span>{{ 'nav.settings' | transloco }}</span>
       </a>
     </nav>
   </header>

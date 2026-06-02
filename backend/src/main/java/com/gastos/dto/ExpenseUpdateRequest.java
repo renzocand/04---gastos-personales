@@ -15,12 +15,12 @@ import jakarta.validation.constraints.Size;
  */
 public record ExpenseUpdateRequest(
 
-        @DecimalMin(value = "0.1", message = "El monto debe ser mayor a 0.1")
+        @DecimalMin(value = "0.1", message = "{expense.amount.min}")
         BigDecimal amount,
 
         Currency currency,
 
-        @Size(max = 80, message = "La descripción no puede superar 80 caracteres")
+        @Size(max = 80, message = "{expense.description.size}")
         String description,
 
         String categoryId,

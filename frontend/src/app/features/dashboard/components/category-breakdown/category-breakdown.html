@@ -2,8 +2,8 @@
   <div class="p-5 sm:p-6">
     <div class="flex items-start justify-between gap-3">
       <div>
-        <h2 class="text-sm font-semibold text-slate-900">Por categoría</h2>
-        <p class="mt-0.5 text-xs text-slate-500">Distribución del mes</p>
+        <h2 class="text-sm font-semibold text-slate-900">{{ 'dashboard.breakdown.title' | transloco }}</h2>
+        <p class="mt-0.5 text-xs text-slate-500">{{ 'dashboard.breakdown.subtitle' | transloco }}</p>
       </div>
       <span
         class="inline-flex flex-none items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium tabular-nums text-slate-600"
@@ -27,10 +27,10 @@
               </span>
               <div class="min-w-0">
                 <p class="truncate text-sm font-medium text-slate-900">
-                  {{ row.label }}
+                  {{ ('categories.' + row.id + '.name') | transloco }}
                 </p>
                 <p class="text-xs text-slate-500">
-                  {{ row.percent | number:'1.0-0' }}% del total
+                  {{ 'dashboard.breakdown.percentOfTotal' | transloco: { percent: (row.percent | number:'1.0-0') } }}
                 </p>
               </div>
             </div>

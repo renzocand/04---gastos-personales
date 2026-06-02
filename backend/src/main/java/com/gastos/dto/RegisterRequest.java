@@ -12,27 +12,27 @@ import jakarta.validation.constraints.Size;
  */
 public record RegisterRequest(
 
-        @NotBlank(message = "El DNI es obligatorio")
-        @Pattern(regexp = "\\d{8}", message = "El DNI debe tener exactamente 8 dígitos")
+        @NotBlank(message = "{register.dni.required}")
+        @Pattern(regexp = "\\d{8}", message = "{register.dni.pattern}")
         String dni,
 
-        @NotBlank(message = "La contraseña es obligatoria")
-        @Size(min = 6, max = 72, message = "La contraseña debe tener entre 6 y 72 caracteres")
+        @NotBlank(message = "{register.password.required}")
+        @Size(min = 6, max = 72, message = "{register.password.size}")
         String password,
 
-        @NotBlank(message = "El nombre es obligatorio")
-        @Size(max = 60, message = "El nombre no puede superar 60 caracteres")
+        @NotBlank(message = "{register.firstName.required}")
+        @Size(max = 60, message = "{register.firstName.size}")
         String firstName,
 
-        @NotBlank(message = "El primer apellido es obligatorio")
-        @Size(max = 60, message = "El primer apellido no puede superar 60 caracteres")
+        @NotBlank(message = "{register.lastName.required}")
+        @Size(max = 60, message = "{register.lastName.size}")
         String lastName,
 
-        @Size(max = 60, message = "El segundo apellido no puede superar 60 caracteres")
+        @Size(max = 60, message = "{register.secondLastName.size}")
         String secondLastName,
 
-        @Email(message = "El email no tiene un formato válido")
-        @Size(max = 120, message = "El email no puede superar 120 caracteres")
+        @Email(message = "{register.email.invalid}")
+        @Size(max = 120, message = "{register.email.size}")
         String email
 ) {
 }

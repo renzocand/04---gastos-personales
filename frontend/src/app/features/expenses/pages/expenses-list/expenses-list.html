@@ -1,11 +1,11 @@
 <div class="flex flex-col gap-5 sm:gap-6">
   <section>
     <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">
-      Gastos
+      {{ 'expenses.list.title' | transloco }}
     </h1>
     <p class="mt-1 text-sm text-slate-500">
       <span class="tabular-nums">{{ summary().count }}</span>
-      {{ summary().count === 1 ? 'movimiento' : 'movimientos' }}
+      {{ (summary().count === 1 ? 'expenses.list.movement' : 'expenses.list.movements') | transloco }}
       <span class="mx-1.5 text-slate-300" aria-hidden="true">·</span>
       <span class="tabular-nums">{{ summary().totalPEN | appCurrency:'PEN' }}</span>
       <span class="mx-1.5 text-slate-300" aria-hidden="true">·</span>
@@ -18,20 +18,20 @@
       <div class="flex items-start justify-between gap-3">
         <div class="flex items-center gap-2 text-sm font-medium text-slate-700">
           <lucide-angular [img]="FilterIcon" class="size-4"></lucide-angular>
-          <span>Filtros</span>
+          <span>{{ 'expenses.list.filters' | transloco }}</span>
         </div>
         <button
           type="button"
           (click)="clearFilters()"
           class="rounded-md px-2 py-1 text-sm font-medium text-violet-700 transition hover:bg-violet-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
         >
-          Limpiar
+          {{ 'expenses.list.clear' | transloco }}
         </button>
       </div>
 
         <fieldset class="mt-4">
           <legend class="text-xs font-medium uppercase tracking-wide text-slate-500">
-            Categoría
+            {{ 'expenses.list.category' | transloco }}
           </legend>
           <div class="mt-2 flex flex-wrap gap-2">
             @for (cat of categoryFilters(); track cat.id) {
@@ -50,7 +50,7 @@
                   @if (cat.icon) {
                     <lucide-angular [img]="cat.icon" class="size-3.5"></lucide-angular>
                   }
-                  {{ cat.name }}
+                  {{ cat.id ? (('categories.' + cat.id + '.name') | transloco) : ('expenses.list.all' | transloco) }}
                 </span>
               </label>
             }
@@ -59,7 +59,7 @@
 
         <fieldset class="mt-4">
           <legend class="text-xs font-medium uppercase tracking-wide text-slate-500">
-            Moneda
+            {{ 'expenses.list.currency' | transloco }}
           </legend>
           <div class="mt-2 flex flex-wrap gap-2">
             @for (cur of currencyFilters; track cur.id) {
@@ -75,7 +75,7 @@
                 <span
                   class="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:border-slate-300 peer-checked:border-violet-600 peer-checked:bg-violet-50 peer-checked:text-violet-700 peer-focus-visible:ring-2 peer-focus-visible:ring-violet-500 peer-focus-visible:ring-offset-2"
                 >
-                  {{ cur.label }}
+                  {{ cur.id ? (cur.symbol + ' ' + (('currency.' + cur.id) | transloco)) : ('expenses.list.all' | transloco) }}
                 </span>
               </label>
             }
@@ -88,7 +88,7 @@
               for="date-from"
               class="block text-xs font-medium uppercase tracking-wide text-slate-500"
             >
-              Desde
+              {{ 'expenses.list.from' | transloco }}
             </label>
             <input
               #dateFromInput
@@ -105,7 +105,7 @@
               for="date-to"
               class="block text-xs font-medium uppercase tracking-wide text-slate-500"
             >
-              Hasta
+              {{ 'expenses.list.to' | transloco }}
             </label>
             <input
               #dateToInput
@@ -139,7 +139,7 @@
   } @else if (error(); as errorMsg) {
     <ui-card>
       <ui-error-state
-        title="No pudimos cargar los gastos"
+        [title]="'expenses.list.loadError' | transloco"
         [message]="errorMsg"
       />
     </ui-card>
@@ -147,14 +147,14 @@
     <ui-card>
       <ui-empty-state
         [icon]="ReceiptIcon"
-        title="Todavía no hay gastos"
-        message="Cuando registres movimientos vas a verlos listados acá."
+        [title]="'expenses.list.empty.title' | transloco"
+        [message]="'expenses.list.empty.message' | transloco"
       >
         <a
           routerLink="/expenses/new"
           class="inline-flex items-center rounded-lg bg-violet-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-violet-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
         >
-          Registrar primer gasto
+          {{ 'expenses.list.empty.cta' | transloco }}
         </a>
       </ui-empty-state>
     </ui-card>
@@ -169,7 +169,7 @@
               {{ group.label }}
             </h2>
             <p class="text-xs font-medium tabular-nums text-slate-500">
-              {{ group.count }} {{ group.count === 1 ? 'gasto' : 'gastos' }}
+              {{ group.count }} {{ (group.count === 1 ? 'expenses.list.expense' : 'expenses.list.expenses') | transloco }}
             </p>
           </header>
           <ul class="divide-y divide-slate-100">
@@ -189,9 +189,9 @@
         </section>
       } @empty {
         <div class="p-10 text-center">
-          <p class="text-sm font-medium text-slate-700">No encontramos gastos</p>
+          <p class="text-sm font-medium text-slate-700">{{ 'expenses.list.noResults.title' | transloco }}</p>
           <p class="mt-1 text-sm text-slate-500">
-            Probá ajustar los filtros o limpiarlos.
+            {{ 'expenses.list.noResults.message' | transloco }}
           </p>
         </div>
       }

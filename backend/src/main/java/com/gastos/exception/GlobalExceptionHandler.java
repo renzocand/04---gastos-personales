@@ -12,12 +12,20 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.gastos.i18n.Messages;
+
 /**
  * Traduce excepciones a respuestas HTTP con un cuerpo JSON uniforme:
  * { timestamp, status, message, fieldErrors? }.
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private final Messages messages;
+
+    public GlobalExceptionHandler(Messages messages) {
+        this.messages = messages;
+    }
 
     /** Recurso inexistente → 404. */
     @ExceptionHandler(NotFoundException.class)
@@ -34,7 +42,7 @@ public class GlobalExceptionHandler {
     /** Credenciales inválidas en el login → 401. */
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<Map<String, Object>> handleBadCredentials(BadCredentialsException ex) {
-        return build(HttpStatus.UNAUTHORIZED, "DNI o contraseña incorrectos", null);
+        return build(HttpStatus.UNAUTHORIZED, messages.get("error.badCredentials"), null);
     }
 
     /** Falla de validación de @Valid → 400 con detalle por campo. */
@@ -43,13 +51,13 @@ public class GlobalExceptionHandler {
         Map<String, String> fieldErrors = new HashMap<>();
         ex.getBindingResult().getFieldErrors()
                 .forEach(err -> fieldErrors.put(err.getField(), err.getDefaultMessage()));
-        return build(HttpStatus.BAD_REQUEST, "Datos inválidos", fieldErrors);
+        return build(HttpStatus.BAD_REQUEST, messages.get("error.validation"), fieldErrors);
     }
 
     /** JSON malformado o valor de enum inválido (ej. currency desconocida) → 400. */
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<Map<String, Object>> handleUnreadable(HttpMessageNotReadableException ex) {
-        return build(HttpStatus.BAD_REQUEST, "Cuerpo de la petición inválido", null);
+        return build(HttpStatus.BAD_REQUEST, messages.get("error.unreadable"), null);
     }
 
     private ResponseEntity<Map<String, Object>> build(HttpStatus status, String message,

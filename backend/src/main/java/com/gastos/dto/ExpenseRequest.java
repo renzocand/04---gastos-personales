@@ -15,21 +15,21 @@ import jakarta.validation.constraints.Size;
  */
 public record ExpenseRequest(
 
-        @NotNull
-        @DecimalMin(value = "0.1", message = "El monto debe ser mayor a 0.1")
+        @NotNull(message = "{expense.amount.required}")
+        @DecimalMin(value = "0.1", message = "{expense.amount.min}")
         BigDecimal amount,
 
-        @NotNull(message = "La moneda es obligatoria")
+        @NotNull(message = "{expense.currency.required}")
         Currency currency,
 
-        @NotBlank(message = "La descripción es obligatoria")
-        @Size(max = 80, message = "La descripción no puede superar 80 caracteres")
+        @NotBlank(message = "{expense.description.required}")
+        @Size(max = 80, message = "{expense.description.size}")
         String description,
 
-        @NotBlank(message = "La categoría es obligatoria")
+        @NotBlank(message = "{expense.category.required}")
         String categoryId,
 
-        @NotNull(message = "La fecha es obligatoria")
+        @NotNull(message = "{expense.date.required}")
         LocalDate date
 ) {
 }

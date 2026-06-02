@@ -1,6 +1,7 @@
 import { DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
+import { TranslocoModule } from '@jsverse/transloco';
 import { Card } from '../../../../shared/ui/card/card';
 import {
   ProgressBar,
@@ -25,7 +26,7 @@ const BAR_COLORS: Record<string, ProgressColor> = {
 
 @Component({
   selector: 'app-category-breakdown',
-  imports: [Card, ProgressBar, LucideAngularModule, AppCurrencyPipe, DecimalPipe],
+  imports: [Card, ProgressBar, LucideAngularModule, AppCurrencyPipe, DecimalPipe, TranslocoModule],
   templateUrl: './category-breakdown.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

@@ -1,0 +1,213 @@
+{
+  "common": {
+    "language": "Language",
+    "save": "Save",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "back": "Back",
+    "optional": "(optional)"
+  },
+  "currency": {
+    "PEN": "Soles",
+    "USD": "Dollars"
+  },
+  "nav": {
+    "brand": "Expenses",
+    "dashboard": "Dashboard",
+    "expenses": "Expenses",
+    "settings": "Settings",
+    "newExpense": "New expense",
+    "logout": "Log out",
+    "logoutFull": "Log out",
+    "greeting": "Hi, {{ name }}",
+    "sections": "Sections"
+  },
+  "auth": {
+    "dni": "DNI",
+    "dniPlaceholder": "8 digits",
+    "password": "Password",
+    "errors": {
+      "dniRequired": "DNI is required.",
+      "dniPattern": "DNI must be exactly 8 digits.",
+      "passwordRequired": "Password is required.",
+      "passwordMinlength": "Password must be at least 6 characters.",
+      "firstNameRequired": "First name is required.",
+      "lastNameRequired": "Last name is required.",
+      "emailInvalid": "Email format is not valid."
+    },
+    "login": {
+      "title": "Sign in",
+      "subtitle": "Sign in with your DNI and password",
+      "submit": "Sign in",
+      "submitting": "Signing in…",
+      "noAccount": "Don't have an account?",
+      "createOne": "Create one"
+    },
+    "register": {
+      "title": "Create account",
+      "subtitle": "Sign up with your DNI to start tracking your expenses",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "secondLastName": "Second last name",
+      "email": "Email",
+      "emailPlaceholder": "you@email.com",
+      "passwordPlaceholder": "At least 6 characters",
+      "submit": "Create account",
+      "submitting": "Creating account…",
+      "haveAccount": "Already have an account?",
+      "signIn": "Sign in"
+    }
+  },
+  "dashboard": {
+    "summary": "This month's summary",
+    "loadError": "We couldn't load the dashboard",
+    "empty": {
+      "title": "No expenses yet",
+      "message": "Start by adding your first transaction to see your summary.",
+      "cta": "Add first expense"
+    },
+    "total": {
+      "label": "Month total",
+      "previousLabel": "vs. last month"
+    },
+    "budget": {
+      "label": "Month spending vs. income",
+      "of": "of {{ income }} income",
+      "exceededBy": "Over by {{ amount }}",
+      "available": "Available {{ amount }}",
+      "msg": {
+        "danger": "You exceeded this month's income.",
+        "warning": "You're very close to your monthly income.",
+        "info": "You've spent more than half your income.",
+        "ok": "You're doing well with your spending this month."
+      },
+      "empty": {
+        "title": "Turn on spending control",
+        "message": "Set your monthly income and we'll warn you when you overspend.",
+        "cta": "Set income"
+      }
+    },
+    "breakdown": {
+      "title": "By category",
+      "subtitle": "This month's breakdown",
+      "percentOfTotal": "{{ percent }}% of total"
+    },
+    "recent": {
+      "title": "Latest expenses",
+      "subtitle": "Recent transactions",
+      "seeAll": "See all",
+      "empty": "You haven't added any expenses yet."
+    }
+  },
+  "expenses": {
+    "list": {
+      "title": "Expenses",
+      "movement": "transaction",
+      "movements": "transactions",
+      "filters": "Filters",
+      "clear": "Clear",
+      "all": "All",
+      "category": "Category",
+      "currency": "Currency",
+      "from": "From",
+      "to": "To",
+      "loadError": "We couldn't load your expenses",
+      "expense": "expense",
+      "expenses": "expenses",
+      "empty": {
+        "title": "No expenses yet",
+        "message": "Once you add transactions you'll see them listed here.",
+        "cta": "Add first expense"
+      },
+      "noResults": {
+        "title": "No expenses found",
+        "message": "Try adjusting or clearing the filters."
+      }
+    },
+    "form": {
+      "titleNew": "New expense",
+      "titleEdit": "Edit expense",
+      "subtitleNew": "Add a transaction",
+      "subtitleEdit": "Edit the transaction details",
+      "currency": "Currency",
+      "amount": "Amount",
+      "description": "Description",
+      "descriptionPlaceholder": "e.g. Lunch at Wong",
+      "category": "Category",
+      "date": "Date",
+      "submitNew": "Save expense",
+      "submitEdit": "Update",
+      "deleteDialog": {
+        "title": "Delete expense",
+        "message": "This action can't be undone. The expense will be permanently deleted."
+      },
+      "errors": {
+        "amountRequired": "Amount is required.",
+        "amountMin": "Amount must be greater than 0.",
+        "descriptionRequired": "Description is required.",
+        "descriptionMaxlength": "Maximum 80 characters.",
+        "categoryRequired": "Choose a category.",
+        "dateRequired": "Date is required."
+      }
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Set your monthly income so the app can help you track how much you're spending.",
+    "monthlyIncome": "Monthly income",
+    "monthlyIncomeHint": "It's just a reference, not accounting. You can leave it empty if you don't want alerts.",
+    "incomeNegative": "Income can't be negative.",
+    "alertsTitle": "Spending alerts",
+    "alertsHint": "Warn me when I reach 50%, 80% and 100% of my income this month.",
+    "languageTitle": "Language",
+    "languageHint": "Choose the app language."
+  },
+  "alerts": {
+    "tier1": "You've spent more than 50% of your income this month.",
+    "tier2": "Careful: you've already spent 80% of your income this month.",
+    "tier3": "You exceeded your monthly income. Review your expenses."
+  },
+  "notFound": {
+    "message": "The page you're looking for doesn't exist or was moved.",
+    "home": "Back to home"
+  },
+  "categories": {
+    "food": {
+      "name": "Food",
+      "description": "Groceries, restaurants, delivery and everything you eat or drink."
+    },
+    "transport": {
+      "name": "Transport",
+      "description": "Fares, fuel, taxis and ride-hailing apps."
+    },
+    "housing": {
+      "name": "Housing",
+      "description": "Rent, mortgage and home maintenance."
+    },
+    "services": {
+      "name": "Utilities",
+      "description": "Recurring bills: electricity, water, gas, internet and mobile."
+    },
+    "health": {
+      "name": "Health",
+      "description": "Pharmacy, medical appointments, insurance and tests."
+    },
+    "education": {
+      "name": "Education",
+      "description": "Tuition, enrollment, courses and study materials."
+    },
+    "leisure": {
+      "name": "Leisure",
+      "description": "Outings, streaming, games and hobbies."
+    },
+    "shopping": {
+      "name": "Shopping",
+      "description": "Clothes, tech and treats that aren't essentials."
+    },
+    "other": {
+      "name": "Other",
+      "description": "Expenses that don't fit the other categories."
+    }
+  }
+}

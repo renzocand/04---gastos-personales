@@ -7,6 +7,7 @@ import com.gastos.dto.ExpenseRequest;
 import com.gastos.dto.ExpenseResponse;
 import com.gastos.dto.ExpenseUpdateRequest;
 import com.gastos.exception.NotFoundException;
+import com.gastos.i18n.Messages;
 import com.gastos.mapper.ExpenseMapper;
 import com.gastos.model.Category;
 import com.gastos.model.Currency;
@@ -31,15 +32,18 @@ public class ExpenseService {
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
     private final ExpenseMapper mapper;
+    private final Messages messages;
 
     public ExpenseService(ExpenseRepository expenseRepository,
                           CategoryRepository categoryRepository,
                           UserRepository userRepository,
-                          ExpenseMapper mapper) {
+                          ExpenseMapper mapper,
+                          Messages messages) {
         this.expenseRepository = expenseRepository;
         this.categoryRepository = categoryRepository;
         this.userRepository = userRepository;
         this.mapper = mapper;
+        this.messages = messages;
     }
 
     public List<ExpenseResponse> findAll(String dni, String categoryId, Currency currency,
@@ -89,16 +93,16 @@ public class ExpenseService {
     /** Recupera un gasto solo si pertenece al usuario; si no, 404. */
     private Expense requireOwnedExpense(String dni, String id) {
         return expenseRepository.findByIdAndUser_Dni(id, dni)
-                .orElseThrow(() -> new NotFoundException("Gasto no encontrado: " + id));
+                .orElseThrow(() -> new NotFoundException(messages.get("error.expenseNotFound", id)));
     }
 
     private Category requireCategory(String categoryId) {
         return categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new NotFoundException("Categoría no encontrada: " + categoryId));
+                .orElseThrow(() -> new NotFoundException(messages.get("error.categoryNotFound", categoryId)));
     }
 
     private User requireUser(String dni) {
         return userRepository.findByDni(dni)
-                .orElseThrow(() -> new NotFoundException("Usuario no encontrado: " + dni));
+                .orElseThrow(() -> new NotFoundException(messages.get("error.userNotFound", dni)));
     }
 }

@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
+import { TranslocoModule } from '@jsverse/transloco';
 import { Store } from '@ngrx/store';
 import { Expense } from '../../models/expense';
 import { Category } from '../../../categories/models/category';
@@ -8,7 +9,7 @@ import { colorFor, iconFor } from '../../../categories/ui/category-display';
 
 @Component({
   selector: 'app-expense-card',
-  imports: [LucideAngularModule],
+  imports: [LucideAngularModule, TranslocoModule],
   templateUrl: './expense-card.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

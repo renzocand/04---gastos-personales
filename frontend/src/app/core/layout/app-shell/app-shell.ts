@@ -9,8 +9,10 @@ import {
   Receipt,
   Settings,
 } from 'lucide-angular';
+import { TranslocoModule } from '@jsverse/transloco';
 import { ToastContainer } from '../../../shared/ui/toast/toast-container';
 import { ToastService } from '../../../shared/ui/toast/toast.service';
+import { LanguageSelector } from '../../../shared/ui/language-selector/language-selector';
 import { AuthActions } from '../../../features/auth/store/auth.actions';
 import { authFeature } from '../../../features/auth/store/auth.feature';
 import { SettingsActions } from '../../../features/settings/store/settings.actions';
@@ -24,6 +26,8 @@ import { CategoriesActions } from '../../../features/categories/store/category.a
     RouterLinkActive,
     LucideAngularModule,
     ToastContainer,
+    TranslocoModule,
+    LanguageSelector,
   ],
   templateUrl: './app-shell.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

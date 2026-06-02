@@ -1,0 +1,214 @@
+{
+  "_todo": "PENDIENTE DE TRADUCCIÓN AL QUECHUA (Runa Simi). Los valores de abajo son placeholders en español copiados de es.json para que la app funcione mientras un hablante de quechua los traduce. Reemplazá cada valor por su equivalente en quechua sureño. Las CLAVES no se tocan; solo los valores. No es trabajo de código.",
+  "common": {
+    "language": "Simi",
+    "save": "Waqaychay",
+    "saving": "Waqaychachkan…",
+    "cancel": "Saqiy",
+    "delete": "Pichay",
+    "back": "Kutiy",
+    "optional": "(munaspalla)"
+  },
+  "currency": {
+    "PEN": "Soles",
+    "USD": "Dólares"
+  },
+  "nav": {
+    "brand": "Qullqi tukuy",
+    "dashboard": "Qhawana",
+    "expenses": "Qullqi tukuy",
+    "settings": "Allichay",
+    "newExpense": "Musuq qullqi tukuy",
+    "logout": "Lluqsiy",
+    "logoutFull": "Lluqsiy",
+    "greeting": "Napaykullayki, {{ name }}",
+    "sections": "Rakiykuna"
+  },
+  "auth": {
+    "dni": "DNI",
+    "dniPlaceholder": "8 yupaykuna",
+    "password": "Yaykuna rimay",
+    "errors": {
+      "dniRequired": "El DNI es obligatorio.",
+      "dniPattern": "El DNI debe tener exactamente 8 dígitos.",
+      "passwordRequired": "La contraseña es obligatoria.",
+      "passwordMinlength": "La contraseña debe tener al menos 6 caracteres.",
+      "firstNameRequired": "El nombre es obligatorio.",
+      "lastNameRequired": "El apellido paterno es obligatorio.",
+      "emailInvalid": "El email no tiene un formato válido."
+    },
+    "login": {
+      "title": "Yaykuy",
+      "subtitle": "Ingresá con tu DNI y contraseña",
+      "submit": "Yaykuy",
+      "submitting": "Yaykuchkan…",
+      "noAccount": "¿No tenés cuenta?",
+      "createOne": "Creá una"
+    },
+    "register": {
+      "title": "Cuentata kamariy",
+      "subtitle": "Registrate con tu DNI para empezar a controlar tus gastos",
+      "firstName": "Suti",
+      "lastName": "Tayta apellido",
+      "secondLastName": "Mama apellido",
+      "email": "Email",
+      "emailPlaceholder": "qan@email.com",
+      "passwordPlaceholder": "Mínimo 6 caracteres",
+      "submit": "Cuentata kamariy",
+      "submitting": "Kamarichkan…",
+      "haveAccount": "¿Ya tenés cuenta?",
+      "signIn": "Yaykuy"
+    }
+  },
+  "dashboard": {
+    "summary": "Kay killapa pisichay",
+    "loadError": "No pudimos cargar el dashboard",
+    "empty": {
+      "title": "Manaraq qullqi tukuykuna kanchu",
+      "message": "Empezá registrando tu primer movimiento para ver tu resumen.",
+      "cta": "Ñawpaq qullqi tukuyta qillqay"
+    },
+    "total": {
+      "label": "Killapa hapchan",
+      "previousLabel": "vs. ñawpaq killa"
+    },
+    "budget": {
+      "label": "Gasto del mes vs. ingreso",
+      "of": "de {{ income }} de ingreso",
+      "exceededBy": "Excedido por {{ amount }}",
+      "available": "Disponible {{ amount }}",
+      "msg": {
+        "danger": "Superaste tu ingreso de este mes.",
+        "warning": "Vas muy cerca de tu ingreso mensual.",
+        "info": "Llevas más de la mitad de tu ingreso.",
+        "ok": "Vas bien con tus gastos este mes."
+      },
+      "empty": {
+        "title": "Activá el control de gastos",
+        "message": "Configurá tu ingreso mensual y te avisamos cuando gastes de más.",
+        "cta": "Configurar ingreso"
+      }
+    },
+    "breakdown": {
+      "title": "Categoría nisqanman hina",
+      "subtitle": "Distribución del mes",
+      "percentOfTotal": "{{ percent }}% del total"
+    },
+    "recent": {
+      "title": "Qhipa qullqi tukuykuna",
+      "subtitle": "Movimientos recientes",
+      "seeAll": "Llapanta qhaway",
+      "empty": "Todavía no cargaste ningún gasto."
+    }
+  },
+  "expenses": {
+    "list": {
+      "title": "Qullqi tukuykuna",
+      "movement": "kuyuy",
+      "movements": "kuyuykuna",
+      "filters": "Suysunakuna",
+      "clear": "Pichay",
+      "all": "Llapan",
+      "category": "Categoría",
+      "currency": "Qullqi",
+      "from": "Manta",
+      "to": "Kama",
+      "loadError": "No pudimos cargar los gastos",
+      "expense": "qullqi tukuy",
+      "expenses": "qullqi tukuykuna",
+      "empty": {
+        "title": "Manaraq qullqi tukuykuna kanchu",
+        "message": "Cuando registres movimientos vas a verlos listados acá.",
+        "cta": "Ñawpaq qullqi tukuyta qillqay"
+      },
+      "noResults": {
+        "title": "Mana qullqi tukuykuna tarikunchu",
+        "message": "Probá ajustar los filtros o limpiarlos."
+      }
+    },
+    "form": {
+      "titleNew": "Musuq qullqi tukuy",
+      "titleEdit": "Qullqi tukuyta allichay",
+      "subtitleNew": "Registrá un movimiento",
+      "subtitleEdit": "Modificá los datos del movimiento",
+      "currency": "Qullqi",
+      "amount": "Hayk'a",
+      "description": "Willay",
+      "descriptionPlaceholder": "Ej: Almuerzo en Wong",
+      "category": "Categoría",
+      "date": "P'unchaw",
+      "submitNew": "Qullqi tukuyta waqaychay",
+      "submitEdit": "Musuqyachiy",
+      "deleteDialog": {
+        "title": "Qullqi tukuyta pichay",
+        "message": "Esta acción no se puede deshacer. El gasto se eliminará permanentemente."
+      },
+      "errors": {
+        "amountRequired": "El monto es obligatorio.",
+        "amountMin": "El monto debe ser mayor a 0.",
+        "descriptionRequired": "La descripción es obligatoria.",
+        "descriptionMaxlength": "Máximo 80 caracteres.",
+        "categoryRequired": "Elegí una categoría.",
+        "dateRequired": "La fecha es obligatoria."
+      }
+    }
+  },
+  "settings": {
+    "title": "Allichay",
+    "subtitle": "Definí tu ingreso mensual para que la app te ayude a controlar cuánto vas gastando.",
+    "monthlyIncome": "Killa yaykuy qullqi",
+    "monthlyIncomeHint": "Es solo una referencia, no contabilidad. Podés dejarlo vacío si no querés usar alertas.",
+    "incomeNegative": "El ingreso no puede ser negativo.",
+    "alertsTitle": "Qullqi tukuy willaykuna",
+    "alertsHint": "Avisarme al llegar al 50%, 80% y 100% de mi ingreso este mes.",
+    "languageTitle": "Simi",
+    "languageHint": "Aplicación simita akllay."
+  },
+  "alerts": {
+    "tier1": "Llevas gastado más del 50% de tu ingreso este mes.",
+    "tier2": "Cuidado: ya gastaste el 80% de tu ingreso este mes.",
+    "tier3": "Superaste tu ingreso mensual. Revisá tus gastos."
+  },
+  "notFound": {
+    "message": "Maskasqayki p'anqa mana kanchu utaq astasqa karqan.",
+    "home": "Qallariyman kutiy"
+  },
+  "categories": {
+    "food": {
+      "name": "Mikhuna",
+      "description": "Mercado, restaurantes, delivery y todo lo que comés o bebés."
+    },
+    "transport": {
+      "name": "Astana",
+      "description": "Pasajes, combustible, taxis y apps de viaje."
+    },
+    "housing": {
+      "name": "Wasi",
+      "description": "Alquiler, hipoteca y mantenimiento de tu casa."
+    },
+    "services": {
+      "name": "Servicios",
+      "description": "Cuentas recurrentes: luz, agua, gas, internet y celular."
+    },
+    "health": {
+      "name": "Qhali kay",
+      "description": "Farmacia, consultas médicas, seguros y exámenes."
+    },
+    "education": {
+      "name": "Yachay",
+      "description": "Pensiones, matrículas, cursos y materiales de estudio."
+    },
+    "leisure": {
+      "name": "Samana",
+      "description": "Salidas, streaming, juegos y pasatiempos."
+    },
+    "shopping": {
+      "name": "Rantiy",
+      "description": "Ropa, tecnología y antojos que no son de primera necesidad."
+    },
+    "other": {
+      "name": "Huk",
+      "description": "Gastos que no encajan en las demás categorías."
+    }
+  }
+}

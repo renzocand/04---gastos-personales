@@ -9,6 +9,8 @@ entity "category" as category {
     --
     * name : VARCHAR(50)
       icon : VARCHAR(50)
+      description : VARCHAR(200)
+      sort_order : INT
 }
 
 entity "app_user" as app_user {

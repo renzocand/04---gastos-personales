@@ -2,7 +2,7 @@
   @if (hasIncome()) {
     <div class="p-5 sm:p-6">
       <div class="flex items-center justify-between gap-3">
-        <p class="text-sm font-medium text-slate-500">Gasto del mes vs. ingreso</p>
+        <p class="text-sm font-medium text-slate-500">{{ 'dashboard.budget.label' | transloco }}</p>
         <span
           class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold tabular-nums"
           [class]="
@@ -21,7 +21,7 @@
         {{ status().spentPEN | appCurrency: 'PEN' }}
       </p>
       <p class="mt-1 text-xs text-slate-500">
-        de {{ status().income | appCurrency: 'PEN' }} de ingreso
+        {{ 'dashboard.budget.of' | transloco: { income: (status().income | appCurrency: 'PEN') } }}
       </p>
 
       <div class="mt-4">
@@ -33,9 +33,9 @@
           [class]="status().remaining < 0 ? 'font-medium text-rose-600' : 'text-slate-500'"
         >
           @if (status().remaining < 0) {
-            Excedido por {{ -status().remaining | appCurrency: 'PEN' }}
+            {{ 'dashboard.budget.exceededBy' | transloco: { amount: (-status().remaining | appCurrency: 'PEN') } }}
           } @else {
-            Disponible {{ status().remaining | appCurrency: 'PEN' }}
+            {{ 'dashboard.budget.available' | transloco: { amount: (status().remaining | appCurrency: 'PEN') } }}
           }
         </span>
         <span
@@ -47,7 +47,7 @@
                 : 'text-rose-700'
           "
         >
-          {{ message() }}
+          {{ ('dashboard.budget.msg.' + status().level) | transloco }}
         </span>
       </div>
     </div>
@@ -61,9 +61,9 @@
           <lucide-angular [img]="WalletIcon" class="size-5"></lucide-angular>
         </span>
         <div>
-          <p class="text-sm font-medium text-slate-900">Activá el control de gastos</p>
+          <p class="text-sm font-medium text-slate-900">{{ 'dashboard.budget.empty.title' | transloco }}</p>
           <p class="mt-0.5 text-sm text-slate-500">
-            Configurá tu ingreso mensual y te avisamos cuando gastes de más.
+            {{ 'dashboard.budget.empty.message' | transloco }}
           </p>
         </div>
       </div>
@@ -71,7 +71,7 @@
         routerLink="/settings"
         class="inline-flex flex-none items-center justify-center rounded-lg bg-violet-600 px-3.5 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-violet-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
       >
-        Configurar ingreso
+        {{ 'dashboard.budget.empty.cta' | transloco }}
       </a>
     </div>
   }

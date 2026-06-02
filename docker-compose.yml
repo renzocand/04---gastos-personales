@@ -18,5 +18,31 @@ services:
       timeout: 5s
       retries: 10
 
+  backend:
+    build: ./backend
+    container_name: gastos-backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      # Dentro de la red de compose la BD es "mysql:3306" (no localhost:3307).
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/gastos?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/Lima&useUnicode=true&characterEncoding=UTF-8
+      SPRING_DATASOURCE_USERNAME: gastos
+      SPRING_DATASOURCE_PASSWORD: gastos
+      # En producción real pasá un secreto fuerte por variable de entorno.
+      APP_JWT_SECRET: ${APP_JWT_SECRET:-gastos-personales-clave-secreta-de-desarrollo-cambiar-en-produccion}
+      # El navegador pega al mismo origen (nginx), pero lo dejamos explícito.
+      APP_CORS_ALLOWED_ORIGINS: http://localhost
+
+  frontend:
+    build: ./frontend
+    container_name: gastos-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+
 volumes:
   gastos-mysql-data:

@@ -1,14 +1,14 @@
 <ui-card>
   <div class="flex items-center justify-between border-b border-slate-100 p-5 sm:p-6">
     <div>
-      <h2 class="text-sm font-semibold text-slate-900">Últimos gastos</h2>
-      <p class="mt-0.5 text-xs text-slate-500">Movimientos recientes</p>
+      <h2 class="text-sm font-semibold text-slate-900">{{ 'dashboard.recent.title' | transloco }}</h2>
+      <p class="mt-0.5 text-xs text-slate-500">{{ 'dashboard.recent.subtitle' | transloco }}</p>
     </div>
     <a
       routerLink="/expenses"
       class="text-sm font-medium text-violet-700 transition hover:text-violet-900"
     >
-      Ver todos
+      {{ 'dashboard.recent.seeAll' | transloco }}
     </a>
   </div>
 
@@ -24,7 +24,7 @@
       </li>
     } @empty {
       <li class="px-5 py-12 text-center text-sm text-slate-500 sm:px-6">
-        Todavía no cargaste ningún gasto.
+        {{ 'dashboard.recent.empty' | transloco }}
       </li>
     }
   </ul>

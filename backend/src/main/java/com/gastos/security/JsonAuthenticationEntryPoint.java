@@ -8,6 +8,7 @@ import java.util.Map;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
@@ -23,9 +24,11 @@ import org.springframework.stereotype.Component;
 public class JsonAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
     private final ObjectMapper objectMapper;
+    private final MessageSource messageSource;
 
-    public JsonAuthenticationEntryPoint(ObjectMapper objectMapper) {
+    public JsonAuthenticationEntryPoint(ObjectMapper objectMapper, MessageSource messageSource) {
         this.objectMapper = objectMapper;
+        this.messageSource = messageSource;
     }
 
     @Override
@@ -39,7 +42,10 @@ public class JsonAuthenticationEntryPoint implements AuthenticationEntryPoint {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("timestamp", Instant.now().toString());
         body.put("status", HttpStatus.UNAUTHORIZED.value());
-        body.put("message", "No autenticado: token ausente o inválido");
+        // Este punto corre en la cadena de filtros (fuera del DispatcherServlet), así que
+        // tomamos el idioma directo del Accept-Language del request.
+        body.put("message", messageSource.getMessage(
+                "error.unauthenticated", null, request.getLocale()));
 
         objectMapper.writeValue(response.getOutputStream(), body);
     }

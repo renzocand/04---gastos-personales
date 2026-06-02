@@ -7,10 +7,10 @@ import jakarta.validation.constraints.NotBlank;
  */
 public record LoginRequest(
 
-        @NotBlank(message = "El DNI es obligatorio")
+        @NotBlank(message = "{login.dni.required}")
         String dni,
 
-        @NotBlank(message = "La contraseña es obligatoria")
+        @NotBlank(message = "{login.password.required}")
         String password
 ) {
 }

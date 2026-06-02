@@ -3,12 +3,13 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angula
 import { RouterLink } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { LogIn, LucideAngularModule, Receipt } from 'lucide-angular';
+import { TranslocoModule } from '@jsverse/transloco';
 import { AuthActions } from '../../store/auth.actions';
 import { authFeature } from '../../store/auth.feature';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, RouterLink, LucideAngularModule],
+  imports: [ReactiveFormsModule, RouterLink, LucideAngularModule, TranslocoModule],
   templateUrl: './login.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

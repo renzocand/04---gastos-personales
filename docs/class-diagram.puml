@@ -15,6 +15,8 @@ package "model" {
         - id : String
         - name : String
         - icon : String
+        - description : String
+        - sortOrder : Integer
     }
 
     class Expense {
@@ -79,6 +81,10 @@ package "dto" {
         + id : String
         + name : String
         + icon : String
+        + description : String
+    }
+    class ExchangeRateResponse <<record>> {
+        + rate : BigDecimal
     }
     class RegisterRequest <<record>> {
         + dni : String
@@ -162,6 +168,9 @@ package "service" {
         + get(dni : String) : SettingsResponse
         + update(dni : String, req : SettingsUpdateRequest) : SettingsResponse
     }
+    class ExchangeRateService {
+        + getUsdToPen() : BigDecimal
+    }
 }
 
 ' ===== Capa controller =====
@@ -183,6 +192,9 @@ package "controller" {
     class SettingsController {
         + get(auth) : SettingsResponse
         + update(auth, req : SettingsUpdateRequest) : SettingsResponse
+    }
+    class ExchangeRateController {
+        + get() : ExchangeRateResponse
     }
 }
 
@@ -212,8 +224,17 @@ package "config" {
         + passwordEncoder() : PasswordEncoder
         + corsConfigurationSource() : CorsConfigurationSource
     }
-    class DemoDataSeeder {
-        + run(args) : void
+    class I18nConfig {
+        + messageSource() : MessageSource
+        + localeResolver() : LocaleResolver
+        + getValidator() : Validator
+    }
+}
+
+' ===== Capa i18n (internacionalización) =====
+package "i18n" {
+    class Messages {
+        + get(code : String, args : Object...) : String
     }
 }
 
@@ -235,6 +256,7 @@ ExpenseController --> ExpenseService
 CategoryController --> CategoryService
 AuthController --> AuthService
 SettingsController --> SettingsService
+ExchangeRateController --> ExchangeRateService
 ExpenseService --> ExpenseRepository
 ExpenseService --> CategoryRepository
 ExpenseService --> UserRepository
@@ -256,9 +278,6 @@ JwtAuthenticationFilter --> CustomUserDetailsService
 CustomUserDetailsService --> UserRepository
 SecurityConfig --> JwtAuthenticationFilter
 SecurityConfig --> JsonAuthenticationEntryPoint
-DemoDataSeeder --> UserRepository
-DemoDataSeeder --> ExpenseRepository
-DemoDataSeeder --> CategoryRepository
 
 ' ===== Excepciones =====
 ExpenseService ..> NotFoundException
@@ -267,5 +286,16 @@ AuthService ..> NotFoundException
 SettingsService ..> NotFoundException
 GlobalExceptionHandler ..> NotFoundException
 GlobalExceptionHandler ..> ConflictException
+
+' ===== Internacionalización (i18n) =====
+' El idioma se resuelve por Accept-Language (es / en / qu). Messages traduce los
+' textos de error; los DTOs llevan claves {clave} validadas contra el MessageSource.
+I18nConfig ..> Messages : provee MessageSource
+ExpenseService --> Messages
+AuthService --> Messages
+SettingsService --> Messages
+CustomUserDetailsService --> Messages
+GlobalExceptionHandler --> Messages
+JsonAuthenticationEntryPoint ..> I18nConfig : MessageSource\n(request.getLocale())
 
 @enduml

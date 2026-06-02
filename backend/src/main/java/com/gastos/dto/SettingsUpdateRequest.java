@@ -11,8 +11,8 @@ import jakarta.validation.constraints.PositiveOrZero;
  */
 public record SettingsUpdateRequest(
 
-        @PositiveOrZero(message = "El ingreso no puede ser negativo")
-        @Digits(integer = 10, fraction = 2, message = "El ingreso tiene un formato inválido")
+        @PositiveOrZero(message = "{settings.income.negative}")
+        @Digits(integer = 10, fraction = 2, message = "{settings.income.digits}")
         BigDecimal monthlyIncome,
 
         boolean alertsEnabled
