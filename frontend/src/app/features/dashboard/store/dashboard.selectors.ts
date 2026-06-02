@@ -1,8 +1,8 @@
 import { createSelector } from "@ngrx/store";
 import { expensesFeature } from "../../expenses/store/expenses.feature";
 import { exchangeRateFeature } from "../../exchange-rate/store/exchange-rate.feature";
+import { categoryFeature } from "../../categories/store/category.feature";
 import { Expense } from "../../expenses/models/expense";
-import { CATEGORIES, CategoryId } from "../../categories/models/category";
 
 
 function toPen(expense:Expense, rate:number):number{
@@ -10,8 +10,9 @@ function toPen(expense:Expense, rate:number):number{
 }
 
 export type BreakdownRow = {
-  id: CategoryId;
+  id: string;
   label: string;
+  icon?: string;
   totalPEN: number;
   percent: number;
 };
@@ -20,7 +21,8 @@ export type BreakdownRow = {
 export const selectCategoryBreakdown = createSelector(
   expensesFeature.selectExpenses,
   exchangeRateFeature.selectRate,
-  (expenses, rate) => {
+  categoryFeature.selectCategories,
+  (expenses, rate, categories) => {
 
     if (rate === null) return [];
 
@@ -32,9 +34,10 @@ export const selectCategoryBreakdown = createSelector(
 
     const totalGlobal = Object.values(totalsByCategory).reduce((acc,k)=> acc + k ,0)
 
-    return Object.values(CATEGORIES).map<BreakdownRow>(cat=> ({
+    return categories.map<BreakdownRow>(cat=> ({
         id: cat.id,
         label: cat.name,
+        icon: cat.icon,
         totalPEN: totalsByCategory[cat.id]??0,
         percent: totalGlobal>0?  (totalsByCategory[cat.id]??0) /totalGlobal*100 :0
     }))

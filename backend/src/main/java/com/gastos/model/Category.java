@@ -10,9 +10,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Categoría de un gasto (Comida, Transporte, Ocio, Otro).
- * El id es un código estable ("food", "transport", ...) que coincide con el
- * union type CategoryId del frontend. Las filas se siembran vía data.sql.
+ * Categoría de un gasto (Comida, Transporte, Salud, ...). El id es un código
+ * estable ("food", "transport", ...) que el frontend usa como clave de join.
+ * Las filas se siembran vía data.sql (origen de verdad de la lista y los nombres).
  */
 @Entity
 @Table(name = "category")
@@ -31,4 +31,12 @@ public class Category {
 
     @Column(length = 50)
     private String icon;
+
+    /** Descripción educativa: qué tipo de gastos van en esta categoría. */
+    @Column(length = 200)
+    private String description;
+
+    /** Orden de presentación en la UI. Lo define el seed (data.sql). */
+    @Column(name = "sort_order")
+    private Integer sortOrder;
 }

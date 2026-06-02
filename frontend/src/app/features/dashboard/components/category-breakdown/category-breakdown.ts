@@ -6,15 +6,20 @@ import {
   ProgressBar,
   ProgressColor,
 } from '../../../../shared/ui/progress-bar/progress-bar';
-import { CategoryId } from '../../../categories/models/category';
-import { CATEGORY_META } from '../../../categories/ui/category-meta';
+import { colorFor, iconFor } from '../../../categories/ui/category-display';
 import { AppCurrencyPipe } from '../../../../shared/pipes/app-currency';
 import { BreakdownRow } from '../../store/dashboard.selectors';
 
-const BAR_COLORS: Record<CategoryId, ProgressColor> = {
+// Color de la barra por id de categoría (paleta reusada; cae a 'violet').
+const BAR_COLORS: Record<string, ProgressColor> = {
   food: 'violet',
   transport: 'indigo',
+  housing: 'emerald',
+  services: 'indigo',
+  health: 'rose',
+  education: 'indigo',
   leisure: 'amber',
+  shopping: 'violet',
   other: 'rose',
 };
 
@@ -30,9 +35,9 @@ export class CategoryBreakdown {
   protected readonly displayRows = computed(() =>
     this.rows().map((row) => ({
       ...row,
-      icon: CATEGORY_META[row.id].icon,
-      iconClass: CATEGORY_META[row.id].iconClass,
-      barColor: BAR_COLORS[row.id],
+      icon: iconFor(row.icon),
+      iconClass: colorFor(row.id),
+      barColor: BAR_COLORS[row.id] ?? 'violet',
     })),
   );
 }

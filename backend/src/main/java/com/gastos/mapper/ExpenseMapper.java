@@ -42,6 +42,6 @@ public class ExpenseMapper {
 
     /** Entidad Category → DTO de respuesta. */
     public CategoryResponse toResponse(Category c) {
-        return new CategoryResponse(c.getId(), c.getName(), c.getIcon());
+        return new CategoryResponse(c.getId(), c.getName(), c.getIcon(), c.getDescription());
     }
 }

@@ -34,7 +34,7 @@
             Categoría
           </legend>
           <div class="mt-2 flex flex-wrap gap-2">
-            @for (cat of categoryFilters; track cat.id) {
+            @for (cat of categoryFilters(); track cat.id) {
               <label class="relative cursor-pointer">
                 <input
                   type="radio"

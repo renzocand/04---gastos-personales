@@ -100,8 +100,8 @@
           Categoría
         </legend>
         <div class="mt-1.5 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
-          @for (cat of categories; track cat.id) {
-            <label class="relative cursor-pointer">
+          @for (cat of categories(); track cat.id) {
+            <label class="relative cursor-pointer" [title]="cat.description">
               <input
                 type="radio"
                 [value]="cat.id"
@@ -125,6 +125,12 @@
             </label>
           }
         </div>
+        @if (selectedCategory()?.description; as hint) {
+          <p class="mt-2 flex items-start gap-1.5 rounded-lg bg-violet-50 px-3 py-2 text-xs text-violet-800">
+            <lucide-angular [img]="InfoIcon" class="mt-0.5 size-3.5 flex-none"></lucide-angular>
+            <span>{{ hint }}</span>
+          </p>
+        }
         @if (form.controls.category.touched && form.controls.category.invalid) {
           <p class="mt-1.5 text-xs font-medium text-rose-600">
             @if (form.controls.category.errors?.['required']) {

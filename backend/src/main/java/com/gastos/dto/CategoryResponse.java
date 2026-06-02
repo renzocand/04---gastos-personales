@@ -6,6 +6,7 @@ package com.gastos.dto;
 public record CategoryResponse(
         String id,
         String name,
-        String icon
+        String icon,
+        String description
 ) {
 }

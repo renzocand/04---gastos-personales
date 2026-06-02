@@ -6,10 +6,10 @@ import { RouterLink } from '@angular/router';
 
 // Terceros
 import { Store } from '@ngrx/store';
-import { ArrowLeft, LucideAngularModule, Trash2 } from 'lucide-angular';
+import { ArrowLeft, Info, LucideAngularModule, Trash2 } from 'lucide-angular';
 
 // Internos (alfabético por path)
-import { CATEGORY_OPTIONS } from '../../../categories/ui/category-meta';
+import { selectCategoryOptions } from '../../../categories/store/category.selectors';
 import { CategoryId } from '../../../categories/models/category';
 import { Expense } from '../../models/expense';
 import { ExpensesActions } from '../../store/expenses.actions';
@@ -44,8 +44,9 @@ export class ExpenseForm {
   protected readonly today = format(new Date(), 'yyyy-MM-dd')
   protected readonly ArrowLeftIcon = ArrowLeft;
   protected readonly TrashIcon = Trash2;
+  protected readonly InfoIcon = Info;
   protected readonly currencies = CURRENCY_OPTIONS;
-  protected readonly categories = CATEGORY_OPTIONS;
+  protected readonly categories = this.store.selectSignal(selectCategoryOptions);
 
 
   protected readonly isEdit = computed(() => this.mode() === 'edit');
@@ -71,6 +72,14 @@ export class ExpenseForm {
     category:this.fb.control<CategoryId | null>(null, Validators.required),
     date:[this.today, Validators.required]
   })
+
+  // Categoría elegida → mostramos su descripción educativa como ayuda.
+  private readonly selectedCategoryId = toSignal(this.form.controls.category.valueChanges, {
+    initialValue: this.form.controls.category.value,
+  });
+  protected readonly selectedCategory = computed(() =>
+    this.categories().find((c) => c.id === this.selectedCategoryId()),
+  );
 
   private readonly syncForm = effect(()=>{
     const expense = this.currentExpense();

@@ -1,10 +1,10 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import {  LucideAngularModule} from 'lucide-angular';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { LucideAngularModule } from 'lucide-angular';
+import { Store } from '@ngrx/store';
 import { Expense } from '../../models/expense';
-import { CATEGORIES } from '../../../categories/models/category';
-import { CATEGORY_META } from '../../../categories/ui/category-meta';
-
-
+import { Category } from '../../../categories/models/category';
+import { selectCategoryEntities } from '../../../categories/store/category.selectors';
+import { colorFor, iconFor } from '../../../categories/ui/category-display';
 
 @Component({
   selector: 'app-expense-card',
@@ -15,8 +15,16 @@ import { CATEGORY_META } from '../../../categories/ui/category-meta';
 export class ExpenseCard {
   expense = input.required<Expense>();
 
-  protected readonly category = computed(() => CATEGORIES[this.expense().categoryId]);
-  protected readonly meta = computed(() => CATEGORY_META[this.expense().categoryId]);
+  private readonly store = inject(Store);
+  private readonly entities = this.store.selectSignal(selectCategoryEntities);
+
+  protected readonly category = computed<Category | undefined>(
+    () => this.entities()[this.expense().categoryId],
+  );
+  protected readonly meta = computed(() => ({
+    icon: iconFor(this.category()?.icon),
+    iconClass: colorFor(this.expense().categoryId),
+  }));
   protected readonly formattedAmount = computed(() => {
     const e = this.expense();
     const symbol = e.currency === 'PEN' ? 'S/' : 'US$';

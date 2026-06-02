@@ -1,13 +1,9 @@
-import { ChangeDetectionStrategy, Component, computed, inject, OnInit, Signal, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import {
-  Bus,
-  Gamepad2,
   LucideAngularModule,
-  Package,
   Receipt,
   SlidersHorizontal,
-  UtensilsCrossed,
 } from 'lucide-angular';
 import { Card } from '../../../../shared/ui/card/card';
 import { EmptyState } from '../../../../shared/ui/empty-state/empty-state';
@@ -19,7 +15,7 @@ import { expensesFeature, ExpensesState } from '../../store/expenses.feature';
 import { ExpensesActions } from '../../store/expenses.actions';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ExpenseDayGroup, selectExpensesGroupedByDay, selectExpensesSummary, selectFilters, selectHasExpenses } from '../../store/expenses.selectors';
-import { CATEGORY_OPTIONS } from '../../../categories/ui/category-meta';
+import { selectCategoryOptions } from '../../../categories/store/category.selectors';
 import { AppCurrencyPipe } from '../../../../shared/pipes/app-currency';
 import { Currency } from '../../models/expense';
 
@@ -59,12 +55,12 @@ export class ExpensesList implements OnInit{
 
   // protected readonly hasExpenses2 = computed(()=>this.expenses().length?true:false);
 
-  protected readonly categoryFilters = [
-    { id: null, name: 'Todas', icon:null, iconClass:null },
-    ...CATEGORY_OPTIONS
-  ];
+  private readonly categoryOptions = this.store.selectSignal(selectCategoryOptions);
 
-  // protected readonly categoryFilters = CATEGORY_OPTIONS
+  protected readonly categoryFilters = computed(() => [
+    { id: null as string | null, name: 'Todas', icon: null, iconClass: null },
+    ...this.categoryOptions(),
+  ]);
 
   protected readonly currencyFilters = [
     { id: null, label: 'Todas', default: true },

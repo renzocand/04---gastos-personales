@@ -5,6 +5,7 @@ import java.util.List;
 import com.gastos.dto.CategoryResponse;
 import com.gastos.mapper.ExpenseMapper;
 import com.gastos.repository.CategoryRepository;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,7 +22,7 @@ public class CategoryService {
     }
 
     public List<CategoryResponse> findAll() {
-        return categoryRepository.findAll().stream()
+        return categoryRepository.findAll(Sort.by("sortOrder")).stream()
                 .map(mapper::toResponse)
                 .toList();
     }

@@ -14,6 +14,7 @@ import { ToastService } from '../../../shared/ui/toast/toast.service';
 import { AuthActions } from '../../../features/auth/store/auth.actions';
 import { authFeature } from '../../../features/auth/store/auth.feature';
 import { SettingsActions } from '../../../features/settings/store/settings.actions';
+import { CategoriesActions } from '../../../features/categories/store/category.actions';
 
 @Component({
   selector: 'app-shell',
@@ -40,8 +41,9 @@ export class AppShell {
   protected readonly user = this.store.selectSignal(authFeature.selectUser);
 
   ngOnInit(): void {
-    // Cargamos la config del usuario una vez al entrar al área autenticada.
+    // Cargamos config y categorías una vez al entrar al área autenticada.
     this.store.dispatch(SettingsActions.load());
+    this.store.dispatch(CategoriesActions.load());
   }
 
   protected logout(): void {

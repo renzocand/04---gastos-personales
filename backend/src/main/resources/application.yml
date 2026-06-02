@@ -3,7 +3,7 @@ spring:
     name: gastos-backend
 
   datasource:
-    url: jdbc:mysql://localhost:3307/gastos?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/Lima
+    url: jdbc:mysql://localhost:3307/gastos?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/Lima&useUnicode=true&characterEncoding=UTF-8
     username: gastos
     password: gastos
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -24,6 +24,8 @@ spring:
     init:
       # Ejecuta siempre data.sql (seed de categorías).
       mode: always
+      # Leer data.sql como UTF-8 (si no, las tildes se corrompen en Windows).
+      encoding: UTF-8
 
 server:
   port: 8080

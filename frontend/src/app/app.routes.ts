@@ -5,6 +5,8 @@ import { provideEffects } from '@ngrx/effects';
 import { ExpensesEffects } from './features/expenses/store/expenses.effects';
 import { exchangeRateFeature } from './features/exchange-rate/store/exchange-rate.feature';
 import { ExchangeRateEffects } from './features/exchange-rate/store/exchange-rate.effects';
+import { categoryFeature } from './features/categories/store/category.feature';
+import { CategoryEffects } from './features/categories/store/category.effects';
 import { authGuard, guestGuard } from './core/guards/auth-guard';
 
 export const routes: Routes = [
@@ -26,7 +28,8 @@ export const routes: Routes = [
     providers:[
       provideState(expensesFeature),
       provideState(exchangeRateFeature),
-      provideEffects(ExpensesEffects,ExchangeRateEffects)
+      provideState(categoryFeature),
+      provideEffects(ExpensesEffects,ExchangeRateEffects,CategoryEffects)
     ],
     loadComponent: () =>
       import('./core/layout/app-shell/app-shell').then((m) => m.AppShell),
