@@ -1,63 +1,44 @@
 @startuml deployment-diagram
-title Diagrama de Despliegue - Gastos Personales (Docker local + túnel Cloudflare)
+title Diagrama de Despliegue - Gastos Personales
 
 skinparam linetype ortho
-skinparam nodesep 20
-skinparam ranksep 40
+top to bottom direction
 
-actor "Usuario\n(internet)" as user
+actor "Usuario" as user
 
-cloud "Internet" {
-    component "open.er-api.com\nTipo de cambio USD -> PEN" as fx
-}
+cloud "Cloudflare\n(Tunnel)" as cf
+cloud "API Externa\n(tipo de cambio)" as fx
 
-cloud "Cloudflare\n(quick tunnel)" as cf {
-    component "edge\nhttps://xxxx.trycloudflare.com" as edge
-}
+node "PC Local" as pc {
+    node "Docker Engine" as docker {
 
-node "PC local (Windows + Docker Desktop)" as pc {
+        node "Frontend Container" as fec {
+            artifact "gastos-frontend\n(Angular + Nginx)" as fe
+        }
 
-    component "cloudflared\n(túnel saliente)" as cfd
+        node "Backend Container" as bec {
+            artifact "gastos-backend.jar\n(Spring Boot)" as be
+        }
 
-    node "Docker Engine  ·  docker compose" as docker {
-        node "gastos-frontend\nnginx:alpine  ·  :80" as fe
-        node "gastos-backend\nSpring Boot / JRE 17  ·  :8080" as be
-        database "gastos-mysql\nMySQL 8.4  ·  :3306" as db
-
-        folder "volumen\ngastos-mysql-data" as vol
-        artifact ".env\nAPP_JWT_SECRET" as env
+        node "MySQL Container" as dbc {
+            database "MySQL 8.4" as db
+            artifact "mysql-data\n(volumen)" as data
+        }
     }
 }
 
-user --> edge : **HTTPS** (URL pública)
-edge <.. cfd : túnel saliente\n(la PC inicia la conexión)
-cfd --> fe : http://localhost:80
-fe ..> be : proxy **/api** -> :8080\n(red interna de docker)\nreenvía **Accept-Language** (es / en / qu)
-be --> db : JDBC :3306\n(SPRING_DATASOURCE_URL)
-db --> vol : persistencia
-env ..> be : variables de entorno
-be ..> fx : HTTPS (tipo de cambio,\ncacheado en el backend)
+user --> cf : HTTPS
+cf --> fe : túnel -> :80
+fe --> be : REST (/api)
+be --> db : JDBC
+db --> data : persistencia
+be --> fx : HTTPS
 
-note bottom of fe
-  nginx sirve los estáticos de Angular
-  y proxea /api al backend.
-  Mismo origen => sin CORS.
-  i18n: Transloco carga /i18n/{es,en,qu}.json
-  y el idioma elegido viaja en Accept-Language.
-end note
-
-note right of be
-  JWT (Spring Security).
-  Seed de categorías vía data.sql.
-  Proxy del tipo de cambio (con caché).
-  i18n: MessageSource + LocaleResolver
-  traducen validaciones y errores por idioma.
-end note
-
-note top of cfd
-  No requiere abrir puertos ni IP pública:
-  cloudflared abre una conexión saliente
-  y Cloudflare publica la URL HTTPS.
-end note
+legend bottom
+El acceso público se realiza mediante un túnel de Cloudflare, evitando exponer
+puertos en el router o usar una IP pública. El frontend (Angular sobre Nginx)
+consume servicios REST del backend (Spring Boot), que persiste en MySQL y consulta
+el tipo de cambio en una API externa. Todo corre en contenedores Docker en la PC.
+endlegend
 
 @enduml

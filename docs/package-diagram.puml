@@ -2,7 +2,7 @@
 title Diagrama de Paquetes - Backend Gastos Personales (com.gastos)
 
 skinparam packageStyle rectangle
-left to right direction
+top to bottom direction
 
 package "com.gastos" {
     package "controller" as controller
@@ -11,41 +11,22 @@ package "com.gastos" {
     package "model" as model
     package "dto" as dto
     package "mapper" as mapper
-    package "exception" as exception
     package "security" as security
+    package "exception" as exception
     package "config" as config
     package "i18n" as i18n
 }
 
-database "MySQL" as db
-
-' Dependencias entre capas (flujo de la petición: arriba -> abajo)
+' Dependencias entre paquetes (organización del sistema)
 controller ..> service
-controller ..> dto
 service ..> repository
 service ..> mapper
-service ..> dto
 service ..> exception
-repository ..> model
-mapper ..> model
 mapper ..> dto
-controller ..> exception : @RestControllerAdvice
-
-' Seguridad: filtro JWT delante de los controllers, valida el token por petición
+mapper ..> model
+repository ..> model
 security ..> service
-security ..> repository
-security ..> model
-config ..> security : SecurityFilterChain + CORS
-
-' Infraestructura
-repository ..> db : JPA / Hibernate
-
-' Internacionalización (i18n): el idioma se decide por el header Accept-Language.
-' MessageSource + LocaleResolver se configuran en config; Messages resuelve textos
-' traducidos para services, handler de excepciones y entry point de seguridad.
-config ..> i18n : MessageSource + LocaleResolver\n(es / en / qu)
-service ..> i18n : Messages (errores de dominio)
-exception ..> i18n : Messages (handler global)
-security ..> i18n : MessageSource (entry point 401)
+exception ..> i18n
+config ..> security
 
 @enduml

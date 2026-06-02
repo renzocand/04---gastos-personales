@@ -1,0 +1,28 @@
+@startuml state-budget
+title Diagrama de Estados - Nivel del presupuesto del mes
+
+[*] --> OK : nuevo mes (gasto = 0)
+
+state "OK\n(< 50% · verde)" as OK
+state "Info\n(>= 50% · ámbar)" as Info
+state "Advertencia\n(>= 80% · rojo)" as Warning
+state "Peligro\n(>= 100% · rojo)" as Danger
+
+' Hacia arriba: al registrar gastos sube el % del ingreso (dispara toast).
+OK --> Info : gasto alcanza 50% del ingreso\n(toast info)
+Info --> Warning : gasto alcanza 80%\n(toast advertencia)
+Warning --> Danger : gasto alcanza 100%\n(toast peligro)
+
+' Hacia abajo: al editar o eliminar gastos baja el %.
+Danger --> Warning : baja de 100%
+Warning --> Info : baja de 80%
+Info --> OK : baja de 50%
+
+note right of OK
+  Nivel = gasto del mes (PEN) / ingreso mensual.
+  Solo el cruce HACIA ARRIBA dispara el toast.
+  Al iniciar un nuevo mes el cálculo se reinicia (vuelve a OK).
+  Aplica solo si el usuario configuró su ingreso.
+end note
+
+@enduml

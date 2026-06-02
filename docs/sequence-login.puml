@@ -1,0 +1,42 @@
+@startuml sequence-login
+title Diagrama de Secuencia - Login con JWT
+
+autonumber
+skinparam sequenceMessageAlign center
+
+actor "Usuario" as user
+participant "Frontend\n(Angular)" as fe
+participant "AuthController" as ctrl
+participant "AuthService" as svc
+participant "AuthenticationManager" as authmgr
+participant "CustomUserDetailsService" as uds
+participant "UserRepository" as repo
+participant "JwtService" as jwt
+participant "JwtAuthenticationFilter" as filter
+participant "ExpenseController" as expctrl
+
+== Inicio de sesión ==
+user -> fe : ingresa DNI + contraseña
+fe -> ctrl : POST /api/auth/login
+ctrl -> svc : login(request)
+svc -> authmgr : authenticate(dni, password)
+authmgr -> uds : loadUserByUsername(dni)
+uds -> repo : findByDni(dni)
+repo --> uds : User
+uds --> authmgr : UserDetails
+authmgr -> authmgr : verifica contraseña (BCrypt)
+svc -> jwt : generateToken(dni)
+jwt --> svc : token JWT
+svc --> ctrl : AuthResponse(token, ...)
+ctrl --> fe : 200 OK { token }
+fe -> fe : guarda el token (localStorage)
+
+== Petición autenticada posterior ==
+user -> fe : abre sus gastos
+fe -> filter : GET /api/expenses\nAuthorization: Bearer <token>
+filter -> jwt : isTokenValid(token)
+jwt --> filter : dni (token válido)
+filter -> expctrl : request autenticada
+expctrl --> fe : 200 OK [ gastos ]
+
+@enduml

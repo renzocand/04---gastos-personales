@@ -1,0 +1,31 @@
+@startuml component-diagram
+title Diagrama de Componentes / Arquitectura - Backend Gastos Personales
+
+skinparam componentStyle rectangle
+top to bottom direction
+
+actor "Cliente REST\n(frontend Angular)" as client
+
+component "Seguridad JWT\n(filtro por petición)" as security
+component "Controller\n(API REST)" as controller
+component "Service\n(lógica de negocio)" as service
+component "Repository\n(JPA / Hibernate)" as repository
+database "MySQL" as db
+
+component "Exception Handler\n(errores uniformes)" as exc
+component "MessageSource (i18n)\n(es / en / qu)" as i18n
+
+' Flujo principal de una petición
+client --> security : HTTP + Bearer JWT
+security --> controller : petición autenticada
+controller --> service
+service --> repository
+repository --> db
+
+' Componentes transversales
+controller ..> exc : excepciones
+exc ..> i18n : mensajes traducidos
+service ..> i18n : textos por idioma
+security ..> i18n : respuesta 401
+
+@enduml

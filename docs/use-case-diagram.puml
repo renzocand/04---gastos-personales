@@ -1,0 +1,43 @@
+@startuml use-case-diagram
+title Diagrama de Casos de Uso - Gastos Personales
+
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Usuario" as user
+actor "API de tipo de cambio" as fx
+
+rectangle "Gastos Personales" {
+    usecase "Registrarse" as uc_reg
+    usecase "Iniciar sesión" as uc_login
+    usecase "Registrar gasto" as uc_add
+    usecase "Editar gasto" as uc_edit
+    usecase "Eliminar gasto" as uc_del
+    usecase "Filtrar gastos" as uc_filter
+    usecase "Ver dashboard / resumen" as uc_dash
+    usecase "Configurar ingreso mensual" as uc_income
+    usecase "Recibir alertas de gasto" as uc_alert
+    usecase "Cambiar idioma" as uc_lang
+}
+
+user --> uc_reg
+user --> uc_login
+user --> uc_add
+user --> uc_edit
+user --> uc_del
+user --> uc_filter
+user --> uc_dash
+user --> uc_income
+user --> uc_lang
+
+' El aviso ocurre como parte de registrar un gasto al cruzar un umbral del ingreso.
+uc_add ..> uc_alert : <<extend>>
+' El dashboard convierte USD a PEN consultando la API externa.
+uc_dash ..> fx : <<include>>
+
+note bottom
+  Todos los casos —salvo "Registrarse" e "Iniciar sesión"—
+  requieren tener la sesión iniciada (token JWT).
+end note
+
+@enduml

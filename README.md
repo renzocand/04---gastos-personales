@@ -62,6 +62,14 @@ Base: `http://localhost:8080/api`
 En `docs/` (formato PlantUML `.puml`). Renderizar con la extensión *PlantUML* de
 VS Code (Alt+D) o en https://www.plantuml.com/plantuml.
 
-- `class-diagram.puml` — diagrama de clases.
-- `package-diagram.puml` — diagrama de paquetes.
-- `er-diagram.puml` — diagrama entidad-relación de la BD.
+**Estructurales:**
+- `class-diagram.puml` — diagrama de clases del **dominio** (entidades + relaciones).
+- `package-diagram.puml` — diagrama de **paquetes** (módulos y sus dependencias).
+- `component-diagram.puml` — diagrama de **componentes/arquitectura** por capas.
+- `er-diagram.puml` — diagrama **entidad-relación** de la BD.
+- `deployment-diagram.puml` — diagrama de **despliegue** (Docker local + túnel).
+
+**De comportamiento:**
+- `use-case-diagram.puml` — **casos de uso** (actor Usuario + funcionalidades).
+- `sequence-login.puml` — **secuencia** del login con JWT y una petición autenticada.
+- `state-budget.puml` — **estados** del nivel del presupuesto del mes (OK → 50% → 80% → 100%).
