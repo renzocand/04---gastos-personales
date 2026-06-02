@@ -1,24 +1,25 @@
 @startuml deployment-diagram
-title Diagrama de Despliegue - Gastos Personales (Docker en Oracle Cloud)
+title Diagrama de Despliegue - Gastos Personales (Docker local + túnel Cloudflare)
 
 skinparam linetype ortho
 skinparam nodesep 20
 skinparam ranksep 40
 
-actor "Usuario" as user
-
-node "Navegador web" as browser {
-    artifact "App Angular (SPA)" as spa
-}
+actor "Usuario\n(internet)" as user
 
 cloud "Internet" {
     component "open.er-api.com\nTipo de cambio USD -> PEN" as fx
 }
 
-cloud "Oracle Cloud — VM 'Always Free'" as oracle {
+cloud "Cloudflare\n(quick tunnel)" as cf {
+    component "edge\nhttps://xxxx.trycloudflare.com" as edge
+}
+
+node "PC local (Windows + Docker Desktop)" as pc {
+
+    component "cloudflared\n(túnel saliente)" as cfd
 
     node "Docker Engine  ·  docker compose" as docker {
-
         node "gastos-frontend\nnginx:alpine  ·  :80" as fe
         node "gastos-backend\nSpring Boot / JRE 17  ·  :8080" as be
         database "gastos-mysql\nMySQL 8.4  ·  :3306" as db
@@ -28,7 +29,9 @@ cloud "Oracle Cloud — VM 'Always Free'" as oracle {
     }
 }
 
-user --> fe : **HTTP :80**\n(única URL pública)
+user --> edge : **HTTPS** (URL pública)
+edge <.. cfd : túnel saliente\n(la PC inicia la conexión)
+cfd --> fe : http://localhost:80
 fe ..> be : proxy **/api** -> :8080\n(red interna de docker)\nreenvía **Accept-Language** (es / en / qu)
 be --> db : JDBC :3306\n(SPRING_DATASOURCE_URL)
 db --> vol : persistencia
@@ -49,6 +52,12 @@ note right of be
   Proxy del tipo de cambio (con caché).
   i18n: MessageSource + LocaleResolver
   traducen validaciones y errores por idioma.
+end note
+
+note top of cfd
+  No requiere abrir puertos ni IP pública:
+  cloudflared abre una conexión saliente
+  y Cloudflare publica la URL HTTPS.
 end note
 
 @enduml
