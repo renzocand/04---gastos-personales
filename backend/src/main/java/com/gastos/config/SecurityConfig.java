@@ -90,7 +90,10 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(allowedOrigins);
+        // Patrones (no orígenes exactos) para admitir comodines como
+        // https://*.trycloudflare.com, cuyo subdominio cambia en cada túnel.
+        // Acepta igual orígenes exactos (p. ej. http://localhost:4200).
+        config.setAllowedOriginPatterns(allowedOrigins);
         config.setAllowedMethods(List.of("GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setExposedHeaders(List.of("Authorization"));

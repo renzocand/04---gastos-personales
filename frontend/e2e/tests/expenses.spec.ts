@@ -33,7 +33,8 @@ test.describe('Gastos', () => {
 
     // PA-06: un rango de fechas en el pasado no devuelve resultados.
     await list.filterByDateRange('2000-01-01', '2000-01-02');
-    await expect(list.noResults).toBeVisible();
+    await expect(list.item('Café filtrable')).toHaveCount(0);
+    await expect(list.emptyState).toBeVisible();
   });
 
   test('PA-07: editar un gasto', async ({ page }) => {

@@ -7,14 +7,22 @@ import { newUser } from '../support/users';
 
 /**
  * Pruebas de aceptación del dashboard: HU-09 (distribución), HU-10 (recientes),
- * HU-11 (nivel de presupuesto consumido). PA-15, PA-16, PA-17, PA-18.
+ * HU-11 (nivel de presupuesto consumido). PA-11, PA-15, PA-16, PA-17, PA-18.
  */
 test.describe('Dashboard / presupuesto', () => {
-  test('PA-17 / PA-18: porcentaje y nivel del presupuesto consumido', async ({ page }) => {
+  test.beforeEach(async ({ page }) => {
+    // El dashboard depende del tipo de cambio (API externa vía backend). Lo
+    // interceptamos para que las pruebas sean deterministas y no dependan de
+    // un servicio de terceros (no afecta los montos en PEN de estas pruebas).
+    await page.route('**/api/exchange-rate', (route) => route.fulfill({ json: { rate: 3.7 } }));
+
     const register = new RegisterPage(page);
     await register.open();
     await register.register(newUser());
+    await expect(page).toHaveURL(/\/dashboard$/); // espera a que la sesión quede establecida
+  });
 
+  test('PA-17 / PA-18: porcentaje y nivel del presupuesto consumido', async ({ page }) => {
     // Ingreso 1000 + gasto de 900 PEN → 90% → nivel "warning".
     const settings = new SettingsPage(page);
     await settings.open();
@@ -31,10 +39,6 @@ test.describe('Dashboard / presupuesto', () => {
   });
 
   test('PA-15 / PA-16: distribución por categorías y gastos recientes', async ({ page }) => {
-    const register = new RegisterPage(page);
-    await register.open();
-    await register.register(newUser());
-
     await new ExpenseFormPage(page).create({ amount: 120, description: 'Gasto reciente' });
 
     const dashboard = new DashboardPage(page);

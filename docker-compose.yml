@@ -33,7 +33,9 @@ services:
       # En producción real pasá un secreto fuerte por variable de entorno.
       APP_JWT_SECRET: ${APP_JWT_SECRET:-gastos-personales-clave-secreta-de-desarrollo-cambiar-en-produccion}
       # El navegador pega al mismo origen (nginx), pero lo dejamos explícito.
-      APP_CORS_ALLOWED_ORIGINS: http://localhost
+      # Incluye el comodín de los túneles rápidos de Cloudflare (dominio aleatorio
+      # que cambia en cada arranque). CSV de orígenes/patrones permitidos.
+      APP_CORS_ALLOWED_ORIGINS: http://localhost,https://*.trycloudflare.com
 
   frontend:
     build: ./frontend

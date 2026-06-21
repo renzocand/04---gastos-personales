@@ -6,6 +6,8 @@ export class ExpensesListPage extends BasePage {
   readonly dateFrom: Locator = this.page.locator('#date-from');
   readonly dateTo: Locator = this.page.locator('#date-to');
   readonly noResults: Locator = this.page.getByTestId('expenses-no-results');
+  // Al filtrar a vacío, la lista cae en el estado "sin gastos" (ui-empty-state).
+  readonly emptyState: Locator = this.page.locator('ui-empty-state');
 
   async open(): Promise<void> {
     await this.goto('/expenses');

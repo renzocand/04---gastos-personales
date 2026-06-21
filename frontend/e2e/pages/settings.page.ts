@@ -9,7 +9,13 @@ export class SettingsPage extends BasePage {
   readonly incomeError: Locator = this.page.getByTestId('income-error');
 
   async open(): Promise<void> {
+    // Esperamos la carga de settings del backend: el form se sincroniza por efecto
+    // cuando llega la respuesta, así no sobreescribe lo que tecleamos después.
+    const loaded = this.page.waitForResponse(
+      (r) => r.url().includes('/api/settings') && r.request().method() === 'GET',
+    );
     await this.goto('/settings');
+    await loaded;
   }
 
   async setIncome(value: number): Promise<void> {
