@@ -50,6 +50,20 @@ public class UserSettings {
     @Column(name = "alerts_enabled", nullable = false)
     private boolean alertsEnabled = true;
 
+    // ===== Accesibilidad (ODS 10 · meta 10.2: inclusión de personas con discapacidad) =====
+
+    /** Tema de alto contraste para baja visión / daltonismo. */
+    @Column(name = "high_contrast", nullable = false)
+    private boolean highContrast = false;
+
+    /** Escala tipográfica de la interfaz: "normal" | "large" | "xlarge". */
+    @Column(name = "font_scale", length = 10, nullable = false)
+    private String fontScale = "normal";
+
+    /** Reduce/desactiva animaciones y transiciones (sensibilidad al movimiento). */
+    @Column(name = "reduce_motion", nullable = false)
+    private boolean reduceMotion = false;
+
     @UpdateTimestamp
     @Column(name = "updated_at")
     private Instant updatedAt;

@@ -13,6 +13,7 @@ import { CategoryBreakdown } from '../../components/category-breakdown/category-
 import { RecentExpenses } from '../../components/recent-expenses/recent-expenses';
 import { TotalCard } from '../../components/total-card/total-card';
 import { BudgetCard } from '../../components/budget-card/budget-card';
+import { BudgetTip } from '../../components/budget-tip/budget-tip';
 import { AppCurrencyPipe } from '../../../../shared/pipes/app-currency';
 import { Store } from '@ngrx/store';
 import { selectExpensesSummary, selectHasExpenses } from '../../../expenses/store/expenses.selectors';
@@ -28,6 +29,7 @@ import { ExchangeRateActions } from '../../../exchange-rate/store/exchange-rate.
   imports: [
     TotalCard,
     BudgetCard,
+    BudgetTip,
     CategoryBreakdown,
     RecentExpenses,
     Card,

@@ -66,6 +66,52 @@
         />
       </label>
 
+      <!-- ===== Accesibilidad (ODS 10 · meta 10.2) ===== -->
+      <fieldset class="space-y-5 border-t border-slate-200 pt-6">
+        <legend class="flex items-center gap-2 text-sm font-medium text-slate-700">
+          <lucide-angular [img]="AccessibilityIcon" class="size-4 text-violet-600"></lucide-angular>
+          {{ 'settings.a11y.title' | transloco }}
+        </legend>
+
+        <div>
+          <p class="text-sm font-medium text-slate-700">{{ 'settings.a11y.fontScale' | transloco }}</p>
+          <div class="mt-2 flex flex-wrap gap-2" role="radiogroup" [attr.aria-label]="'settings.a11y.fontScale' | transloco">
+            @for (scale of fontScales; track scale) {
+              <label
+                class="cursor-pointer rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 transition has-[:checked]:border-violet-500 has-[:checked]:bg-violet-50 has-[:checked]:font-medium has-[:checked]:text-violet-700 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-violet-500"
+              >
+                <input type="radio" [value]="scale" formControlName="fontScale" class="sr-only" />
+                {{ 'settings.a11y.fontScales.' + scale | transloco }}
+              </label>
+            }
+          </div>
+        </div>
+
+        <label class="flex items-center justify-between gap-4">
+          <span>
+            <span class="block text-sm font-medium text-slate-700">{{ 'settings.a11y.highContrast' | transloco }}</span>
+            <span class="mt-0.5 block text-xs text-slate-500">{{ 'settings.a11y.highContrastHint' | transloco }}</span>
+          </span>
+          <input
+            type="checkbox"
+            formControlName="highContrast"
+            class="size-5 flex-none cursor-pointer rounded border-slate-300 text-violet-600 focus:ring-2 focus:ring-violet-500/30"
+          />
+        </label>
+
+        <label class="flex items-center justify-between gap-4">
+          <span>
+            <span class="block text-sm font-medium text-slate-700">{{ 'settings.a11y.reduceMotion' | transloco }}</span>
+            <span class="mt-0.5 block text-xs text-slate-500">{{ 'settings.a11y.reduceMotionHint' | transloco }}</span>
+          </span>
+          <input
+            type="checkbox"
+            formControlName="reduceMotion"
+            class="size-5 flex-none cursor-pointer rounded border-slate-300 text-violet-600 focus:ring-2 focus:ring-violet-500/30"
+          />
+        </label>
+      </fieldset>
+
       <div class="flex justify-end pt-2">
         <button
           type="submit"

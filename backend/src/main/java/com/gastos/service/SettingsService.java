@@ -34,8 +34,8 @@ public class SettingsService {
     /** Configuración del usuario; si no tiene fila aún, devuelve los defaults. */
     public SettingsResponse get(String dni) {
         return settingsRepository.findByUser_Dni(dni)
-                .map(s -> new SettingsResponse(s.getMonthlyIncome(), s.isAlertsEnabled()))
-                .orElseGet(() -> new SettingsResponse(null, true));
+                .map(SettingsService::toResponse)
+                .orElseGet(() -> new SettingsResponse(null, true, false, "normal", false));
     }
 
     /** Crea o actualiza la configuración del usuario autenticado. */
@@ -50,8 +50,20 @@ public class SettingsService {
 
         settings.setMonthlyIncome(req.monthlyIncome());
         settings.setAlertsEnabled(req.alertsEnabled());
+        settings.setHighContrast(req.highContrast());
+        // Si no llega un valor válido, conservamos "normal" como escala por defecto.
+        settings.setFontScale(req.fontScale() != null ? req.fontScale() : "normal");
+        settings.setReduceMotion(req.reduceMotion());
 
-        UserSettings saved = settingsRepository.save(settings);
-        return new SettingsResponse(saved.getMonthlyIncome(), saved.isAlertsEnabled());
+        return toResponse(settingsRepository.save(settings));
+    }
+
+    private static SettingsResponse toResponse(UserSettings s) {
+        return new SettingsResponse(
+                s.getMonthlyIncome(),
+                s.isAlertsEnabled(),
+                s.isHighContrast(),
+                s.getFontScale(),
+                s.isReduceMotion());
     }
 }

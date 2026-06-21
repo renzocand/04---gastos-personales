@@ -1,3 +1,62 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import 'tailwindcss';
+
+/* ===== Accesibilidad (ODS 10 · meta 10.2) =====
+   Preferencias controladas desde Configuración y reflejadas en <html> con
+   atributos data-* por settings.effects.ts. Como Tailwind usa unidades rem,
+   subir el font-size raíz escala toda la interfaz de forma proporcional. */
+
+html[data-font='large'] {
+  font-size: 18px;
+}
+
+html[data-font='xlarge'] {
+  font-size: 20px;
+}
+
+/* Alto contraste: oscurece los textos tenues y refuerza bordes/anillos para
+   mejorar la legibilidad de personas con baja visión o daltonismo. */
+html[data-contrast='high'] {
+  --tw-ring-opacity: 1;
+}
+
+html[data-contrast='high'] .text-slate-400,
+html[data-contrast='high'] .text-slate-500 {
+  color: #1e293b; /* slate-800 */
+}
+
+html[data-contrast='high'] .border-slate-300 {
+  border-color: #475569; /* slate-600 */
+}
+
+html[data-contrast='high'] .shadow-sm,
+html[data-contrast='high'] .shadow-lg {
+  box-shadow: none;
+}
+
+html[data-contrast='high'] .ring-1 {
+  --tw-ring-color: #334155; /* slate-700 */
+}
+
+/* Reducción de movimiento: por preferencia explícita del usuario o del sistema
+   operativo, desactivamos transiciones y animaciones. */
+html[data-reduce-motion='true'] *,
+html[data-reduce-motion='true'] *::before,
+html[data-reduce-motion='true'] *::after {
+  transition-duration: 0.01ms !important;
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  scroll-behavior: auto !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}

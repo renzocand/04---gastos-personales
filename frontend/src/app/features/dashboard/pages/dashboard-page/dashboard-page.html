@@ -81,6 +81,8 @@
   } @else {
     <app-budget-card [status]="budgetStatus()" />
 
+    <app-budget-tip [status]="budgetStatus()" />
+
     <div class="grid gap-4 sm:grid-cols-2">
       <app-total-card [total]="summary().totalPEN | appCurrency:'PEN'" />
       <app-total-card [total]="summary().totalUSD | appCurrency:'USD'" />

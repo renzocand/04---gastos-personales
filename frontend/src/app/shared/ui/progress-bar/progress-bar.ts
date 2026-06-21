@@ -16,6 +16,7 @@ const BAR_CLASS: Record<ProgressColor, string> = {
     <div
       class="h-2 w-full overflow-hidden rounded-full bg-slate-100"
       role="progressbar"
+      [attr.aria-label]="label()"
       [attr.aria-valuenow]="clamped()"
       aria-valuemin="0"
       aria-valuemax="100"
@@ -32,6 +33,8 @@ const BAR_CLASS: Record<ProgressColor, string> = {
 export class ProgressBar {
   percent = input.required<number>();
   color = input<ProgressColor>('violet');
+  /** Etiqueta accesible para lectores de pantalla (qué representa la barra). */
+  label = input<string>();
 
   protected readonly clamped = computed(() =>
     Math.max(0, Math.min(100, this.percent())),

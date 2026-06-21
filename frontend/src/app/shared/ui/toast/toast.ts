@@ -6,6 +6,7 @@ import {
   LucideAngularModule,
   X,
 } from 'lucide-angular';
+import { TranslocoModule } from '@jsverse/transloco';
 
 export type ToastVariant = 'success' | 'error' | 'info';
 
@@ -35,7 +36,7 @@ const VARIANT: Record<ToastVariant, VariantStyle> = {
 
 @Component({
   selector: 'ui-toast',
-  imports: [LucideAngularModule],
+  imports: [LucideAngularModule, TranslocoModule],
   template: `
     <div
       role="status"
@@ -55,7 +56,7 @@ const VARIANT: Record<ToastVariant, VariantStyle> = {
         <button
           type="button"
           (click)="dismissed.emit()"
-          aria-label="Cerrar notificación"
+          [attr.aria-label]="'a11y.dismiss' | transloco"
           class="flex-none rounded-md p-0.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
         >
           <lucide-angular [img]="CloseIcon" class="size-4"></lucide-angular>

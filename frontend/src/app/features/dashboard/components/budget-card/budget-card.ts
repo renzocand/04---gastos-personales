@@ -1,6 +1,13 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { LucideAngularModule, Wallet } from 'lucide-angular';
+import {
+  CircleAlert,
+  CircleCheck,
+  Info,
+  LucideAngularModule,
+  TriangleAlert,
+  Wallet,
+} from 'lucide-angular';
 import { TranslocoModule } from '@jsverse/transloco';
 import { Card } from '../../../../shared/ui/card/card';
 import { ProgressBar, ProgressColor } from '../../../../shared/ui/progress-bar/progress-bar';
@@ -32,6 +39,23 @@ export class BudgetCard {
         return 'amber';
       default:
         return 'emerald';
+    }
+  });
+
+  /**
+   * Icono por nivel: el estado del presupuesto NO se comunica solo por color
+   * (a11y · ODS 10), también por icono y texto para daltonismo/baja visión.
+   */
+  protected readonly levelIcon = computed(() => {
+    switch (this.status().level) {
+      case 'danger':
+        return CircleAlert;
+      case 'warning':
+        return TriangleAlert;
+      case 'info':
+        return Info;
+      default:
+        return CircleCheck;
     }
   });
 }

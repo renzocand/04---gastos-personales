@@ -4,7 +4,7 @@
       <div class="flex items-center justify-between gap-3">
         <p class="text-sm font-medium text-slate-500">{{ 'dashboard.budget.label' | transloco }}</p>
         <span
-          class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold tabular-nums"
+          class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold tabular-nums"
           [class]="
             status().level === 'ok'
               ? 'bg-emerald-50 text-emerald-700'
@@ -12,7 +12,9 @@
                 ? 'bg-amber-50 text-amber-700'
                 : 'bg-rose-50 text-rose-700'
           "
+          [attr.aria-label]="('dashboard.budget.msg.' + status().level | transloco) + ' ' + percentRounded() + '%'"
         >
+          <lucide-angular [img]="levelIcon()" class="size-3.5" aria-hidden="true"></lucide-angular>
           {{ percentRounded() }}%
         </span>
       </div>
@@ -25,7 +27,11 @@
       </p>
 
       <div class="mt-4">
-        <ui-progress-bar [percent]="status().percent" [color]="barColor()" />
+        <ui-progress-bar
+          [percent]="status().percent"
+          [color]="barColor()"
+          [label]="'dashboard.budget.label' | transloco"
+        />
       </div>
 
       <div class="mt-3 flex items-center justify-between text-xs">

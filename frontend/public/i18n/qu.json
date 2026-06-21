@@ -83,6 +83,23 @@
         "info": "Llevas más de la mitad de tu ingreso.",
         "ok": "Vas bien con tus gastos este mes."
       },
+      "tips": {
+        "info": [
+          "Vas por la mitad de tu ingreso. Apartá un porcentaje fijo para ahorro apenas cobras.",
+          "Anotá hasta los gastos chicos: sumados pesan más de lo que parece.",
+          "Definí un tope mensual por categoría para no pasarte sin darte cuenta."
+        ],
+        "warning": [
+          "Ya gastaste el 80%. Pausá las compras no esenciales hasta fin de mes.",
+          "Revisá tus suscripciones y dá de baja las que no uses.",
+          "Antes de un gasto grande, esperá 24 horas y volvé a evaluarlo."
+        ],
+        "danger": [
+          "Superaste tu ingreso: prioriza solo gastos esenciales el resto del mes.",
+          "Identificá tu categoría más cara y ponéle un límite para el próximo mes.",
+          "Considerá un pequeño fondo de emergencia para no depender de deudas."
+        ]
+      },
       "empty": {
         "title": "Activá el control de gastos",
         "message": "Configurá tu ingreso mensual y te avisamos cuando gastes de más.",
@@ -162,12 +179,28 @@
     "alertsTitle": "Qullqi tukuy willaykuna",
     "alertsHint": "Avisarme al llegar al 50%, 80% y 100% de mi ingreso este mes.",
     "languageTitle": "Simi",
-    "languageHint": "Aplicación simita akllay."
+    "languageHint": "Aplicación simita akllay.",
+    "a11y": {
+      "title": "Accesibilidad",
+      "fontScale": "Tamaño del texto",
+      "fontScales": {
+        "normal": "Normal",
+        "large": "Grande",
+        "xlarge": "Muy grande"
+      },
+      "highContrast": "Alto contraste",
+      "highContrastHint": "Mejora la legibilidad para baja visión y daltonismo.",
+      "reduceMotion": "Reducir movimiento",
+      "reduceMotionHint": "Desactiva animaciones y transiciones."
+    }
   },
   "alerts": {
     "tier1": "Llevas gastado más del 50% de tu ingreso este mes.",
     "tier2": "Cuidado: ya gastaste el 80% de tu ingreso este mes.",
     "tier3": "Superaste tu ingreso mensual. Revisá tus gastos."
+  },
+  "a11y": {
+    "dismiss": "Cerrar notificación"
   },
   "notFound": {
     "message": "Maskasqayki p'anqa mana kanchu utaq astasqa karqan.",

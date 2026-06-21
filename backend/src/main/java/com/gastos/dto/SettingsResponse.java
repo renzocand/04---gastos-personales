@@ -8,6 +8,9 @@ import java.math.BigDecimal;
  */
 public record SettingsResponse(
         BigDecimal monthlyIncome,
-        boolean alertsEnabled
+        boolean alertsEnabled,
+        boolean highContrast,
+        String fontScale,
+        boolean reduceMotion
 ) {
 }

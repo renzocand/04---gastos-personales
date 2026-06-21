@@ -3,6 +3,7 @@ package com.gastos.dto;
 import java.math.BigDecimal;
 
 import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.PositiveOrZero;
 
 /**
@@ -15,6 +16,15 @@ public record SettingsUpdateRequest(
         @Digits(integer = 10, fraction = 2, message = "{settings.income.digits}")
         BigDecimal monthlyIncome,
 
-        boolean alertsEnabled
+        boolean alertsEnabled,
+
+        // ===== Preferencias de accesibilidad =====
+
+        boolean highContrast,
+
+        @Pattern(regexp = "normal|large|xlarge", message = "{settings.fontScale.invalid}")
+        String fontScale,
+
+        boolean reduceMotion
 ) {
 }

@@ -82,6 +82,23 @@
         "info": "You've spent more than half your income.",
         "ok": "You're doing well with your spending this month."
       },
+      "tips": {
+        "info": [
+          "You're halfway through your income. Set aside a fixed share for savings as soon as you get paid.",
+          "Track even small expenses: together they add up more than you'd think.",
+          "Set a monthly cap per category so you don't overshoot without noticing."
+        ],
+        "warning": [
+          "You've spent 80%. Pause non-essential purchases until the end of the month.",
+          "Review your subscriptions and cancel the ones you don't use.",
+          "Before a big purchase, wait 24 hours and reassess it."
+        ],
+        "danger": [
+          "You went over your income: prioritize only essential expenses for the rest of the month.",
+          "Find your most expensive category and set a limit for next month.",
+          "Consider a small emergency fund so you don't rely on debt."
+        ]
+      },
       "empty": {
         "title": "Turn on spending control",
         "message": "Set your monthly income and we'll warn you when you overspend.",
@@ -161,12 +178,28 @@
     "alertsTitle": "Spending alerts",
     "alertsHint": "Warn me when I reach 50%, 80% and 100% of my income this month.",
     "languageTitle": "Language",
-    "languageHint": "Choose the app language."
+    "languageHint": "Choose the app language.",
+    "a11y": {
+      "title": "Accessibility",
+      "fontScale": "Text size",
+      "fontScales": {
+        "normal": "Normal",
+        "large": "Large",
+        "xlarge": "Extra large"
+      },
+      "highContrast": "High contrast",
+      "highContrastHint": "Improves readability for low vision and color blindness.",
+      "reduceMotion": "Reduce motion",
+      "reduceMotionHint": "Turns off animations and transitions."
+    }
   },
   "alerts": {
     "tier1": "You've spent more than 50% of your income this month.",
     "tier2": "Careful: you've already spent 80% of your income this month.",
     "tier3": "You exceeded your monthly income. Review your expenses."
+  },
+  "a11y": {
+    "dismiss": "Dismiss notification"
   },
   "notFound": {
     "message": "The page you're looking for doesn't exist or was moved.",

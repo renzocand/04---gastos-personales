@@ -10,7 +10,13 @@ export interface SettingsState {
 }
 
 const initialState: SettingsState = {
-  settings: { monthlyIncome: null, alertsEnabled: true },
+  settings: {
+    monthlyIncome: null,
+    alertsEnabled: true,
+    highContrast: false,
+    fontScale: 'normal',
+    reduceMotion: false,
+  },
   loading: false,
   error: null,
 };
