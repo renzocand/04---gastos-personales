@@ -15,6 +15,7 @@ export type ConfirmVariant = 'default' | 'danger';
   template: `
     <dialog
       #dialogRef
+      data-testid="confirm-dialog"
       class="m-auto w-full max-w-md rounded-2xl p-0 backdrop:bg-slate-900/40 backdrop:backdrop-blur-sm"
       (close)="onNativeClose()"
     >
@@ -26,6 +27,7 @@ export type ConfirmVariant = 'default' | 'danger';
         <div class="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <button
             type="button"
+            data-testid="confirm-cancel"
             (click)="cancel()"
             class="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
           >
@@ -33,6 +35,7 @@ export type ConfirmVariant = 'default' | 'danger';
           </button>
           <button
             type="button"
+            data-testid="confirm-accept"
             (click)="confirm()"
             class="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium text-white shadow-sm transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
             [class]="confirmBtnClass()"

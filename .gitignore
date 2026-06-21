@@ -19,6 +19,12 @@ backend/.mvn/wrapper/maven-wrapper.jar
 # Variables de entorno (secretos). Se versiona solo .env.example.
 .env
 
+# JMeter (pruebas no funcionales): se versiona solo el plan (.jmx), el script y el
+# README; los resultados crudos (.jtl) y los dashboards HTML (rep-*) son generados.
+perf/*.jtl
+perf/rep-*/
+# jmeter.log ya queda cubierto por la regla *.log de arriba.
+
 # Sistema
 .DS_Store
 Thumbs.db

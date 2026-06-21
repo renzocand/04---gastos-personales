@@ -188,7 +188,7 @@
           </ul>
         </section>
       } @empty {
-        <div class="p-10 text-center">
+        <div data-testid="expenses-no-results" class="p-10 text-center">
           <p class="text-sm font-medium text-slate-700">{{ 'expenses.list.noResults.title' | transloco }}</p>
           <p class="mt-1 text-sm text-slate-500">
             {{ 'expenses.list.noResults.message' | transloco }}

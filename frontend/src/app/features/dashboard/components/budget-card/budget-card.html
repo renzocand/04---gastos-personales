@@ -4,6 +4,8 @@
       <div class="flex items-center justify-between gap-3">
         <p class="text-sm font-medium text-slate-500">{{ 'dashboard.budget.label' | transloco }}</p>
         <span
+          data-testid="budget-status"
+          [attr.data-level]="status().level"
           class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold tabular-nums"
           [class]="
             status().level === 'ok'

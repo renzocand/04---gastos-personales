@@ -19,7 +19,7 @@
   <ui-card>
     <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6 p-5 sm:p-6" novalidate>
       @if (error()) {
-        <div class="rounded-lg bg-rose-50 px-3 py-2.5 text-sm font-medium text-rose-700 ring-1 ring-rose-600/20">
+        <div data-testid="form-error" class="rounded-lg bg-rose-50 px-3 py-2.5 text-sm font-medium text-rose-700 ring-1 ring-rose-600/20">
           {{ error() }}
         </div>
       }
@@ -48,7 +48,7 @@
           {{ 'settings.monthlyIncomeHint' | transloco }}
         </p>
         @if (form.controls.monthlyIncome.touched && form.controls.monthlyIncome.errors?.['min']) {
-          <p class="mt-1.5 text-xs font-medium text-rose-600">{{ 'settings.incomeNegative' | transloco }}</p>
+          <p data-testid="income-error" class="mt-1.5 text-xs font-medium text-rose-600">{{ 'settings.incomeNegative' | transloco }}</p>
         }
       </div>
 
