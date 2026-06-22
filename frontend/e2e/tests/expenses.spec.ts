@@ -31,10 +31,10 @@ test.describe('Gastos', () => {
     const list = new ExpensesListPage(page);
     await expect(list.item('Café filtrable')).toBeVisible(); // PA-05: coincide
 
-    // PA-06: un rango de fechas en el pasado no devuelve resultados.
-    await list.filterByDateRange('2000-01-01', '2000-01-02');
-    await expect(list.item('Café filtrable')).toHaveCount(0);
+    // PA-06: un filtro "hasta" en el pasado no devuelve resultados.
+    await list.filterByDateTo('2000-01-02');
     await expect(list.emptyState).toBeVisible();
+    await expect(list.item('Café filtrable')).toHaveCount(0);
   });
 
   test('PA-07: editar un gasto', async ({ page }) => {

@@ -11,7 +11,7 @@ prueba está nombrada con su ID para trazabilidad directa con el paper.
 | Backend unitarias (JUnit 5 + Mockito + AssertJ) | 5 | 26 | ✅ |
 | Frontend unitarias (Vitest + jsdom, Angular) | 8 (+1 shell) | 44 | ✅ |
 | **Total unitarias** | **14** | **70** | ✅ |
-| E2E aceptación (Playwright POM · 3 navegadores) | 4 specs + 6 page objects | 16 escenarios (×3 = 48) | ▶ requiere stack |
+| E2E aceptación (Playwright POM · 3 navegadores) | 4 specs + 6 page objects | 16 escenarios (×3 = 48) | ✅ |
 
 ## Cómo ejecutar
 
@@ -126,9 +126,12 @@ Pruebas end-to-end en **navegador real** (Chromium, Firefox y WebKit → **RNF-0
 con patrón Page Object Model en `frontend/e2e/`. Validan las PA recorriendo la app
 integrada (Angular + backend + MySQL).
 
-- **Requisitos**: stack levantado (MySQL + backend en :8080 + frontend en :4200) y
-  `npx playwright install` (descarga navegadores).
-- **Correr**: `cd frontend && npm run e2e` (o `npm run e2e:ui`). Detalle en `frontend/e2e/README.md`.
+- **Resultado**: **48/48 verde** (16 escenarios × Chromium/Firefox/WebKit) corridos
+  contra el stack dockerizado (`docker compose up -d --build`, app en `http://localhost`).
+- **Requisitos**: stack levantado y `npx playwright install` (descarga navegadores).
+- **Correr contra docker**: `cd frontend && E2E_BASE_URL=http://localhost npm run e2e`.
+  Contra el dev server (`ng serve`, :4200): `npm run e2e` (arranca/reúsa el server solo).
+  Detalle en `frontend/e2e/README.md`.
 - Se agregaron atributos `data-testid` a la app para selección estable: diálogo de
   confirmación (`confirm-dialog/-cancel/-accept`), badge de presupuesto
   (`budget-status` + `data-level`), errores de formulario (`form-error`, `income-error`),

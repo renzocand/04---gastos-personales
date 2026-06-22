@@ -22,7 +22,17 @@ export class SettingsPage extends BasePage {
     await this.monthlyIncome.fill(String(value));
   }
 
+  /** Hace clic en Guardar (sin esperar). Útil cuando el form es inválido (no hay PUT). */
   async saveSettings(): Promise<void> {
     await this.save.click();
+  }
+
+  /** Guarda y espera la confirmación del backend (PUT). Para formularios válidos. */
+  async saveAndWait(): Promise<void> {
+    const saved = this.page.waitForResponse(
+      (r) => r.url().includes('/api/settings') && r.request().method() === 'PUT',
+    );
+    await this.save.click();
+    await saved;
   }
 }

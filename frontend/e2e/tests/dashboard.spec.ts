@@ -27,7 +27,7 @@ test.describe('Dashboard / presupuesto', () => {
     const settings = new SettingsPage(page);
     await settings.open();
     await settings.setIncome(1000);
-    await settings.saveSettings();
+    await settings.saveAndWait();
 
     await new ExpenseFormPage(page).create({ amount: 900, description: 'Gasto grande' });
 

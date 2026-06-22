@@ -1,31 +1,135 @@
 @startuml component-diagram
-title Diagrama de Componentes / Arquitectura - Backend Gastos Personales
+title Diagrama de Componentes (detallado a nivel de metodo) - Backend Gastos Personales
 
-skinparam componentStyle rectangle
-top to bottom direction
+skinparam classAttributeIconSize 0
+left to right direction
+hide fields
+hide circle
 
-actor "Cliente REST\n(frontend Angular)" as client
+' ================================================================
+' Cada componente se muestra con los metodos que expone, sus
+' parametros y el tipo que retorna. Sirve de base para el Paso 3
+' (pruebas unitarias con assert).
+' ================================================================
 
-component "Seguridad JWT\n(filtro por petición)" as security
-component "Controller\n(API REST)" as controller
-component "Service\n(lógica de negocio)" as service
-component "Repository\n(JPA / Hibernate)" as repository
-database "MySQL" as db
+class "Cliente REST\n(frontend Angular)" as client <<actor>>
 
-component "Exception Handler\n(errores uniformes)" as exc
-component "MessageSource (i18n)\n(es / en / qu)" as i18n
+package "controller (API REST)" {
+    class AuthController {
+        + register(req: RegisterRequest) : AuthResponse
+        + login(req: LoginRequest) : AuthResponse
+        + me(auth: Authentication) : UserResponse
+    }
+    class ExpenseController {
+        + list(auth, categoryId, currency, dateFrom, dateTo) : List<ExpenseResponse>
+        + create(auth, req: ExpenseRequest) : ExpenseResponse
+        + update(auth, id: String, req: ExpenseUpdateRequest) : ExpenseResponse
+        + delete(auth, id: String) : void
+    }
+    class CategoryController {
+        + list() : List<CategoryResponse>
+    }
+    class SettingsController {
+        + get(auth: Authentication) : SettingsResponse
+        + update(auth, req: SettingsUpdateRequest) : SettingsResponse
+    }
+    class ExchangeRateController {
+        + get() : ExchangeRateResponse
+    }
+}
 
-' Flujo principal de una petición
-client --> security : HTTP + Bearer JWT
-security --> controller : petición autenticada
-controller --> service
-service --> repository
-repository --> db
+package "service (logica de negocio)" {
+    class AuthService {
+        + register(req: RegisterRequest) : AuthResponse
+        + login(req: LoginRequest) : AuthResponse
+        + me(dni: String) : UserResponse
+    }
+    class ExpenseService {
+        + findAll(dni, categoryId, currency, dateFrom, dateTo) : List<ExpenseResponse>
+        + create(dni: String, req: ExpenseRequest) : ExpenseResponse
+        + update(dni: String, id: String, req: ExpenseUpdateRequest) : ExpenseResponse
+        + delete(dni: String, id: String) : void
+    }
+    class CategoryService {
+        + findAll() : List<CategoryResponse>
+    }
+    class SettingsService {
+        + get(dni: String) : SettingsResponse
+        + update(dni: String, req: SettingsUpdateRequest) : SettingsResponse
+    }
+    class ExchangeRateService {
+        + getUsdToPen() : BigDecimal
+    }
+}
 
-' Componentes transversales
-controller ..> exc : excepciones
-exc ..> i18n : mensajes traducidos
-service ..> i18n : textos por idioma
-security ..> i18n : respuesta 401
+package "security (JWT)" {
+    class JwtService {
+        + generateToken(dni: String) : String
+        + extractDni(token: String) : String
+        + isTokenValid(token: String, dni: String) : boolean
+    }
+    class CustomUserDetailsService {
+        + loadUserByUsername(dni: String) : UserDetails
+    }
+    class JwtAuthenticationFilter {
+        # doFilterInternal(req, res, chain) : void
+    }
+}
+
+package "mapper" {
+    class ExpenseMapper {
+        + toResponse(e: Expense) : ExpenseResponse
+        + toEntity(req: ExpenseRequest, c: Category, u: User) : Expense
+        + toResponse(c: Category) : CategoryResponse
+    }
+}
+
+package "repository (Spring Data JPA)" {
+    interface ExpenseRepository {
+        + findFiltered(dni, categoryId, currency, dateFrom, dateTo) : List<Expense>
+        + findByIdAndUser_Dni(id: String, dni: String) : Optional<Expense>
+    }
+    interface UserRepository {
+        + findByDni(dni: String) : Optional<User>
+        + existsByDni(dni: String) : boolean
+    }
+    interface UserSettingsRepository {
+        + findByUser_Dni(dni: String) : Optional<UserSettings>
+    }
+    interface CategoryRepository {
+        + findById(id: String) : Optional<Category>
+    }
+}
+
+class "MySQL" as db <<database>>
+
+' ===== Flujo principal de una peticion =====
+client --> JwtAuthenticationFilter : HTTP + Bearer JWT
+JwtAuthenticationFilter --> AuthController
+JwtAuthenticationFilter --> ExpenseController
+JwtAuthenticationFilter ..> JwtService : valida token
+JwtAuthenticationFilter ..> CustomUserDetailsService : carga usuario
+
+AuthController --> AuthService
+ExpenseController --> ExpenseService
+CategoryController --> CategoryService
+SettingsController --> SettingsService
+ExchangeRateController --> ExchangeRateService
+
+AuthService ..> UserRepository
+AuthService ..> JwtService
+ExpenseService ..> ExpenseRepository
+ExpenseService ..> CategoryRepository
+ExpenseService ..> UserRepository
+ExpenseService ..> ExpenseMapper
+CategoryService ..> CategoryRepository
+CategoryService ..> ExpenseMapper
+SettingsService ..> UserSettingsRepository
+SettingsService ..> UserRepository
+
+ExpenseRepository --> db
+UserRepository --> db
+UserSettingsRepository --> db
+CategoryRepository --> db
 
 @enduml

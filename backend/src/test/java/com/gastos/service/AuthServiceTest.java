@@ -13,7 +13,9 @@ import java.util.Optional;
 import com.gastos.dto.AuthResponse;
 import com.gastos.dto.LoginRequest;
 import com.gastos.dto.RegisterRequest;
+import com.gastos.dto.UserResponse;
 import com.gastos.exception.ConflictException;
+import com.gastos.exception.NotFoundException;
 import com.gastos.i18n.Messages;
 import com.gastos.model.User;
 import com.gastos.repository.UserRepository;
@@ -116,5 +118,38 @@ class AuthServiceTest {
         assertThatThrownBy(() -> service.login(new LoginRequest(DNI, "wrong")))
                 .isInstanceOf(BadCredentialsException.class);
         verify(userRepository, never()).findByDni(anyString());
+    }
+
+    // ---- TC-15 / PA-24: Datos del usuario autenticado (GET /api/auth/me) ----
+
+    @Test
+    @DisplayName("TC-15 / PA-24: me devuelve los datos públicos del usuario hallado por DNI")
+    void tc15_pa24_me_ok() {
+        User user = new User();
+        user.setDni(DNI);
+        user.setFirstName("Renzo");
+        user.setLastName("Candiotti");
+        user.setSecondLastName("Quispe");
+        user.setEmail("renzo@example.com");
+        user.setRole("USER");
+        when(userRepository.findByDni(DNI)).thenReturn(Optional.of(user));
+
+        UserResponse res = service.me(DNI);
+
+        assertThat(res.dni()).isEqualTo(DNI);
+        assertThat(res.firstName()).isEqualTo("Renzo");
+        assertThat(res.lastName()).isEqualTo("Candiotti");
+        assertThat(res.secondLastName()).isEqualTo("Quispe");
+        assertThat(res.email()).isEqualTo("renzo@example.com");
+        assertThat(res.role()).isEqualTo("USER");
+    }
+
+    @Test
+    @DisplayName("TC-15: me con DNI inexistente lanza NotFoundException")
+    void tc15_me_userNotFound() {
+        when(userRepository.findByDni(DNI)).thenReturn(Optional.empty());
+        when(messages.get(anyString(), any())).thenReturn("Usuario no encontrado");
+
+        assertThatThrownBy(() -> service.me(DNI)).isInstanceOf(NotFoundException.class);
     }
 }

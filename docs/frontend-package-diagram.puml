@@ -1,0 +1,60 @@
+@startuml frontend-package-diagram
+title Diagrama de Paquetes - Frontend Angular (src/app)
+
+skinparam packageStyle rectangle
+skinparam linetype ortho
+top to bottom direction
+
+package "src/app" {
+
+    package "core" {
+        package "guards"
+        package "i18n"
+        package "interceptors"
+        package "layout"
+    }
+
+    package "features" {
+
+        ' Las demas features se dejan colapsadas: TODAS tienen la
+        ' misma estructura interna (pages, services, store, ...).
+        package "auth"
+        package "expenses"
+        package "categories"
+        package "exchange-rate"
+        package "settings"
+
+        ' Se expande dashboard como ejemplo porque ahi vive budget.
+        package "dashboard" {
+            package "components"
+            package "pages"
+            package "store" as store
+        }
+    }
+
+    package "shared" {
+        package "pipes"
+        package "ui"
+    }
+}
+
+note right of store
+  store/ contiene:
+  - budget.ts            (toPen, tierFor, levelFor)  [U]
+  - budget.selectors.ts                               [U]
+  - dashboard.selectors.ts                            [U]
+  - dashboard.feature.ts (reducer)                    [U]
+  <-- aqui vive "budget"
+end note
+
+' Regla de arquitectura: cada feature usa core y shared.
+"features" ..> "core"
+"features" ..> "shared"
+
+legend left
+  Todas las features tienen la misma estructura interna
+  (pages, services, store, ...). Se muestra dashboard como
+  ejemplo. Ruta: src/app > features > <feature> > store > archivo.
+endlegend
+
+@enduml

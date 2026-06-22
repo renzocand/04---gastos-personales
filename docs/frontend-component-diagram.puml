@@ -1,0 +1,100 @@
+@startuml frontend-component-diagram
+allowmixing
+title Diagrama de Componentes - Frontend Angular (store NgRx real: expenses + dashboard)
+
+skinparam classAttributeIconSize 0
+hide circle
+left to right direction
+
+' ================================================================
+' Fiel al codigo. Cada caja es un ARCHIVO real del store; cada
+' linea es algo exportado por ese archivo.
+' [U] = prueba unitaria (Paso 3)   [I] = integracion (Paso 4)
+' ================================================================
+
+package "features/expenses/store" {
+
+    class "expenses.actions.ts" as acts {
+        ExpensesActions (createActionGroup)
+        --
+        load / loadSuccess / loadFailure
+        add / addSuccess / addFailure
+        update / updateSuccess / updateFailure
+        delete / deleteSuccess / deleteFailure
+        categoryFilterChanged / currencyFilterChanged
+        dateFromChanged / dateToChanged / filtersCleared
+    }
+
+    class "expenses.feature.ts" as feat {
+        expensesFeature = createFeature(...)
+        --
+        ExpensesState { expenses, loading, error, filters }
+        createReducer(initialState, on(accion) => nuevo estado)   [U]
+        auto-selectors: selectExpenses, selectLoading, selectError
+    }
+
+    class "expenses.selectors.ts" as esel {
+        + selectExpensesGroupedByDay(state) : ExpenseDayGroup[]   [U]
+        + selectExpensesSummary(state) : Resumen   [U]
+        + selectHasExpenses(state) : boolean   [U]
+        + selectExpenseById(id)(state) : Expense   [U]
+        + selectFilters(state) : ExpenseFilters   [U]
+    }
+
+    class "expenses.effects.ts" as eff {
+        ExpensesEffects
+        --
+        load$ / add$ / update$ / delete$   [I]
+        triggerLoadOnFiltersChange$   [I]
+        navigateAfterAdd$/Update$/Delete$ (dispatch:false)
+    }
+}
+
+package "features/dashboard/store" {
+
+    class "budget.ts" as budget {
+        funciones puras
+        --
+        + toPen(expense, rate) : number   [U]
+        + tierFor(percent) : number(0..3)   [U]
+        + levelFor(percent) : BudgetLevel   [U]
+    }
+
+    class "budget.selectors.ts" as bsel {
+        + selectMonthSpendingPEN(state) : number   [U]
+        + selectBudgetStatus(state) : BudgetStatus   [U]
+    }
+
+    class "dashboard.selectors.ts" as dsel {
+        + selectCategoryBreakdown(state) : Breakdown[]   [U]
+        + selectRecentExpenses(state) : Expense[]   [U]
+    }
+}
+
+class "ExpensesService" as svc {
+    (services/expenses.service.ts)
+    --
+    + getAll/create/update/delete(...) : Observable
+}
+cloud "Backend API\n/api/expenses" as api
+
+' ===== relaciones reales del codigo =====
+feat ..> acts : reducer: on(accion)
+esel ..> feat : leen el estado
+bsel ..> feat : lee expenses
+dsel ..> feat : lee expenses
+bsel ..> budget : usa toPen/levelFor
+
+' ===== flujo de INTEGRACION [I] =====
+eff ..> acts : ofType / dispatch
+eff ..> svc : llaman al service
+svc ..> api : HTTP (con token)
+
+legend left
+  [U] = prueba unitaria (Paso 3): reducer (dispatch accion -> assert estado),
+        selectors y funciones puras de budget.ts.
+  [I] = prueba de integracion (Paso 4): los effects, junto con el service y el HTTP.
+  Las actions normalmente no se prueban solas (son creadores de accion).
+endlegend
+
+@enduml

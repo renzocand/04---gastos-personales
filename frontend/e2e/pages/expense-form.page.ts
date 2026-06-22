@@ -47,6 +47,9 @@ export class ExpenseFormPage extends BasePage {
     await this.openNew();
     await this.fillForm(data);
     await this.submit.click();
+    // Al guardar con éxito la app navega a /expenses; esperar asegura que el
+    // gasto quedó persistido antes de seguir (evita carreras en Firefox/WebKit).
+    await this.page.waitForURL(/\/expenses$/);
   }
 
   /** PA-09: abre el diálogo de borrado y CONFIRMA. */

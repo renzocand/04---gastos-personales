@@ -2,7 +2,9 @@
 title Diagrama de Paquetes - Backend Gastos Personales (com.gastos)
 
 skinparam packageStyle rectangle
+skinparam linetype ortho
 top to bottom direction
+
 
 package "com.gastos" {
     package "controller" as controller
@@ -17,7 +19,7 @@ package "com.gastos" {
     package "i18n" as i18n
 }
 
-' Dependencias entre paquetes (organización del sistema)
+' Dependencias entre paquetes (la arquitectura por capas)
 controller ..> service
 service ..> repository
 service ..> mapper

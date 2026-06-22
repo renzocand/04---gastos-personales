@@ -22,9 +22,17 @@ export class ExpensesListPage extends BasePage {
     await this.item(description).click();
   }
 
-  /** PA-05 / PA-06: filtra por rango de fechas (dispara recarga con debounce). */
-  async filterByDateRange(from: string, to: string): Promise<void> {
-    await this.dateFrom.fill(from);
+  /**
+   * PA-06: filtra "hasta" una fecha y espera la recarga del backend. Un solo
+   * filtro (un solo change) evita estados intermedios; el blur fuerza el evento
+   * change también en WebKit/Firefox.
+   */
+  async filterByDateTo(to: string): Promise<void> {
+    const reloaded = this.page.waitForResponse(
+      (r) => r.url().includes('/api/expenses') && r.request().method() === 'GET',
+    );
     await this.dateTo.fill(to);
+    await this.dateTo.blur();
+    await reloaded;
   }
 }

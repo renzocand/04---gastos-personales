@@ -20,7 +20,7 @@ test.describe('Configuración e idioma', () => {
     const settings = new SettingsPage(page);
     await settings.open();
     await settings.setIncome(3500);
-    await settings.saveSettings();
+    await settings.saveAndWait();
 
     // Recargar /settings: el valor quedó guardado en el backend.
     await page.reload();
