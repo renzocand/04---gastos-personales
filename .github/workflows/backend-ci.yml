@@ -30,12 +30,12 @@ jobs:
       working-directory: ./backend
       run: chmod +x mvnw
 
-    # 4. Compilar el proyecto y ejecutar la suite de pruebas automáticas
+    # 3. Compilar el proyecto y ejecutar la suite de pruebas usando el Maven global de GitHub
     - name: Compilar y Ejecutar Pruebas con Maven
       working-directory: ./backend
-      run: ./mvnw clean verify
+      run: mvn clean verify
 
-    # 5. Mostrar de forma clara y visual el resultado en los logs
+    # 4. Mostrar de forma clara y visual el resultado en los logs
     - name: Reportar Estado del Pipeline
       if: always()
       run: |
