@@ -25,7 +25,7 @@ jobs:
         cache: 'maven'
         cache-dependency-path: 'backend/pom.xml'
 
-    # 3. Compilar el proyecto excluyendo los tests de integración
+    # 3. Compilar el proyecto
     - name: Compilar y Ejecutar Pruebas
       working-directory: ./backend
       run: mvn clean verify -Dtest=!*IntegrationTest
