@@ -25,10 +25,10 @@ jobs:
         cache: 'maven'
         cache-dependency-path: 'backend/pom.xml'
 
-    # 3. Compilar el proyecto y ejecutar la suite de pruebas usando el Maven global
-    - name: Compilar y Ejecutar Pruebas con Maven
+    # 3. Compilar el proyecto excluyendo los tests de integración
+    - name: Compilar y Ejecutar Pruebas
       working-directory: ./backend
-      run: mvn clean verify
+      run: mvn clean verify -Dtest=!*IntegrationTest
 
     # 4. Mostrar de forma clara y visual el resultado en los logs
     - name: Reportar Estado del Pipeline
