@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -oE '\\\\$\\\\{__P\\\\\\([^\\)]*\\\\\\)\\\\}' gastos-rnf01.jmx)",
+      "Bash(rm -f carga.jtl)",
+      "Bash(rm -rf rep-carga)",
+      "Bash(jmeter -n -t gastos-rnf01.jmx -JBASE_URL=http://localhost -JDNI=99999999 -JPASSWORD=secret123 -JUSERS=50 -JRAMP=10 -JLOOPS=20 -JMAX_MS=1000 -l carga.jtl -e -o rep-carga)"
+    ]
+  }
+}

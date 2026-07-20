@@ -1,0 +1,75 @@
+@startuml acceptance-e2e-diagram
+title Arquitectura de Pruebas de Aceptacion (E2E) - Playwright + Page Object Model
+
+skinparam componentStyle rectangle
+skinparam linetype ortho
+top to bottom direction
+
+actor "Playwright\n(test runner)\nchromium / firefox / webkit\n(RNF-06)" as runner
+
+package "tests/ (specs por area - escenarios PA)" {
+    rectangle "auth.spec.ts\nPA-20 .. PA-25" as authspec
+    rectangle "expenses.spec.ts\nPA-01, 05, 06, 07, 09, 10" as expspec
+    rectangle "settings.spec.ts\nPA-12, 13, 19" as setspec
+    rectangle "dashboard.spec.ts\nPA-11, 15, 16, 17, 18" as dashspec
+}
+
+package "pages/ (Page Object Model)" {
+    rectangle "BasePage\n(goto / path / activeLang)" as base
+    rectangle "RegisterPage" as reg
+    rectangle "LoginPage" as log
+    rectangle "AppShell" as shell
+    rectangle "ExpenseFormPage" as eform
+    rectangle "ExpensesListPage" as elist
+    rectangle "SettingsPage" as sett
+    rectangle "DashboardPage" as dash
+}
+
+package "support/" {
+    rectangle "users.ts\n(DNI unico por prueba)" as users
+}
+
+package "App bajo prueba (stack integrado real)" {
+    rectangle "Frontend Angular\n:4200 (ng serve) / nginx :80" as fe
+    rectangle "Backend Spring Boot\n:8080 - API REST + JWT" as be
+    database "MySQL\n:3307" as db
+}
+
+' ===== El runner ejecuta los specs =====
+runner --> authspec
+runner --> expspec
+runner --> setspec
+runner --> dashspec
+
+' ===== Los specs usan Page Objects (no tocan el DOM directo) =====
+authspec ..> reg
+authspec ..> log
+authspec ..> shell
+expspec ..> eform
+expspec ..> elist
+setspec ..> sett
+setspec ..> shell
+dashspec ..> dash
+dashspec ..> eform
+dashspec ..> sett
+
+authspec ..> users
+expspec ..> users
+setspec ..> users
+dashspec ..> users
+
+' ===== Cada pagina extiende BasePage =====
+reg --|> base
+log --|> base
+shell --|> base
+eform --|> base
+elist --|> base
+sett --|> base
+dash --|> base
+
+' ===== La base interactua con la app real via locators =====
+base --> fe : navega / interactua\n(locators + data-testid)
+fe --> be : HTTP REST + Bearer JWT
+be --> db : Spring Data JPA
+
+@enduml
