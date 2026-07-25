@@ -55,6 +55,11 @@ public class Expense {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    /** Recibo/boleta asociado (opcional). Un recibo puede tener varios gastos. */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "receipt_id")
+    private Receipt receipt;
+
     @Column(nullable = false)
     private LocalDate date;
 

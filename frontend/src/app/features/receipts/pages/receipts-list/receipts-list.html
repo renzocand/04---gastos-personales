@@ -1,0 +1,58 @@
+<div class="flex flex-col gap-5 sm:gap-6">
+  <section>
+    <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">
+      {{ 'receipts.list.title' | transloco }}
+    </h1>
+    <p class="mt-1 text-sm text-slate-500">
+      {{ 'receipts.list.subtitle' | transloco }}
+    </p>
+  </section>
+
+  @if (loading()) {
+    <ui-card>
+      <div class="space-y-4 p-5 sm:p-6">
+        @for (i of [1, 2, 3, 4, 5]; track i) {
+          <div class="flex items-center gap-3">
+            <ui-skeleton class="h-10 w-10 rounded-lg" />
+            <div class="flex-1 space-y-2">
+              <ui-skeleton class="h-4 w-40" />
+              <ui-skeleton class="h-3 w-24" />
+            </div>
+            <ui-skeleton class="h-4 w-16" />
+          </div>
+        }
+      </div>
+    </ui-card>
+  } @else if (error(); as errorMsg) {
+    <ui-card>
+      <ui-error-state
+        [title]="'receipts.list.loadError' | transloco"
+        [message]="errorMsg"
+      />
+    </ui-card>
+  } @else if (!hasReceipts()) {
+    <ui-card>
+      <ui-empty-state
+        [icon]="ReceiptIcon"
+        [title]="'receipts.list.empty.title' | transloco"
+        [message]="'receipts.list.empty.message' | transloco"
+      >
+      </ui-empty-state>
+    </ui-card>
+  } @else {
+    <ui-card>
+      <ul class="divide-y divide-slate-100">
+        @for (receipt of receipts(); track receipt.id) {
+          <li>
+            <a
+              [routerLink]="['/receipts', receipt.id]"
+              class="block px-5 py-3 transition hover:bg-slate-50 focus:outline-none focus-visible:bg-violet-50 sm:px-6"
+            >
+              <app-receipt-card [receipt]="receipt" />
+            </a>
+          </li>
+        }
+      </ul>
+    </ui-card>
+  }
+</div>

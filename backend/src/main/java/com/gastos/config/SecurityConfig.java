@@ -58,6 +58,12 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
+                        // Endpoints del bot de Telegram (sin JWT, usa API key interna)
+                        .requestMatchers("/api/telegram/link").permitAll()
+                        .requestMatchers("/api/telegram/user/**").permitAll()
+                        .requestMatchers("/api/telegram/unlink-by-telegram/**").permitAll()
+                        .requestMatchers("/api/telegram/expenses").permitAll()
+                        .requestMatchers("/api/telegram/check-duplicate").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(eh -> eh.authenticationEntryPoint(authenticationEntryPoint))

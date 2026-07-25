@@ -1,0 +1,22 @@
+<div class="flex items-center gap-3">
+  <span
+    class="flex size-10 flex-none items-center justify-center rounded-lg"
+    [class]="receipt().source === 'TELEGRAM' ? 'bg-sky-100 text-sky-700' : 'bg-slate-100 text-slate-700'"
+    aria-hidden="true"
+  >
+    <lucide-angular [img]="sourceIcon()" class="size-5"></lucide-angular>
+  </span>
+  <div class="min-w-0 flex-1">
+    <p class="truncate text-sm font-medium text-slate-900">
+      {{ receipt().vendor }}
+    </p>
+    <p class="text-xs text-slate-500">
+      {{ formattedDate() }}
+      <span class="mx-1 text-slate-300" aria-hidden="true">·</span>
+      {{ receipt().itemCount }} {{ (receipt().itemCount === 1 ? 'receipts.list.item' : 'receipts.list.items') | transloco }}
+    </p>
+  </div>
+  <p class="flex-none text-sm font-semibold text-slate-900">
+    {{ formattedTotal() }}
+  </p>
+</div>

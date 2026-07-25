@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { Store } from '@ngrx/store';
 import {
+  FileText,
   LayoutDashboard,
   LogOut,
   LucideAngularModule,
@@ -13,6 +14,7 @@ import { TranslocoModule } from '@jsverse/transloco';
 import { ToastContainer } from '../../../shared/ui/toast/toast-container';
 import { ToastService } from '../../../shared/ui/toast/toast.service';
 import { LanguageSelector } from '../../../shared/ui/language-selector/language-selector';
+import { SyncIndicator } from '../../../shared/ui/sync-indicator/sync-indicator';
 import { AuthActions } from '../../../features/auth/store/auth.actions';
 import { authFeature } from '../../../features/auth/store/auth.feature';
 import { SettingsActions } from '../../../features/settings/store/settings.actions';
@@ -28,6 +30,7 @@ import { CategoriesActions } from '../../../features/categories/store/category.a
     ToastContainer,
     TranslocoModule,
     LanguageSelector,
+    SyncIndicator,
   ],
   templateUrl: './app-shell.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -38,6 +41,7 @@ export class AppShell {
 
   protected readonly DashboardIcon = LayoutDashboard;
   protected readonly ReceiptIcon = Receipt;
+  protected readonly ReceiptsIcon = FileText;
   protected readonly PlusIcon = Plus;
   protected readonly LogOutIcon = LogOut;
   protected readonly SettingsIcon = Settings;

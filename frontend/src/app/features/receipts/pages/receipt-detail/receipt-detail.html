@@ -1,0 +1,144 @@
+<div class="mx-auto max-w-xl">
+  <div class="mb-4">
+    <button
+      type="button"
+      (click)="location.back()"
+      class="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-sm font-medium text-slate-600 transition hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
+    >
+      <lucide-angular [img]="ArrowLeftIcon" class="size-4"></lucide-angular>
+      <span>{{ 'common.back' | transloco }}</span>
+    </button>
+  </div>
+
+  @if (loading()) {
+    <ui-card>
+      <div class="space-y-4 p-5 sm:p-6">
+        <div class="flex items-center gap-3">
+          <ui-skeleton class="h-12 w-12 rounded-lg" />
+          <div class="flex-1 space-y-2">
+            <ui-skeleton class="h-5 w-48" />
+            <ui-skeleton class="h-4 w-32" />
+          </div>
+        </div>
+        <ui-skeleton class="h-px w-full" />
+        @for (i of [1, 2, 3]; track i) {
+          <div class="flex items-center gap-3">
+            <ui-skeleton class="h-10 w-10 rounded-lg" />
+            <div class="flex-1 space-y-2">
+              <ui-skeleton class="h-4 w-40" />
+              <ui-skeleton class="h-3 w-24" />
+            </div>
+            <ui-skeleton class="h-4 w-16" />
+          </div>
+        }
+      </div>
+    </ui-card>
+  } @else if (error(); as errorMsg) {
+    <ui-card>
+      <ui-error-state
+        [title]="'receipts.detail.loadError' | transloco"
+        [message]="errorMsg"
+      />
+    </ui-card>
+  } @else if (receipt(); as r) {
+    <ui-card>
+      <div class="p-5 sm:p-6">
+        <!-- Header -->
+        <header class="flex items-start gap-4">
+          <span
+            class="flex size-12 flex-none items-center justify-center rounded-xl"
+            [class]="r.source === 'TELEGRAM' ? 'bg-sky-100 text-sky-700' : 'bg-slate-100 text-slate-700'"
+            aria-hidden="true"
+          >
+            <lucide-angular [img]="sourceIcon()" class="size-6"></lucide-angular>
+          </span>
+          <div class="min-w-0 flex-1">
+            <h1 class="text-xl font-semibold tracking-tight text-slate-900">
+              {{ r.vendor }}
+            </h1>
+            <p class="mt-0.5 text-sm text-slate-500">
+              {{ formattedDate() }}
+            </p>
+          </div>
+          <p class="text-xl font-bold text-slate-900">
+            {{ formattedTotal() }}
+          </p>
+        </header>
+
+        <!-- Divider -->
+        <div class="my-5 border-t border-slate-100"></div>
+
+        <!-- Items section -->
+        <section>
+          <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500">
+            {{ 'receipts.detail.items' | transloco }}
+            <span class="ml-1 text-slate-400">({{ r.items.length }})</span>
+          </h2>
+
+          <ul class="mt-3 divide-y divide-slate-100">
+            @for (item of r.items; track item.id) {
+              <li class="group flex items-center gap-3 py-3">
+                <span
+                  class="flex size-10 flex-none items-center justify-center rounded-lg"
+                  [class]="colorFor(item.categoryId)"
+                  aria-hidden="true"
+                >
+                  <lucide-angular [img]="iconFor()" class="size-5"></lucide-angular>
+                </span>
+                <div class="min-w-0 flex-1">
+                  <p class="truncate text-sm font-medium text-slate-900">
+                    {{ item.description }}
+                  </p>
+                  <p class="text-xs text-slate-500">
+                    {{ ('categories.' + item.categoryId + '.name') | transloco }}
+                  </p>
+                </div>
+                <p class="flex-none text-sm font-semibold text-slate-900">
+                  {{ formatAmount(item.amount, item.currency) }}
+                </p>
+                <a
+                  [routerLink]="['/expenses', item.id, 'edit']"
+                  class="flex size-8 flex-none items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-violet-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+                  [attr.aria-label]="'Editar ' + item.description"
+                >
+                  <lucide-angular [img]="PencilIcon" class="size-4"></lucide-angular>
+                </a>
+              </li>
+            }
+          </ul>
+        </section>
+
+        <!-- Divider -->
+        <div class="my-5 border-t border-slate-100"></div>
+
+        <!-- Actions -->
+        <div class="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-end">
+          <button
+            type="button"
+            data-testid="receipt-delete"
+            (click)="confirmDialogRef.open()"
+            class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-rose-200 bg-white px-4 py-2.5 text-sm font-medium text-rose-700 transition hover:bg-rose-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2 sm:mr-auto"
+          >
+            <lucide-angular [img]="TrashIcon" class="size-4"></lucide-angular>
+            {{ 'common.delete' | transloco }}
+          </button>
+          <a
+            routerLink="/receipts"
+            class="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
+          >
+            {{ 'common.back' | transloco }}
+          </a>
+        </div>
+      </div>
+    </ui-card>
+  }
+</div>
+
+<ui-confirm-dialog
+  #confirmDialogRef
+  [title]="'receipts.detail.deleteDialog.title' | transloco"
+  [message]="'receipts.detail.deleteDialog.message' | transloco"
+  [confirmLabel]="'common.delete' | transloco"
+  confirmVariant="danger"
+  (confirmed)="onDeleteConfirmed()"
+/>

@@ -2,7 +2,7 @@ import {
   ApplicationConfig,
   inject,
   provideAppInitializer,
-  provideBrowserGlobalErrorListeners,
+  provideBrowserGlobalErrorListeners, isDevMode,
 } from '@angular/core';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { TranslocoService } from '@jsverse/transloco';
@@ -20,6 +20,7 @@ import { AuthEffects } from './features/auth/store/auth.effects';
 import { settingsFeature } from './features/settings/store/settings.feature';
 import { SettingsEffects } from './features/settings/store/settings.effects';
 import { AlertsEffects } from './features/settings/store/alerts.effects';
+import { provideServiceWorker } from '@angular/service-worker';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -39,7 +40,10 @@ export const appConfig: ApplicationConfig = {
     provideAppTransloco(),
     provideAppInitializer(() => {
       inject(TranslocoService).setActiveLang(readStoredLang());
-    }),
+    }), provideServiceWorker('ngsw-worker.js', {
+            enabled: !isDevMode(),
+            registrationStrategy: 'registerWhenStable:30000'
+          }),
     // provideStore({ [expensesFeature.name]: expensesFeature.reducer })
   ],
 };

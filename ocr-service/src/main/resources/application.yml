@@ -1,0 +1,26 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: ocr-service
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+ocr:
+  tesseract:
+    data-path: ${TESSDATA_PREFIX:/usr/share/tesseract-ocr/5/tessdata}
+    language: spa
+
+gemini:
+  api-key: ${GEMINI_API_KEY:AIzaSyDCOdEKdMxVLOix6ESUoaOI12iHRH8Jw0Y}
+  model: ${GEMINI_MODEL:gemini-flash-latest}
+
+gastos-backend:
+  base-url: ${GASTOS_BACKEND_URL:http://localhost:8080}
+
+logging:
+  level:
+    com.gastos.ocr: DEBUG

@@ -39,4 +39,19 @@ public interface ExpenseRepository extends JpaRepository<Expense, String> {
      * evitando que alguien modifique gastos ajenos.
      */
     Optional<Expense> findByIdAndUser_Dni(String id, String dni);
+
+    /**
+     * Lista los gastos asociados a un recibo.
+     */
+    List<Expense> findByReceiptId(String receiptId);
+
+    /**
+     * Cuenta los gastos asociados a un recibo.
+     */
+    int countByReceiptId(String receiptId);
+
+    /**
+     * Elimina todos los gastos asociados a un recibo.
+     */
+    void deleteByReceiptId(String receiptId);
 }

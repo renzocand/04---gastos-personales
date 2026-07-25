@@ -83,3 +83,10 @@ export const selectExpensesSummary = createSelector(
 )
 
 export const selectFilters = expensesFeature.selectFilters;
+
+export const selectPendingIds = expensesFeature.selectPendingIds;
+
+export const selectIsPending = (id: string) => createSelector(
+  selectPendingIds,
+  (pendingIds) => pendingIds.includes(id)
+);

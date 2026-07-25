@@ -16,6 +16,13 @@
     </div>
   </ui-card>
 
+  <!-- Telegram Bot -->
+  <ui-card class="mb-5 block sm:mb-6">
+    <div class="p-5 sm:p-6">
+      <app-telegram-settings />
+    </div>
+  </ui-card>
+
   <ui-card>
     <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6 p-5 sm:p-6" novalidate>
       @if (error()) {

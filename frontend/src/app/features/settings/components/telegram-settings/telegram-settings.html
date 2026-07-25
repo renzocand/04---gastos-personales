@@ -1,0 +1,94 @@
+<div class="space-y-4">
+  <div class="flex items-center gap-2">
+    <lucide-angular [img]="MessageCircleIcon" class="size-4 text-violet-600"></lucide-angular>
+    <span class="text-sm font-medium text-slate-700">Telegram Bot</span>
+  </div>
+
+  <p class="text-xs text-slate-500">
+    Vincula tu cuenta de Telegram para enviar fotos de boletas y registrar gastos automáticamente.
+  </p>
+
+  @if (error()) {
+    <div class="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700 ring-1 ring-rose-600/20">
+      {{ error() }}
+    </div>
+  }
+
+  <!-- Generar código -->
+  <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+    @if (!linkCode()) {
+      <button
+        type="button"
+        (click)="generateCode()"
+        [disabled]="loading()"
+        class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-violet-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-violet-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        @if (loading()) {
+          <lucide-angular [img]="RefreshIcon" class="size-4 animate-spin"></lucide-angular>
+          Generando...
+        } @else {
+          Generar código de vinculación
+        }
+      </button>
+    } @else {
+      <div class="text-center">
+        <p class="mb-2 text-xs text-slate-500">Tu código (expira en {{ formatCountdown() }}):</p>
+        <div class="flex items-center justify-center gap-2">
+          <code class="rounded-lg bg-white px-4 py-2 font-mono text-2xl font-bold tracking-widest text-violet-700 ring-1 ring-slate-200">
+            {{ linkCode()?.code }}
+          </code>
+          <button
+            type="button"
+            (click)="copyCode()"
+            class="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
+            [title]="copied() ? 'Copiado!' : 'Copiar código'"
+          >
+            <lucide-angular [img]="copied() ? CheckIcon : CopyIcon" class="size-5" [class.text-green-600]="copied()"></lucide-angular>
+          </button>
+        </div>
+        <p class="mt-3 text-xs text-slate-500">
+          Envía este código al bot <strong>@gastos_bot</strong> en Telegram:<br>
+          <code class="mt-1 inline-block rounded bg-slate-100 px-2 py-1 font-mono text-xs">/vincular {{ linkCode()?.code }}</code>
+        </p>
+        <button
+          type="button"
+          (click)="generateCode()"
+          class="mt-3 text-xs text-violet-600 hover:underline"
+        >
+          Generar nuevo código
+        </button>
+      </div>
+    }
+  </div>
+
+  <!-- Cuentas vinculadas -->
+  @if (links().length > 0) {
+    <div class="space-y-2">
+      <p class="text-xs font-medium text-slate-700">Cuentas vinculadas:</p>
+      @for (link of links(); track link.id) {
+        <div class="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-3 py-2">
+          <div class="flex items-center gap-2">
+            <lucide-angular [img]="MessageCircleIcon" class="size-4 text-sky-500"></lucide-angular>
+            <span class="text-sm text-slate-700">
+              @if (link.telegramUsername) {
+                @{{ link.telegramUsername }}
+              } @else if (link.telegramName) {
+                {{ link.telegramName }}
+              } @else {
+                Telegram #{{ link.telegramId }}
+              }
+            </span>
+          </div>
+          <button
+            type="button"
+            (click)="unlink(link.id)"
+            class="rounded p-1 text-slate-400 transition hover:bg-rose-50 hover:text-rose-600"
+            title="Desvincular"
+          >
+            <lucide-angular [img]="TrashIcon" class="size-4"></lucide-angular>
+          </button>
+        </div>
+      }
+    </div>
+  }
+</div>

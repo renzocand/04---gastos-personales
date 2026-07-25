@@ -17,6 +17,7 @@
     "brand": "Qullqi tukuy",
     "dashboard": "Qhawana",
     "expenses": "Qullqi tukuy",
+    "receipts": "Boletas",
     "settings": "Allichay",
     "newExpense": "Musuq qullqi tukuy",
     "logout": "Lluqsiy",
@@ -116,6 +117,16 @@
       "subtitle": "Movimientos recientes",
       "seeAll": "Llapanta qhaway",
       "empty": "Todavía no cargaste ningún gasto."
+    },
+    "trend": {
+      "title": "P'unchaw kuyuy",
+      "subtitle": "P'unchawmanta qullqi tukuy"
+    },
+    "metrics": {
+      "dailyAvg": "P'unchaw chawpi",
+      "projection": "Killa proyección",
+      "vsLastMonth": "vs. ñawpaq killa",
+      "topExpense": "Hatun qullqi tukuy"
     }
   },
   "expenses": {
@@ -167,6 +178,28 @@
         "descriptionMaxlength": "Máximo 80 caracteres.",
         "categoryRequired": "Elegí una categoría.",
         "dateRequired": "La fecha es obligatoria."
+      }
+    }
+  },
+  "receipts": {
+    "list": {
+      "title": "Boletas",
+      "subtitle": "Telegramwanmanta utaq hukkunamantapas boletas.",
+      "loadError": "Mana boletakunata cargayta atirqanikuchu",
+      "item": "item",
+      "items": "items",
+      "empty": {
+        "title": "Manaraq boletakuna kanchu",
+        "message": "Telegramwan boleta fotokunatapas apachiptiyqika kaypi tarikunqa."
+      }
+    },
+    "detail": {
+      "title": "Boleta willakuy",
+      "items": "Items",
+      "loadError": "Mana boletapa willayninta cargayta atirqanikuchu",
+      "deleteDialog": {
+        "title": "Boletata pichay",
+        "message": "Kay ruwayqa mana kutichiy atikuqchu. Boletaqa llapan qullqi tukuykunantin wiñaypaq pichasqa kanqa."
       }
     }
   },
@@ -236,8 +269,12 @@
       "description": "Salidas, streaming, juegos y pasatiempos."
     },
     "shopping": {
-      "name": "Rantiy",
-      "description": "Ropa, tecnología y antojos que no son de primera necesidad."
+      "name": "Kikin rantiy",
+      "description": "Ropa, calzado, accesorios, tecnología y cuidado personal."
+    },
+    "home": {
+      "name": "Wasi imakuna",
+      "description": "Limpieza, artículos de cocina, electrodomésticos menores y decoración."
     },
     "other": {
       "name": "Huk",

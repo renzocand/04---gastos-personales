@@ -35,7 +35,7 @@ services:
       # El navegador pega al mismo origen (nginx), pero lo dejamos explícito.
       # Incluye el comodín de los túneles rápidos de Cloudflare (dominio aleatorio
       # que cambia en cada arranque). CSV de orígenes/patrones permitidos.
-      APP_CORS_ALLOWED_ORIGINS: http://localhost,https://*.trycloudflare.com
+      APP_CORS_ALLOWED_ORIGINS: http://localhost,https://*.trycloudflare.com,https://gastos.candiottisoftware.com
 
   frontend:
     build: ./frontend
@@ -44,7 +44,33 @@ services:
     depends_on:
       - backend
     ports:
-      - "80:80"
+      - "3080:80"
+
+  ocr-service:
+    build: ./ocr-service
+    container_name: gastos-ocr
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      OLLAMA_BASE_URL: http://host.docker.internal:11434
+      GASTOS_BACKEND_URL: http://backend:8080
+    depends_on:
+      - backend
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  telegram-bot:
+    build: ./telegram-bot
+    container_name: gastos-telegram-bot
+    restart: unless-stopped
+    environment:
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      OCR_SERVICE_URL: http://ocr-service:8081
+      GASTOS_BACKEND_URL: http://backend:8080
+    depends_on:
+      - backend
+      - ocr-service
 
 volumes:
   gastos-mysql-data:

@@ -16,10 +16,11 @@
     "brand": "Gastos",
     "dashboard": "Dashboard",
     "expenses": "Gastos",
-    "settings": "Configuración",
+    "receipts": "Boletas",
+    "settings": "Configuracion",
     "newExpense": "Nuevo gasto",
     "logout": "Salir",
-    "logoutFull": "Cerrar sesión",
+    "logoutFull": "Cerrar sesion",
     "greeting": "Hola, {{ name }}",
     "sections": "Secciones"
   },
@@ -115,6 +116,16 @@
       "subtitle": "Movimientos recientes",
       "seeAll": "Ver todos",
       "empty": "Todavía no cargaste ningún gasto."
+    },
+    "trend": {
+      "title": "Tendencia diaria",
+      "subtitle": "Gastos por día del mes"
+    },
+    "metrics": {
+      "dailyAvg": "Promedio diario",
+      "projection": "Proyección mensual",
+      "vsLastMonth": "vs. mes anterior",
+      "topExpense": "Gasto más grande"
     }
   },
   "expenses": {
@@ -166,6 +177,28 @@
         "descriptionMaxlength": "Máximo 80 caracteres.",
         "categoryRequired": "Elegí una categoría.",
         "dateRequired": "La fecha es obligatoria."
+      }
+    }
+  },
+  "receipts": {
+    "list": {
+      "title": "Boletas",
+      "subtitle": "Boletas y recibos escaneados desde Telegram u otras fuentes.",
+      "loadError": "No pudimos cargar las boletas",
+      "item": "item",
+      "items": "items",
+      "empty": {
+        "title": "Todavia no hay boletas",
+        "message": "Cuando envies fotos de boletas por Telegram las veras listadas aca."
+      }
+    },
+    "detail": {
+      "title": "Detalle de boleta",
+      "items": "Items",
+      "loadError": "No pudimos cargar el detalle de la boleta",
+      "deleteDialog": {
+        "title": "Eliminar boleta",
+        "message": "Esta accion no se puede deshacer. La boleta y todos sus gastos asociados se eliminaran permanentemente."
       }
     }
   },
@@ -235,8 +268,12 @@
       "description": "Salidas, streaming, juegos y pasatiempos."
     },
     "shopping": {
-      "name": "Compras",
-      "description": "Ropa, tecnología y antojos que no son de primera necesidad."
+      "name": "Compras personales",
+      "description": "Ropa, calzado, accesorios, tecnología y cuidado personal."
+    },
+    "home": {
+      "name": "Hogar",
+      "description": "Limpieza, artículos de cocina, electrodomésticos menores y decoración."
     },
     "other": {
       "name": "Otro",

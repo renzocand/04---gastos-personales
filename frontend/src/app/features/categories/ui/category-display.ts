@@ -6,6 +6,7 @@ import {
   Home,
   Package,
   ShoppingBag,
+  Sparkles,
   UtensilsCrossed,
   Zap,
 } from 'lucide-angular';
@@ -25,6 +26,7 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
   GraduationCap,
   Gamepad2,
   ShoppingBag,
+  Sparkles,
   Package,
 };
 
@@ -45,6 +47,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   education: 'bg-blue-100 text-blue-700',
   leisure: 'bg-amber-100 text-amber-700',
   shopping: 'bg-fuchsia-100 text-fuchsia-700',
+  home: 'bg-teal-100 text-teal-700',
   other: 'bg-slate-100 text-slate-700',
 };
 

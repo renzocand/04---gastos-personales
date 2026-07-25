@@ -83,14 +83,22 @@
 
     <app-budget-tip [status]="budgetStatus()" />
 
+    <!-- Métricas rápidas -->
+    <app-quick-metrics />
+
+    <!-- Totales PEN / USD -->
     <div class="grid gap-4 sm:grid-cols-2">
       <app-total-card [total]="summary().totalPEN | appCurrency:'PEN'" />
       <app-total-card [total]="summary().totalUSD | appCurrency:'USD'" />
     </div>
 
+    <!-- Gráfico de tendencia diaria -->
+    <app-spending-trend-chart />
+
+    <!-- Gráficos y listas -->
     <div class="grid gap-5 sm:gap-6 lg:grid-cols-5">
       <div class="lg:col-span-2">
-        <app-category-breakdown [rows]="categoryBreakdown()" />
+        <app-category-donut-chart />
       </div>
       <div class="lg:col-span-3">
         <app-recent-expenses [items]="recentExpenses()" />

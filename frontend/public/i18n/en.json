@@ -16,6 +16,7 @@
     "brand": "Expenses",
     "dashboard": "Dashboard",
     "expenses": "Expenses",
+    "receipts": "Receipts",
     "settings": "Settings",
     "newExpense": "New expense",
     "logout": "Log out",
@@ -115,6 +116,16 @@
       "subtitle": "Recent transactions",
       "seeAll": "See all",
       "empty": "You haven't added any expenses yet."
+    },
+    "trend": {
+      "title": "Daily trend",
+      "subtitle": "Spending per day"
+    },
+    "metrics": {
+      "dailyAvg": "Daily average",
+      "projection": "Month projection",
+      "vsLastMonth": "vs. last month",
+      "topExpense": "Top expense"
     }
   },
   "expenses": {
@@ -166,6 +177,28 @@
         "descriptionMaxlength": "Maximum 80 characters.",
         "categoryRequired": "Choose a category.",
         "dateRequired": "Date is required."
+      }
+    }
+  },
+  "receipts": {
+    "list": {
+      "title": "Receipts",
+      "subtitle": "Receipts scanned from Telegram or other sources.",
+      "loadError": "We couldn't load your receipts",
+      "item": "item",
+      "items": "items",
+      "empty": {
+        "title": "No receipts yet",
+        "message": "When you send receipt photos via Telegram you'll see them listed here."
+      }
+    },
+    "detail": {
+      "title": "Receipt detail",
+      "items": "Items",
+      "loadError": "We couldn't load the receipt detail",
+      "deleteDialog": {
+        "title": "Delete receipt",
+        "message": "This action can't be undone. The receipt and all its associated expenses will be permanently deleted."
       }
     }
   },
@@ -235,8 +268,12 @@
       "description": "Outings, streaming, games and hobbies."
     },
     "shopping": {
-      "name": "Shopping",
-      "description": "Clothes, tech and treats that aren't essentials."
+      "name": "Personal shopping",
+      "description": "Clothes, shoes, accessories, tech and personal care."
+    },
+    "home": {
+      "name": "Household",
+      "description": "Cleaning supplies, kitchen items, small appliances and decor."
     },
     "other": {
       "name": "Other",

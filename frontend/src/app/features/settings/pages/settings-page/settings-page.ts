@@ -5,13 +5,14 @@ import { Accessibility, LucideAngularModule, Wallet } from 'lucide-angular';
 import { TranslocoModule } from '@jsverse/transloco';
 import { Card } from '../../../../shared/ui/card/card';
 import { LanguageSelector } from '../../../../shared/ui/language-selector/language-selector';
+import { TelegramSettings } from '../../components/telegram-settings/telegram-settings';
 import { SettingsActions } from '../../store/settings.actions';
 import { settingsFeature } from '../../store/settings.feature';
 import { FontScale, UserSettings } from '../../models/settings';
 
 @Component({
   selector: 'app-settings-page',
-  imports: [ReactiveFormsModule, LucideAngularModule, Card, TranslocoModule, LanguageSelector],
+  imports: [ReactiveFormsModule, LucideAngularModule, Card, TranslocoModule, LanguageSelector, TelegramSettings],
   templateUrl: './settings-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

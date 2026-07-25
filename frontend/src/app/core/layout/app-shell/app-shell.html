@@ -21,6 +21,8 @@
           <span class="sr-only sm:hidden">{{ 'nav.newExpense' | transloco }}</span>
         </a>
 
+        <ui-sync-indicator />
+
         <ui-language-selector />
 
         @if (user(); as currentUser) {
@@ -59,6 +61,14 @@
       >
         <lucide-angular [img]="ReceiptIcon" class="size-4"></lucide-angular>
         <span>{{ 'nav.expenses' | transloco }}</span>
+      </a>
+      <a
+        routerLink="/receipts"
+        routerLinkActive="border-violet-600 text-violet-700"
+        class="flex items-center gap-2 border-b-2 border-transparent px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:text-slate-900"
+      >
+        <lucide-angular [img]="ReceiptsIcon" class="size-4"></lucide-angular>
+        <span>{{ 'nav.receipts' | transloco }}</span>
       </a>
       <a
         routerLink="/settings"

@@ -7,6 +7,8 @@ import { exchangeRateFeature } from './features/exchange-rate/store/exchange-rat
 import { ExchangeRateEffects } from './features/exchange-rate/store/exchange-rate.effects';
 import { categoryFeature } from './features/categories/store/category.feature';
 import { CategoryEffects } from './features/categories/store/category.effects';
+import { receiptsFeature } from './features/receipts/store/receipts.feature';
+import { ReceiptsEffects } from './features/receipts/store/receipts.effects';
 import { authGuard, guestGuard } from './core/guards/auth-guard';
 
 export const routes: Routes = [
@@ -29,7 +31,8 @@ export const routes: Routes = [
       provideState(expensesFeature),
       provideState(exchangeRateFeature),
       provideState(categoryFeature),
-      provideEffects(ExpensesEffects,ExchangeRateEffects,CategoryEffects)
+      provideState(receiptsFeature),
+      provideEffects(ExpensesEffects,ExchangeRateEffects,CategoryEffects,ReceiptsEffects)
     ],
     loadComponent: () =>
       import('./core/layout/app-shell/app-shell').then((m) => m.AppShell),
@@ -64,6 +67,20 @@ export const routes: Routes = [
           import(
             './features/expenses/pages/expense-form/expense-form'
           ).then((m) => m.ExpenseForm),
+      },
+      {
+        path: 'receipts',
+        loadComponent: () =>
+          import(
+            './features/receipts/pages/receipts-list/receipts-list'
+          ).then((m) => m.ReceiptsList),
+      },
+      {
+        path: 'receipts/:id',
+        loadComponent: () =>
+          import(
+            './features/receipts/pages/receipt-detail/receipt-detail'
+          ).then((m) => m.ReceiptDetail),
       },
       {
         path: 'settings',

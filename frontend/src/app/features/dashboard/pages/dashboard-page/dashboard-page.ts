@@ -9,15 +9,18 @@ import { Card } from '../../../../shared/ui/card/card';
 import { EmptyState } from '../../../../shared/ui/empty-state/empty-state';
 import { ErrorState } from '../../../../shared/ui/error-state/error-state';
 import { Skeleton } from '../../../../shared/ui/skeleton/skeleton';
-import { CategoryBreakdown } from '../../components/category-breakdown/category-breakdown';
+// CategoryBreakdown replaced by CategoryDonutChart
 import { RecentExpenses } from '../../components/recent-expenses/recent-expenses';
 import { TotalCard } from '../../components/total-card/total-card';
 import { BudgetCard } from '../../components/budget-card/budget-card';
 import { BudgetTip } from '../../components/budget-tip/budget-tip';
+import { SpendingTrendChart } from '../../components/spending-trend-chart/spending-trend-chart';
+import { CategoryDonutChart } from '../../components/category-donut-chart/category-donut-chart';
+import { QuickMetrics } from '../../components/quick-metrics/quick-metrics';
 import { AppCurrencyPipe } from '../../../../shared/pipes/app-currency';
 import { Store } from '@ngrx/store';
 import { selectExpensesSummary, selectHasExpenses } from '../../../expenses/store/expenses.selectors';
-import { selectCategoryBreakdown, selectRecentExpenses } from '../../store/dashboard.selectors';
+import { selectRecentExpenses } from '../../store/dashboard.selectors';
 import { selectBudgetStatus } from '../../store/budget.selectors';
 import { expensesFeature } from '../../../expenses/store/expenses.feature';
 import { exchangeRateFeature } from '../../../exchange-rate/store/exchange-rate.feature';
@@ -30,8 +33,10 @@ import { ExchangeRateActions } from '../../../exchange-rate/store/exchange-rate.
     TotalCard,
     BudgetCard,
     BudgetTip,
-    CategoryBreakdown,
     RecentExpenses,
+    SpendingTrendChart,
+    CategoryDonutChart,
+    QuickMetrics,
     Card,
     EmptyState,
     ErrorState,
@@ -64,7 +69,6 @@ export class DashboardPage {
   protected readonly summary = this.store.selectSignal(selectExpensesSummary);
   protected readonly hasExpenses = this.store.selectSignal(selectHasExpenses);
   protected readonly budgetStatus = this.store.selectSignal(selectBudgetStatus);
-  protected readonly categoryBreakdown = this.store.selectSignal(selectCategoryBreakdown);
   protected readonly recentExpenses = this.store.selectSignal(selectRecentExpenses);
 
   private readonly expensesLoading = this.store.selectSignal(expensesFeature.selectLoading);
