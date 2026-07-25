@@ -74,6 +74,7 @@
     },
     "budget": {
       "label": "Gasto del mes vs. ingreso",
+      "converted": "Convertido a soles",
       "of": "de {{ income }} de ingreso",
       "exceededBy": "Excedido por {{ amount }}",
       "available": "Disponible {{ amount }}",

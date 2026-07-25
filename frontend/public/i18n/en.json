@@ -74,6 +74,7 @@
     },
     "budget": {
       "label": "Month spending vs. income",
+      "converted": "Converted to soles",
       "of": "of {{ income }} income",
       "exceededBy": "Over by {{ amount }}",
       "available": "Available {{ amount }}",

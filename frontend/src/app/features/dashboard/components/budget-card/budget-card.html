@@ -2,7 +2,10 @@
   @if (hasIncome()) {
     <div class="p-5 sm:p-6">
       <div class="flex items-center justify-between gap-3">
-        <p class="text-sm font-medium text-slate-500">{{ 'dashboard.budget.label' | transloco }}</p>
+        <div>
+          <p class="text-sm font-medium text-slate-500">{{ 'dashboard.budget.label' | transloco }}</p>
+          <p class="text-xs text-slate-400">{{ 'dashboard.budget.converted' | transloco }}</p>
+        </div>
         <span
           data-testid="budget-status"
           [attr.data-level]="status().level"

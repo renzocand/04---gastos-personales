@@ -75,6 +75,7 @@
     },
     "budget": {
       "label": "Gasto del mes vs. ingreso",
+      "converted": "Solesman tikrasqa",
       "of": "de {{ income }} de ingreso",
       "exceededBy": "Excedido por {{ amount }}",
       "available": "Disponible {{ amount }}",
