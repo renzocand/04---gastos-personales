@@ -68,6 +68,8 @@ services:
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
       OCR_SERVICE_URL: http://ocr-service:8081
       GASTOS_BACKEND_URL: http://backend:8080
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-AIzaSyDCOdEKdMxVLOix6ESUoaOI12iHRH8Jw0Y}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-flash-latest}
     depends_on:
       - backend
       - ocr-service

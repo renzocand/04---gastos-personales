@@ -97,6 +97,17 @@ public class ReceiptService {
         User user = link.getUser();
         String vendor = request.vendor() != null ? request.vendor() : "";
 
+        // Determinar moneda (default PEN si no se especifica)
+        Currency currency = Currency.PEN;
+        if (request.currency() != null) {
+            try {
+                currency = Currency.valueOf(request.currency().toUpperCase());
+            } catch (IllegalArgumentException e) {
+                // Si no es válida, usar PEN por defecto
+                currency = Currency.PEN;
+            }
+        }
+
         // Crear el recibo
         Receipt receipt = new Receipt();
         receipt.setVendor(vendor);
@@ -108,6 +119,7 @@ public class ReceiptService {
 
         // Crear los gastos asociados
         final Receipt savedReceipt = receipt;
+        final Currency expenseCurrency = currency;
         List<Expense> expenses = request.items().stream()
                 .map(item -> {
                     Category category = requireCategory(item.categoryId());
@@ -117,7 +129,7 @@ public class ReceiptService {
 
                     Expense expense = new Expense();
                     expense.setAmount(item.amount());
-                    expense.setCurrency(Currency.PEN);
+                    expense.setCurrency(expenseCurrency);
                     expense.setDescription(description);
                     expense.setCategory(category);
                     expense.setUser(user);

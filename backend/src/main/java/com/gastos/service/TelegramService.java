@@ -206,6 +206,7 @@ public class TelegramService {
                 request.vendor(),
                 request.date(),
                 null, // total no disponible en el request antiguo
+                null, // currency default PEN
                 items
         );
 

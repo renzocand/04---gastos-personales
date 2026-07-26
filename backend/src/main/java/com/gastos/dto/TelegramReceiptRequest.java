@@ -15,6 +15,7 @@ public record TelegramReceiptRequest(
         String vendor,
         @NotNull LocalDate date,
         BigDecimal total,
+        String currency, // PEN o USD, default PEN si es null
         @Valid @NotNull List<Item> items
 ) {
     /**

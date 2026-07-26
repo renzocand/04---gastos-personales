@@ -10,11 +10,15 @@ Comandos:
 
 Uso:
 - Envía una foto de tu boleta y el bot la procesará automáticamente
+- Envía un mensaje de texto con el gasto (ej: "parrillada 45 soles")
 """
 
 import os
 import logging
 import uuid
+import re
+import json
+from datetime import date
 import httpx
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
@@ -31,6 +35,53 @@ from telegram.request import HTTPXRequest
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 OCR_SERVICE_URL = os.getenv("OCR_SERVICE_URL", "http://localhost:8081")
 BACKEND_URL = os.getenv("GASTOS_BACKEND_URL", "http://localhost:8080")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-flash-latest")
+
+# Prompt para procesar gastos de texto
+TEXT_EXPENSE_PROMPT = """Analiza este mensaje de texto que describe uno o más gastos y extrae la información.
+
+CATEGORÍAS DISPONIBLES (usa SOLO estos IDs exactos):
+- food: Comida (mercado, restaurantes, alimentos, bebidas, snacks)
+- transport: Transporte (taxi, gasolina, pasajes, peajes)
+- housing: Vivienda (alquiler, hipoteca, mantenimiento estructural)
+- services: Servicios (luz, agua, gas, internet, teléfono)
+- health: Salud (farmacia, medicamentos, consultas médicas)
+- education: Educación (cursos, libros, materiales de estudio)
+- leisure: Ocio (streaming, entretenimiento, juegos, salidas)
+- shopping: Compras personales (ropa, calzado, accesorios, tecnología/gadgets, cuidado personal)
+- home: Hogar (productos de limpieza, artículos de cocina, electrodomésticos menores, decoración)
+- other: Otro (solo si no encaja en ninguna de las anteriores)
+
+MONEDAS:
+- PEN: Soles peruanos (indicado por: "soles", "S/", "S/.", o sin especificar)
+- USD: Dólares americanos (indicado por: "dolares", "dólares", "$", "USD")
+
+INSTRUCCIONES:
+1. Identifica cada gasto mencionado (puede ser uno o varios)
+2. Extrae el monto de cada gasto. Acepta formatos como:
+   - Soles: "45 soles", "S/30", "S/.50", "25.50"
+   - Dólares: "$30", "30 dolares", "8 USD"
+3. Detecta la moneda de cada gasto (PEN o USD). Si no se especifica, asume PEN.
+4. Usa como descripción el nombre del producto/servicio mencionado
+5. Asigna la categoría más apropiada según las definiciones anteriores
+6. Si no hay tienda específica, usa "Manual" como vendor
+7. La fecha es hoy: {today}
+
+EJEMPLOS DE ENTRADA:
+- "parrillada 45 soles" → un item en PEN
+- "pollo a la brasa S/30" → un item en PEN
+- "netflix 8 dolares" → un item en USD (streaming = leisure)
+- "uber $15" → un item en USD (transporte)
+- "luz 85 agua 45" → dos items en PEN
+
+RESPONDE ÚNICAMENTE con JSON válido, sin markdown ni explicaciones:
+{{"vendor":"nombre o Manual","date":"{today}","currency":"PEN o USD","items":[{{"description":"descripción","amount":0.00,"categoryId":"categoria"}}],"total":0.00}}
+
+IMPORTANTE: Si hay gastos en diferentes monedas, usa la moneda del primer gasto. Todos los items deben estar en la misma moneda.
+
+MENSAJE A ANALIZAR:
+{message}"""
 
 # Logging
 logging.basicConfig(
@@ -61,14 +112,16 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Mensaje de bienvenida."""
     user = update.effective_user
     await update.message.reply_text(
-        f"¡Hola {user.first_name}! 👋\n\n"
-        "Soy el bot de Gastos Personales. Puedo procesar tus boletas automáticamente.\n\n"
-        "📋 *Cómo empezar:*\n"
+        f"¡Hola {user.first_name}!\n\n"
+        "Soy el bot de Gastos Personales. Puedo procesar tus gastos automáticamente.\n\n"
+        "*Cómo empezar:*\n"
         "1. Ve a la web y genera un código de vinculación\n"
         "2. Envíame: /vincular CODIGO\n"
-        "3. ¡Listo! Ahora solo envía fotos de tus boletas\n\n"
-        "📸 *Uso:*\n"
-        "Envía una foto de tu boleta y la procesaré con OCR.\n\n"
+        "3. ¡Listo!\n\n"
+        "*Uso:*\n"
+        "- Envía una *foto* de tu boleta (OCR automático)\n"
+        "- O escribe tu gasto: `parrillada 45 soles`\n"
+        "- Soporta soles y dólares: `netflix 8 dolares`\n\n"
         "*Comandos:*\n"
         "/vincular CODIGO - Vincula tu cuenta\n"
         "/desvincular - Desvincula esta cuenta\n"
@@ -297,10 +350,197 @@ async def process_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         )
 
 
+async def call_gemini_for_text(message_text: str) -> dict:
+    """Llama a Gemini para procesar un mensaje de texto como gasto."""
+    today = date.today().isoformat()
+    prompt = TEXT_EXPENSE_PROMPT.format(today=today, message=message_text)
+
+    request_body = {
+        "contents": [
+            {
+                "parts": [
+                    {"text": prompt}
+                ]
+            }
+        ],
+        "generationConfig": {
+            "temperature": 0.1,
+            "maxOutputTokens": 2048
+        }
+    }
+
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent?key={GEMINI_API_KEY}"
+
+    async with httpx.AsyncClient(timeout=60.0) as client:
+        response = await client.post(
+            url,
+            json=request_body,
+            headers={"Content-Type": "application/json"}
+        )
+
+        if response.status_code != 200:
+            logger.error(f"Gemini API error: {response.status_code} - {response.text}")
+            raise Exception(f"Gemini API error: {response.status_code}")
+
+        data = response.json()
+
+        # Verificar errores
+        if "error" in data:
+            raise Exception(f"Gemini error: {data['error'].get('message', 'Unknown')}")
+
+        # Extraer texto de respuesta
+        candidates = data.get("candidates", [])
+        if not candidates:
+            raise Exception("No candidates in Gemini response")
+
+        text = candidates[0]["content"]["parts"][0]["text"]
+        logger.debug(f"Gemini raw response: {text}")
+
+        # Extraer JSON de la respuesta
+        json_str = extract_json_from_text(text)
+        return json.loads(json_str)
+
+
+def extract_json_from_text(text: str) -> str:
+    """Extrae JSON válido del texto de respuesta."""
+    # Remover bloques de código markdown si existen
+    cleaned = re.sub(r'```json\s*', '', text)
+    cleaned = re.sub(r'```\s*', '', cleaned).strip()
+
+    # Encontrar el JSON
+    start = cleaned.find('{')
+    end = cleaned.rfind('}')
+
+    if start == -1 or end == -1 or end < start:
+        raise ValueError(f"No valid JSON found in response: {text}")
+
+    return cleaned[start:end + 1]
+
+
+async def process_text_expense(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Procesa un mensaje de texto como gasto."""
+    user = update.effective_user
+    message_text = update.message.text.strip()
+
+    # Ignorar mensajes muy cortos o que no parecen gastos
+    if len(message_text) < 3:
+        return
+
+    # Verificar si parece un gasto (contiene números)
+    if not re.search(r'\d', message_text):
+        # No tiene números, probablemente no es un gasto
+        await update.message.reply_text(
+            "Para registrar un gasto, incluye el monto.\n"
+            "Ejemplos:\n"
+            "  `parrillada 45 soles`\n"
+            "  `taxi S/15`\n"
+            "  `netflix 8 dolares`",
+            parse_mode="Markdown"
+        )
+        return
+
+    # Verificar API key de Gemini
+    if not GEMINI_API_KEY:
+        await update.message.reply_text(
+            "❌ La función de gastos por texto no está configurada.\n"
+            "Contacta al administrador."
+        )
+        return
+
+    # Verificar vinculación
+    try:
+        async with httpx.AsyncClient() as client:
+            user_response = await client.get(
+                f"{BACKEND_URL}/api/telegram/user/{user.id}",
+                timeout=30.0,
+            )
+
+            if user_response.status_code != 200:
+                await update.message.reply_text(
+                    "❌ Primero debes vincular tu cuenta.\n"
+                    "Usa: /vincular CODIGO"
+                )
+                return
+
+    except httpx.RequestError as e:
+        logger.error(f"Error checking user: {e}")
+        await update.message.reply_text("❌ Error de conexión. Intenta más tarde.")
+        return
+
+    await update.message.reply_text("🤖 Procesando tu gasto...")
+
+    try:
+        # Llamar a Gemini para procesar el texto
+        expense_data = await call_gemini_for_text(message_text)
+
+        # Calcular total si no viene
+        items = expense_data.get("items", [])
+        if not expense_data.get("total") and items:
+            expense_data["total"] = sum(item.get("amount", 0) for item in items)
+
+        # Detectar moneda (por defecto PEN)
+        currency = expense_data.get("currency", "PEN").upper()
+        currency_symbol = "$" if currency == "USD" else "S/"
+
+        # Generar UUID para este gasto
+        receipt_id = str(uuid.uuid4())
+
+        # Guardar datos en almacenamiento temporal
+        pending_receipts[receipt_id] = expense_data
+
+        # Mostrar resultado
+        items_text = "\n".join(
+            f"  • {item['description']}: {currency_symbol} {item['amount']:.2f} — {CATEGORY_NAMES.get(item['categoryId'], item['categoryId'])}"
+            for item in items
+        )
+
+        result_message = (
+            f"✅ *Gasto procesado*\n\n"
+            f"🏪 *Tienda:* {expense_data.get('vendor', 'Manual')}\n"
+            f"📅 *Fecha:* {expense_data.get('date', date.today().isoformat())}\n"
+            f"💵 *Moneda:* {currency}\n"
+            f"💰 *Total:* {currency_symbol} {expense_data.get('total', 0):.2f}\n\n"
+            f"📝 *Items:*\n{items_text if items_text else '  No se detectaron items'}"
+        )
+
+        # Crear inline keyboard con botones de confirmación
+        if items:
+            keyboard = [
+                [
+                    InlineKeyboardButton("✅ Guardar", callback_data=f"save:{receipt_id}"),
+                    InlineKeyboardButton("✏️ Corregir categoría", callback_data=f"fix_category:{receipt_id}"),
+                ]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            await update.message.reply_text(result_message, parse_mode="Markdown", reply_markup=reply_markup)
+        else:
+            await update.message.reply_text(
+                "❌ No pude identificar ningún gasto en tu mensaje.\n"
+                "Intenta con un formato como: `parrillada 45 soles`",
+                parse_mode="Markdown"
+            )
+
+    except json.JSONDecodeError as e:
+        logger.error(f"Error parsing Gemini response: {e}")
+        await update.message.reply_text(
+            "❌ No pude procesar tu mensaje. Intenta con otro formato.\n"
+            "Ejemplo: `pollo a la brasa S/30`",
+            parse_mode="Markdown"
+        )
+    except Exception as e:
+        logger.error(f"Error processing text expense: {e}")
+        await update.message.reply_text(
+            "❌ Error procesando el mensaje. Intenta de nuevo."
+        )
+
+
 def build_summary_message(ocr_data: dict) -> str:
     """Construye el mensaje de resumen de la boleta."""
+    currency = ocr_data.get("currency", "PEN").upper()
+    currency_symbol = "$" if currency == "USD" else "S/"
+
     items_text = "\n".join(
-        f"  • {item['description']}: S/ {item['amount']:.2f} — {CATEGORY_NAMES.get(item['categoryId'], item['categoryId'])}"
+        f"  • {item['description']}: {currency_symbol} {item['amount']:.2f} — {CATEGORY_NAMES.get(item['categoryId'], item['categoryId'])}"
         for item in ocr_data.get("items", [])
     )
 
@@ -308,7 +548,8 @@ def build_summary_message(ocr_data: dict) -> str:
         f"✅ *Boleta procesada*\n\n"
         f"🏪 *Tienda:* {ocr_data.get('vendor', 'No detectado')}\n"
         f"📅 *Fecha:* {ocr_data.get('date', 'No detectada')}\n"
-        f"💰 *Total:* S/ {ocr_data.get('total', 0):.2f}\n\n"
+        f"💵 *Moneda:* {currency}\n"
+        f"💰 *Total:* {currency_symbol} {ocr_data.get('total', 0):.2f}\n\n"
         f"📝 *Items:*\n{items_text if items_text else '  No se detectaron items'}"
     )
 
@@ -368,6 +609,7 @@ async def save_receipt_to_backend(query, user, receipt_id: str, ocr_data: dict) 
     date = ocr_data.get("date", "")
     vendor = ocr_data.get("vendor", "")
     total = ocr_data.get("total", 0)
+    currency = ocr_data.get("currency", "PEN")  # Default PEN
 
     try:
         async with httpx.AsyncClient() as client:
@@ -378,6 +620,7 @@ async def save_receipt_to_backend(query, user, receipt_id: str, ocr_data: dict) 
                     "vendor": vendor,
                     "date": date,
                     "total": total,
+                    "currency": currency,
                     "items": [
                         {
                             "description": item["description"],
@@ -552,6 +795,20 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         await query.edit_message_text(message, parse_mode="Markdown", reply_markup=keyboard)
 
 
+async def unknown_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Responde a comandos no reconocidos."""
+    await update.message.reply_text(
+        "Comando no reconocido.\n\n"
+        "*Comandos disponibles:*\n"
+        "/start - Ver ayuda\n"
+        "/vincular CODIGO - Vincular cuenta\n"
+        "/desvincular - Desvincular cuenta\n"
+        "/estado - Ver estado\n\n"
+        "O envía un gasto: `parrillada 45 soles`",
+        parse_mode="Markdown"
+    )
+
+
 def main() -> None:
     """Inicia el bot."""
     if not TELEGRAM_TOKEN:
@@ -579,6 +836,10 @@ def main() -> None:
     application.add_handler(CommandHandler("desvincular", desvincular))
     application.add_handler(CommandHandler("estado", estado))
     application.add_handler(MessageHandler(filters.PHOTO, process_photo))
+    # Handler para mensajes de texto (gastos manuales) - excluye comandos
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, process_text_expense))
+    # Handler para comandos no reconocidos (debe ir después de los comandos conocidos)
+    application.add_handler(MessageHandler(filters.COMMAND, unknown_command))
     application.add_handler(CallbackQueryHandler(handle_callback))
 
     # Iniciar bot
