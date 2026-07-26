@@ -394,7 +394,7 @@ async def call_gemini_for_text(message_text: str) -> dict:
             raise Exception("No candidates in Gemini response")
 
         text = candidates[0]["content"]["parts"][0]["text"]
-        logger.debug(f"Gemini raw response: {text}")
+        logger.info(f"Gemini raw response for text expense: {text}")
 
         # Extraer JSON de la respuesta
         json_str = extract_json_from_text(text)
@@ -527,8 +527,15 @@ async def process_text_expense(update: Update, context: ContextTypes.DEFAULT_TYP
             "Ejemplo: `pollo a la brasa S/30`",
             parse_mode="Markdown"
         )
+    except ValueError as e:
+        logger.error(f"ValueError processing text expense: {e}")
+        await update.message.reply_text(
+            "❌ No pude extraer información del mensaje.\n"
+            "Intenta con un formato más claro: `237 mantenimiento`",
+            parse_mode="Markdown"
+        )
     except Exception as e:
-        logger.error(f"Error processing text expense: {e}")
+        logger.error(f"Error processing text expense: {type(e).__name__}: {e}", exc_info=True)
         await update.message.reply_text(
             "❌ Error procesando el mensaje. Intenta de nuevo."
         )
