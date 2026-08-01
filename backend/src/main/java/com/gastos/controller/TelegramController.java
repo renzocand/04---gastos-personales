@@ -3,6 +3,7 @@ package com.gastos.controller;
 import com.gastos.dto.*;
 import com.gastos.service.ReceiptService;
 import com.gastos.service.TelegramService;
+import com.gastos.service.UserCategoryService;
 import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -23,10 +24,14 @@ public class TelegramController {
 
     private final TelegramService telegramService;
     private final ReceiptService receiptService;
+    private final UserCategoryService userCategoryService;
 
-    public TelegramController(TelegramService telegramService, ReceiptService receiptService) {
+    public TelegramController(TelegramService telegramService,
+                              ReceiptService receiptService,
+                              UserCategoryService userCategoryService) {
         this.telegramService = telegramService;
         this.receiptService = receiptService;
+        this.userCategoryService = userCategoryService;
     }
 
     /**
@@ -64,6 +69,18 @@ public class TelegramController {
     public ResponseEntity<TelegramUserResponse> getUserByTelegramId(
             @PathVariable Long telegramId) {
         return ResponseEntity.ok(telegramService.getUserByTelegramId(telegramId));
+    }
+
+    /**
+     * Obtiene las categorías del usuario vinculado a un Telegram ID.
+     * Usado por el bot para construir el prompt de Gemini con categorías dinámicas.
+     * GET /api/telegram/categories/{telegramId}
+     */
+    @GetMapping("/categories/{telegramId}")
+    public ResponseEntity<List<UserCategoryResponse>> getCategoriesByTelegramId(
+            @PathVariable Long telegramId) {
+        TelegramUserResponse user = telegramService.getUserByTelegramId(telegramId);
+        return ResponseEntity.ok(userCategoryService.findByUser(user.dni()));
     }
 
     /**

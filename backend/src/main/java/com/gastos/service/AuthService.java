@@ -10,6 +10,7 @@ import com.gastos.i18n.Messages;
 import com.gastos.model.User;
 import com.gastos.repository.UserRepository;
 import com.gastos.security.JwtService;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -31,17 +32,20 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final UserCategoryService userCategoryService;
     private final Messages messages;
 
     public AuthService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
                        JwtService jwtService,
                        AuthenticationManager authenticationManager,
+                       @Lazy UserCategoryService userCategoryService,
                        Messages messages) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
+        this.userCategoryService = userCategoryService;
         this.messages = messages;
     }
 
@@ -63,6 +67,9 @@ public class AuthService {
         user.setRole("USER");
 
         userRepository.save(user);
+
+        // Inicializar categorías para el nuevo usuario (copia las globales)
+        userCategoryService.initializeForUser(user);
 
         String token = jwtService.generateToken(user.getDni());
         return new AuthResponse(token, BEARER, user.getDni(), user.getFirstName(), user.getLastName());

@@ -1,0 +1,137 @@
+<div class="flex flex-col gap-5 sm:gap-6">
+  <section class="flex items-center gap-3">
+    <button
+      type="button"
+      (click)="location.back()"
+      class="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white p-2 text-slate-600 transition hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
+    >
+      <lucide-angular [img]="ArrowLeftIcon" class="size-5"></lucide-angular>
+    </button>
+    <div>
+      <h1 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">
+        {{ isEdit() ? 'Editar Categoria' : 'Nueva Categoria' }}
+      </h1>
+      <p class="mt-1 text-sm text-slate-500">
+        {{ isEdit() ? 'Modifica los datos de tu categoria' : 'Crea una categoria personalizada para tus gastos' }}
+      </p>
+    </div>
+  </section>
+
+  @if (error()) {
+    <div class="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+      {{ error() }}
+    </div>
+  }
+
+  <ui-card>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6 p-4 sm:p-5">
+      <!-- Nombre -->
+      <div>
+        <label for="name" class="block text-sm font-medium text-slate-700">
+          Nombre <span class="text-red-500">*</span>
+        </label>
+        <input
+          id="name"
+          type="text"
+          formControlName="name"
+          placeholder="Ej: Comida, Transporte, Suscripciones..."
+          class="mt-1.5 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20"
+          [class.border-red-300]="form.controls.name.touched && form.controls.name.invalid"
+        />
+        @if (form.controls.name.touched && form.controls.name.errors) {
+          <p class="mt-1 text-xs text-red-600">
+            @if (form.controls.name.errors['required']) {
+              El nombre es requerido
+            } @else if (form.controls.name.errors['maxlength']) {
+              Maximo 50 caracteres
+            }
+          </p>
+        }
+      </div>
+
+      <!-- Icono -->
+      <div>
+        <label class="block text-sm font-medium text-slate-700">Icono</label>
+        <div class="mt-2 grid grid-cols-6 gap-2 sm:grid-cols-8 md:grid-cols-12">
+          @for (icon of availableIcons; track icon.id) {
+            <label class="relative cursor-pointer">
+              <input
+                type="radio"
+                [value]="icon.id"
+                formControlName="icon"
+                class="peer sr-only"
+              />
+              <div
+                class="flex size-10 items-center justify-center rounded-lg border-2 border-slate-200 bg-white transition hover:border-slate-300 peer-checked:border-violet-600 peer-checked:bg-violet-50"
+                [title]="icon.name"
+              >
+                <lucide-angular [img]="iconFor(icon.id)" class="size-5 text-slate-600 peer-checked:text-violet-600"></lucide-angular>
+              </div>
+            </label>
+          }
+        </div>
+      </div>
+
+      <!-- Descripcion -->
+      <div>
+        <label for="description" class="block text-sm font-medium text-slate-700">
+          Descripcion
+        </label>
+        <p class="mt-0.5 text-xs text-slate-500">
+          Contexto para que la IA entienda cuando usar esta categoria
+        </p>
+        <textarea
+          id="description"
+          formControlName="description"
+          rows="3"
+          placeholder="Ej: Supermercado, mercado, alimentos para la casa..."
+          class="mt-1.5 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20"
+          [class.border-red-300]="form.controls.description.touched && form.controls.description.invalid"
+        ></textarea>
+        @if (form.controls.description.touched && form.controls.description.errors?.['maxlength']) {
+          <p class="mt-1 text-xs text-red-600">Maximo 500 caracteres</p>
+        }
+      </div>
+
+      <!-- Botones -->
+      <div class="flex items-center justify-between pt-4">
+        @if (isEdit()) {
+          <ui-confirm-dialog
+            title="Eliminar categoria"
+            message="Esta accion no se puede deshacer. Los gastos existentes mantendran la referencia a esta categoria."
+            confirmText="Eliminar"
+            (confirm)="onDeleteConfirmed()"
+          >
+            <button
+              type="button"
+              [disabled]="saving()"
+              class="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-white px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:opacity-50"
+            >
+              <lucide-angular [img]="TrashIcon" class="size-4"></lucide-angular>
+              <span>Eliminar</span>
+            </button>
+          </ui-confirm-dialog>
+        } @else {
+          <div></div>
+        }
+
+        <div class="flex items-center gap-3">
+          <button
+            type="button"
+            (click)="location.back()"
+            class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            [disabled]="saving() || form.invalid"
+            class="rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-violet-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 disabled:opacity-50"
+          >
+            {{ saving() ? 'Guardando...' : (isEdit() ? 'Guardar cambios' : 'Crear categoria') }}
+          </button>
+        </div>
+      </div>
+    </form>
+  </ui-card>
+</div>

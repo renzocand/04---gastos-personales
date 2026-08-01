@@ -83,6 +83,29 @@ export const routes: Routes = [
           ).then((m) => m.ReceiptDetail),
       },
       {
+        path: 'categories',
+        loadComponent: () =>
+          import(
+            './features/categories/pages/categories-list/categories-list'
+          ).then((m) => m.CategoriesList),
+      },
+      {
+        path: 'categories/new',
+        data: { mode: 'create' },
+        loadComponent: () =>
+          import(
+            './features/categories/pages/category-form/category-form'
+          ).then((m) => m.CategoryForm),
+      },
+      {
+        path: 'categories/:id/edit',
+        data: { mode: 'edit' },
+        loadComponent: () =>
+          import(
+            './features/categories/pages/category-form/category-form'
+          ).then((m) => m.CategoryForm),
+      },
+      {
         path: 'settings',
         loadComponent: () =>
           import(

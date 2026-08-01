@@ -19,11 +19,10 @@ import com.gastos.dto.ExpenseUpdateRequest;
 import com.gastos.exception.NotFoundException;
 import com.gastos.i18n.Messages;
 import com.gastos.mapper.ExpenseMapper;
-import com.gastos.model.Category;
 import com.gastos.model.Currency;
 import com.gastos.model.Expense;
 import com.gastos.model.User;
-import com.gastos.repository.CategoryRepository;
+import com.gastos.model.UserCategory;
 import com.gastos.repository.ExpenseRepository;
 import com.gastos.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -44,7 +43,7 @@ class ExpenseServiceTest {
     private static final String DNI = "12345678";
 
     @Mock private ExpenseRepository expenseRepository;
-    @Mock private CategoryRepository categoryRepository;
+    @Mock private UserCategoryService userCategoryService;
     @Mock private UserRepository userRepository;
     @Mock private ExpenseMapper mapper;
     @Mock private Messages messages;
@@ -53,14 +52,16 @@ class ExpenseServiceTest {
 
     private User user() {
         User u = new User();
+        u.setId("user-1");
         u.setDni(DNI);
         return u;
     }
 
-    private Category category(String id) {
-        Category c = new Category();
+    private UserCategory category(String id) {
+        UserCategory c = new UserCategory();
         c.setId(id);
         c.setName(id);
+        c.setUser(user());
         return c;
     }
 
@@ -88,12 +89,12 @@ class ExpenseServiceTest {
         ExpenseRequest req = new ExpenseRequest(new BigDecimal("50.00"), Currency.PEN,
                 "Almuerzo", "food", LocalDate.of(2026, 6, 1));
         User user = user();
-        Category category = category("food");
+        UserCategory category = category("food");
         Expense entity = expense(req.amount(), req.currency(), req.description());
         ExpenseResponse response = anyResponse();
 
         when(userRepository.findByDni(DNI)).thenReturn(Optional.of(user));
-        when(categoryRepository.findById("food")).thenReturn(Optional.of(category));
+        when(userCategoryService.requireOwnedCategory(user.getId(), "food")).thenReturn(category);
         when(mapper.toEntity(req, category, user)).thenReturn(entity);
         when(expenseRepository.save(entity)).thenReturn(entity);
         when(mapper.toResponse(entity)).thenReturn(response);
@@ -109,9 +110,10 @@ class ExpenseServiceTest {
     void tc01_create_categoryNotFound() {
         ExpenseRequest req = new ExpenseRequest(new BigDecimal("50.00"), Currency.PEN,
                 "Almuerzo", "ghost", LocalDate.of(2026, 6, 1));
-        when(userRepository.findByDni(DNI)).thenReturn(Optional.of(user()));
-        when(categoryRepository.findById("ghost")).thenReturn(Optional.empty());
-        when(messages.get(anyString(), any())).thenReturn("Categoría no encontrada");
+        User user = user();
+        when(userRepository.findByDni(DNI)).thenReturn(Optional.of(user));
+        when(userCategoryService.requireOwnedCategory(user.getId(), "ghost"))
+                .thenThrow(new NotFoundException("Categoría no encontrada"));
 
         assertThatThrownBy(() -> service.create(DNI, req)).isInstanceOf(NotFoundException.class);
         verify(expenseRepository, never()).save(any());

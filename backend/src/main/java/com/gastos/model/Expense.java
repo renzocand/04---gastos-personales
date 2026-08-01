@@ -47,8 +47,8 @@ public class Expense {
     private String description;
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
-    @JoinColumn(name = "category_id", nullable = false)
-    private Category category;
+    @JoinColumn(name = "user_category_id", nullable = false)
+    private UserCategory category;
 
     /** Dueño del gasto. Cada usuario solo ve y gestiona los suyos. */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

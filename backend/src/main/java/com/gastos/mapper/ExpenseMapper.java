@@ -6,6 +6,7 @@ import com.gastos.dto.ExpenseResponse;
 import com.gastos.model.Category;
 import com.gastos.model.Expense;
 import com.gastos.model.User;
+import com.gastos.model.UserCategory;
 import org.springframework.stereotype.Component;
 
 /**
@@ -29,7 +30,7 @@ public class ExpenseMapper {
     }
 
     /** Request de creación + categoría y dueño ya resueltos → nueva entidad Expense. */
-    public Expense toEntity(ExpenseRequest req, Category category, User user) {
+    public Expense toEntity(ExpenseRequest req, UserCategory category, User user) {
         Expense e = new Expense();
         e.setAmount(req.amount());
         e.setCurrency(req.currency());
@@ -40,8 +41,13 @@ public class ExpenseMapper {
         return e;
     }
 
-    /** Entidad Category → DTO de respuesta. */
+    /** Entidad Category global → DTO de respuesta (para plantillas). */
     public CategoryResponse toResponse(Category c) {
+        return new CategoryResponse(c.getId(), c.getName(), c.getIcon(), c.getDescription());
+    }
+
+    /** Entidad UserCategory → DTO de respuesta compatible con CategoryResponse. */
+    public CategoryResponse toResponse(UserCategory c) {
         return new CategoryResponse(c.getId(), c.getName(), c.getIcon(), c.getDescription());
     }
 }

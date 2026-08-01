@@ -9,6 +9,7 @@ import {
   Plus,
   Receipt,
   Settings,
+  Tag,
 } from 'lucide-angular';
 import { TranslocoModule } from '@jsverse/transloco';
 import { ToastContainer } from '../../../shared/ui/toast/toast-container';
@@ -42,6 +43,7 @@ export class AppShell {
   protected readonly DashboardIcon = LayoutDashboard;
   protected readonly ReceiptIcon = Receipt;
   protected readonly ReceiptsIcon = FileText;
+  protected readonly CategoriesIcon = Tag;
   protected readonly PlusIcon = Plus;
   protected readonly LogOutIcon = LogOut;
   protected readonly SettingsIcon = Settings;

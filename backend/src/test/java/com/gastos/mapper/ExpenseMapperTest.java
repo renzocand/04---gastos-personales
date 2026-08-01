@@ -13,6 +13,7 @@ import com.gastos.model.Category;
 import com.gastos.model.Currency;
 import com.gastos.model.Expense;
 import com.gastos.model.User;
+import com.gastos.model.UserCategory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -29,9 +30,13 @@ class ExpenseMapperTest {
     @Test
     @DisplayName("TC-17 / PA-26: toResponse(Expense) copia los campos y aplana category.id")
     void tc17_pa26_toResponse_expense() {
-        Category cat = new Category();
+        User user = new User();
+        user.setDni("12345678");
+
+        UserCategory cat = new UserCategory();
         cat.setId("cat-1");
         cat.setName("Comida");
+        cat.setUser(user);
 
         Instant created = Instant.parse("2026-06-01T10:00:00Z");
         Instant updated = Instant.parse("2026-06-02T12:30:00Z");
@@ -64,10 +69,11 @@ class ExpenseMapperTest {
     void tc17_pa27_toEntity() {
         ExpenseRequest req = new ExpenseRequest(
                 new BigDecimal("50.00"), Currency.USD, "Taxi", "cat-1", LocalDate.of(2026, 6, 3));
-        Category category = new Category();
-        category.setId("cat-1");
         User user = new User();
         user.setDni("12345678");
+        UserCategory category = new UserCategory();
+        category.setId("cat-1");
+        category.setUser(user);
 
         Expense e = mapper.toEntity(req, category, user);
 

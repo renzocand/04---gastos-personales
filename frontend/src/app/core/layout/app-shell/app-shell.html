@@ -71,6 +71,14 @@
         <span>{{ 'nav.receipts' | transloco }}</span>
       </a>
       <a
+        routerLink="/categories"
+        routerLinkActive="border-violet-600 text-violet-700"
+        class="flex items-center gap-2 border-b-2 border-transparent px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:text-slate-900"
+      >
+        <lucide-angular [img]="CategoriesIcon" class="size-4"></lucide-angular>
+        <span>Categorias</span>
+      </a>
+      <a
         routerLink="/settings"
         routerLinkActive="border-violet-600 text-violet-700"
         class="flex items-center gap-2 border-b-2 border-transparent px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:text-slate-900"

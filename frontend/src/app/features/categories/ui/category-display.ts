@@ -1,5 +1,8 @@
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { LucideAngularModule } from 'lucide-angular';
 import {
   Bus,
+  CreditCard,
   Gamepad2,
   GraduationCap,
   HeartPulse,
@@ -7,6 +10,8 @@ import {
   Package,
   ShoppingBag,
   Sparkles,
+  Tag,
+  Utensils,
   UtensilsCrossed,
   Zap,
 } from 'lucide-angular';
@@ -19,6 +24,7 @@ type LucideIcon = typeof Package;
  */
 const CATEGORY_ICONS: Record<string, LucideIcon> = {
   UtensilsCrossed,
+  Utensils,
   Bus,
   Home,
   Zap,
@@ -28,10 +34,27 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
   ShoppingBag,
   Sparkles,
   Package,
+  CreditCard,
+  Tag,
 };
 
 export function iconFor(name?: string): LucideIcon {
   return (name && CATEGORY_ICONS[name]) || Package;
+}
+
+/**
+ * Componente que muestra el icono de una categoría dado su nombre.
+ */
+@Component({
+  selector: 'app-category-icon',
+  standalone: true,
+  imports: [LucideAngularModule],
+  template: `<lucide-angular [img]="icon()" class="size-full"></lucide-angular>`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class CategoryIconDisplay {
+  iconName = input<string | undefined>();
+  icon = computed(() => iconFor(this.iconName()));
 }
 
 /**

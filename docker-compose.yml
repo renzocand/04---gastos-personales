@@ -55,6 +55,8 @@ services:
     environment:
       OLLAMA_BASE_URL: http://host.docker.internal:11434
       GASTOS_BACKEND_URL: http://backend:8080
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-flash-latest}
     depends_on:
       - backend
     extra_hosts:

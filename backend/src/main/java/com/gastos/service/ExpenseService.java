@@ -9,11 +9,10 @@ import com.gastos.dto.ExpenseUpdateRequest;
 import com.gastos.exception.NotFoundException;
 import com.gastos.i18n.Messages;
 import com.gastos.mapper.ExpenseMapper;
-import com.gastos.model.Category;
 import com.gastos.model.Currency;
 import com.gastos.model.Expense;
 import com.gastos.model.User;
-import com.gastos.repository.CategoryRepository;
+import com.gastos.model.UserCategory;
 import com.gastos.repository.ExpenseRepository;
 import com.gastos.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -29,18 +28,18 @@ import org.springframework.transaction.annotation.Transactional;
 public class ExpenseService {
 
     private final ExpenseRepository expenseRepository;
-    private final CategoryRepository categoryRepository;
+    private final UserCategoryService userCategoryService;
     private final UserRepository userRepository;
     private final ExpenseMapper mapper;
     private final Messages messages;
 
     public ExpenseService(ExpenseRepository expenseRepository,
-                          CategoryRepository categoryRepository,
+                          UserCategoryService userCategoryService,
                           UserRepository userRepository,
                           ExpenseMapper mapper,
                           Messages messages) {
         this.expenseRepository = expenseRepository;
-        this.categoryRepository = categoryRepository;
+        this.userCategoryService = userCategoryService;
         this.userRepository = userRepository;
         this.mapper = mapper;
         this.messages = messages;
@@ -56,7 +55,7 @@ public class ExpenseService {
     @Transactional
     public ExpenseResponse create(String dni, ExpenseRequest req) {
         User user = requireUser(dni);
-        Category category = requireCategory(req.categoryId());
+        UserCategory category = requireCategory(user.getId(), req.categoryId());
         Expense saved = expenseRepository.save(mapper.toEntity(req, category, user));
         return mapper.toResponse(saved);
     }
@@ -64,6 +63,7 @@ public class ExpenseService {
     @Transactional
     public ExpenseResponse update(String dni, String id, ExpenseUpdateRequest req) {
         Expense expense = requireOwnedExpense(dni, id);
+        User user = expense.getUser();
 
         if (req.amount() != null) {
             expense.setAmount(req.amount());
@@ -78,7 +78,7 @@ public class ExpenseService {
             expense.setDate(req.date());
         }
         if (req.categoryId() != null) {
-            expense.setCategory(requireCategory(req.categoryId()));
+            expense.setCategory(requireCategory(user.getId(), req.categoryId()));
         }
 
         return mapper.toResponse(expense);
@@ -96,9 +96,8 @@ public class ExpenseService {
                 .orElseThrow(() -> new NotFoundException(messages.get("error.expenseNotFound", id)));
     }
 
-    private Category requireCategory(String categoryId) {
-        return categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new NotFoundException(messages.get("error.categoryNotFound", categoryId)));
+    private UserCategory requireCategory(String userId, String categoryId) {
+        return userCategoryService.requireOwnedCategory(userId, categoryId);
     }
 
     private User requireUser(String dni) {

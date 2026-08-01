@@ -38,20 +38,11 @@ BACKEND_URL = os.getenv("GASTOS_BACKEND_URL", "http://localhost:8080")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-flash-latest")
 
-# Prompt para procesar gastos de texto
-TEXT_EXPENSE_PROMPT = """Analiza este mensaje de texto que describe uno o más gastos y extrae la información.
+# Template del prompt para procesar gastos de texto (las categorías se inyectan dinámicamente)
+TEXT_EXPENSE_PROMPT_TEMPLATE = """Analiza este mensaje de texto que describe uno o más gastos y extrae la información.
 
-CATEGORÍAS DISPONIBLES (usa SOLO estos IDs exactos):
-- food: Comida (mercado, restaurantes, alimentos, bebidas, snacks)
-- transport: Transporte (taxi, gasolina, pasajes, peajes)
-- housing: Vivienda (alquiler, hipoteca, mantenimiento estructural)
-- services: Servicios (luz, agua, gas, internet, teléfono)
-- health: Salud (farmacia, medicamentos, consultas médicas)
-- education: Educación (cursos, libros, materiales de estudio)
-- leisure: Ocio (streaming, entretenimiento, juegos, salidas)
-- shopping: Compras personales (ropa, calzado, accesorios, tecnología/gadgets, cuidado personal)
-- home: Hogar (productos de limpieza, artículos de cocina, electrodomésticos menores, decoración)
-- other: Otro (solo si no encaja en ninguna de las anteriores)
+CATEGORÍAS DEL USUARIO (usa SOLO estos IDs exactos):
+{categories_section}
 
 MONEDAS:
 - PEN: Soles peruanos (indicado por: "soles", "S/", "S/.", o sin especificar)
@@ -64,19 +55,12 @@ INSTRUCCIONES:
    - Dólares: "$30", "30 dolares", "8 USD"
 3. Detecta la moneda de cada gasto (PEN o USD). Si no se especifica, asume PEN.
 4. Usa como descripción el nombre del producto/servicio mencionado
-5. Asigna la categoría más apropiada según las definiciones anteriores
+5. Asigna la categoría más apropiada según las descripciones del usuario
 6. Si no hay tienda específica, usa "Manual" como vendor
 7. La fecha es hoy: {today}
 
-EJEMPLOS DE ENTRADA:
-- "parrillada 45 soles" → un item en PEN
-- "pollo a la brasa S/30" → un item en PEN
-- "netflix 8 dolares" → un item en USD (streaming = leisure)
-- "uber $15" → un item en USD (transporte)
-- "luz 85 agua 45" → dos items en PEN
-
 RESPONDE ÚNICAMENTE con JSON válido, sin markdown ni explicaciones:
-{{"vendor":"nombre o Manual","date":"{today}","currency":"PEN o USD","items":[{{"description":"descripción","amount":0.00,"categoryId":"categoria"}}],"total":0.00}}
+{{"vendor":"nombre o Manual","date":"{today}","currency":"PEN o USD","items":[{{"description":"descripción","amount":0.00,"categoryId":"categoria_id"}}],"total":0.00}}
 
 IMPORTANTE: Si hay gastos en diferentes monedas, usa la moneda del primer gasto. Todos los items deben estar en la misma moneda.
 
@@ -90,22 +74,70 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Mapeo de IDs de categoría a nombres descriptivos
-CATEGORY_NAMES = {
-    "food": "Comida",
-    "transport": "Transporte",
-    "housing": "Vivienda",
-    "services": "Servicios",
-    "health": "Salud",
-    "education": "Educación",
-    "leisure": "Ocio",
-    "shopping": "Compras personales",
-    "home": "Hogar",
-    "other": "Otro",
-}
-
 # Almacenamiento temporal de boletas pendientes de confirmación
+# Cada entrada incluye: ocr_data y categories (lista de categorías del usuario)
 pending_receipts = {}
+
+# Cache de categorías por telegram_id (TTL simple de 5 minutos)
+_categories_cache = {}
+_categories_cache_time = {}
+CATEGORIES_CACHE_TTL = 300  # 5 minutos
+
+
+async def get_user_categories(telegram_id: int) -> list[dict]:
+    """Obtiene las categorías del usuario desde el backend."""
+    import time
+
+    # Verificar cache
+    cache_key = str(telegram_id)
+    if cache_key in _categories_cache:
+        if time.time() - _categories_cache_time.get(cache_key, 0) < CATEGORIES_CACHE_TTL:
+            return _categories_cache[cache_key]
+
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                f"{BACKEND_URL}/api/telegram/categories/{telegram_id}",
+                timeout=30.0,
+            )
+
+            if response.status_code == 200:
+                categories = response.json()
+                # Guardar en cache
+                _categories_cache[cache_key] = categories
+                _categories_cache_time[cache_key] = time.time()
+                return categories
+            else:
+                logger.warning(f"Failed to get categories for telegram_id {telegram_id}: {response.status_code}")
+                return []
+
+    except httpx.RequestError as e:
+        logger.error(f"Error getting user categories: {e}")
+        return []
+
+
+def build_categories_prompt_section(categories: list[dict]) -> str:
+    """Construye la sección de categorías para el prompt de Gemini."""
+    if not categories:
+        # Fallback a categorías por defecto si no hay categorías del usuario
+        return """- other: Otro (gastos generales)"""
+
+    lines = []
+    for cat in categories:
+        cat_id = cat.get("id", "")
+        name = cat.get("name", "")
+        description = cat.get("description", "")
+        if description:
+            lines.append(f"- {cat_id}: {name} ({description})")
+        else:
+            lines.append(f"- {cat_id}: {name}")
+
+    return "\n".join(lines)
+
+
+def build_category_names_map(categories: list[dict]) -> dict[str, str]:
+    """Construye un mapa de id -> nombre para mostrar en mensajes."""
+    return {cat.get("id", ""): cat.get("name", cat.get("id", "")) for cat in categories}
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -278,6 +310,15 @@ async def process_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         await update.message.reply_text("❌ Error de conexión. Intenta más tarde.")
         return
 
+    # Obtener categorías del usuario
+    categories = await get_user_categories(user.id)
+    if not categories:
+        await update.message.reply_text(
+            "❌ No se pudieron obtener tus categorías.\n"
+            "Intenta de nuevo más tarde."
+        )
+        return
+
     # Obtener la foto de mayor resolución
     photo = update.message.photo[-1]
 
@@ -307,12 +348,18 @@ async def process_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         # Generar UUID para esta boleta
         receipt_id = str(uuid.uuid4())
 
-        # Guardar datos en almacenamiento temporal
-        pending_receipts[receipt_id] = ocr_data
+        # Guardar datos en almacenamiento temporal (incluye categorías para uso posterior)
+        pending_receipts[receipt_id] = {
+            "data": ocr_data,
+            "categories": categories
+        }
+
+        # Construir mapa de nombres de categorías
+        category_names = build_category_names_map(categories)
 
         # Mostrar resultado
         items_text = "\n".join(
-            f"  • {item['description']}: S/ {item['amount']:.2f} — {CATEGORY_NAMES.get(item['categoryId'], item['categoryId'])}"
+            f"  • {item['description']}: S/ {item['amount']:.2f} — {category_names.get(item['categoryId'], item['categoryId'])}"
             for item in ocr_data.get("items", [])
         )
 
@@ -331,6 +378,9 @@ async def process_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
                 [
                     InlineKeyboardButton("✅ Guardar", callback_data=f"save:{receipt_id}"),
                     InlineKeyboardButton("✏️ Corregir categoría", callback_data=f"fix_category:{receipt_id}"),
+                ],
+                [
+                    InlineKeyboardButton("❌ Cancelar", callback_data=f"cancel:{receipt_id}"),
                 ]
             ]
             reply_markup = InlineKeyboardMarkup(keyboard)
@@ -350,10 +400,15 @@ async def process_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         )
 
 
-async def call_gemini_for_text(message_text: str) -> dict:
+async def call_gemini_for_text(message_text: str, categories: list[dict]) -> dict:
     """Llama a Gemini para procesar un mensaje de texto como gasto."""
     today = date.today().isoformat()
-    prompt = TEXT_EXPENSE_PROMPT.format(today=today, message=message_text)
+    categories_section = build_categories_prompt_section(categories)
+    prompt = TEXT_EXPENSE_PROMPT_TEMPLATE.format(
+        today=today,
+        message=message_text,
+        categories_section=categories_section
+    )
 
     request_body = {
         "contents": [
@@ -447,7 +502,7 @@ async def process_text_expense(update: Update, context: ContextTypes.DEFAULT_TYP
         )
         return
 
-    # Verificar vinculación
+    # Verificar vinculación y obtener categorías
     try:
         async with httpx.AsyncClient() as client:
             user_response = await client.get(
@@ -467,11 +522,20 @@ async def process_text_expense(update: Update, context: ContextTypes.DEFAULT_TYP
         await update.message.reply_text("❌ Error de conexión. Intenta más tarde.")
         return
 
+    # Obtener categorías del usuario
+    categories = await get_user_categories(user.id)
+    if not categories:
+        await update.message.reply_text(
+            "❌ No se pudieron obtener tus categorías.\n"
+            "Intenta de nuevo más tarde."
+        )
+        return
+
     await update.message.reply_text("🤖 Procesando tu gasto...")
 
     try:
-        # Llamar a Gemini para procesar el texto
-        expense_data = await call_gemini_for_text(message_text)
+        # Llamar a Gemini para procesar el texto con las categorías del usuario
+        expense_data = await call_gemini_for_text(message_text, categories)
 
         # Calcular total si no viene
         items = expense_data.get("items", [])
@@ -485,12 +549,18 @@ async def process_text_expense(update: Update, context: ContextTypes.DEFAULT_TYP
         # Generar UUID para este gasto
         receipt_id = str(uuid.uuid4())
 
-        # Guardar datos en almacenamiento temporal
-        pending_receipts[receipt_id] = expense_data
+        # Guardar datos en almacenamiento temporal (incluye categorías para uso posterior)
+        pending_receipts[receipt_id] = {
+            "data": expense_data,
+            "categories": categories
+        }
+
+        # Construir mapa de nombres de categorías
+        category_names = build_category_names_map(categories)
 
         # Mostrar resultado
         items_text = "\n".join(
-            f"  • {item['description']}: {currency_symbol} {item['amount']:.2f} — {CATEGORY_NAMES.get(item['categoryId'], item['categoryId'])}"
+            f"  • {item['description']}: {currency_symbol} {item['amount']:.2f} — {category_names.get(item['categoryId'], item['categoryId'])}"
             for item in items
         )
 
@@ -509,6 +579,9 @@ async def process_text_expense(update: Update, context: ContextTypes.DEFAULT_TYP
                 [
                     InlineKeyboardButton("✅ Guardar", callback_data=f"save:{receipt_id}"),
                     InlineKeyboardButton("✏️ Corregir categoría", callback_data=f"fix_category:{receipt_id}"),
+                ],
+                [
+                    InlineKeyboardButton("❌ Cancelar", callback_data=f"cancel:{receipt_id}"),
                 ]
             ]
             reply_markup = InlineKeyboardMarkup(keyboard)
@@ -541,13 +614,14 @@ async def process_text_expense(update: Update, context: ContextTypes.DEFAULT_TYP
         )
 
 
-def build_summary_message(ocr_data: dict) -> str:
+def build_summary_message(ocr_data: dict, categories: list[dict]) -> str:
     """Construye el mensaje de resumen de la boleta."""
     currency = ocr_data.get("currency", "PEN").upper()
     currency_symbol = "$" if currency == "USD" else "S/"
+    category_names = build_category_names_map(categories)
 
     items_text = "\n".join(
-        f"  • {item['description']}: {currency_symbol} {item['amount']:.2f} — {CATEGORY_NAMES.get(item['categoryId'], item['categoryId'])}"
+        f"  • {item['description']}: {currency_symbol} {item['amount']:.2f} — {category_names.get(item['categoryId'], item['categoryId'])}"
         for item in ocr_data.get("items", [])
     )
 
@@ -567,16 +641,20 @@ def build_summary_keyboard(receipt_id: str) -> InlineKeyboardMarkup:
         [
             InlineKeyboardButton("✅ Guardar", callback_data=f"save:{receipt_id}"),
             InlineKeyboardButton("✏️ Corregir categoría", callback_data=f"fix_category:{receipt_id}"),
+        ],
+        [
+            InlineKeyboardButton("❌ Cancelar", callback_data=f"cancel:{receipt_id}"),
         ]
     ]
     return InlineKeyboardMarkup(keyboard)
 
 
-def build_items_keyboard(receipt_id: str, items: list) -> InlineKeyboardMarkup:
+def build_items_keyboard(receipt_id: str, items: list, categories: list[dict]) -> InlineKeyboardMarkup:
     """Construye el teclado con la lista de items para editar."""
+    category_names = build_category_names_map(categories)
     keyboard = []
     for index, item in enumerate(items):
-        category_name = CATEGORY_NAMES.get(item['categoryId'], item['categoryId'])
+        category_name = category_names.get(item['categoryId'], item['categoryId'])
         button_text = f"{item['description']} - {category_name}"
         keyboard.append([InlineKeyboardButton(button_text, callback_data=f"edit_item:{receipt_id}:{index}")])
 
@@ -584,25 +662,16 @@ def build_items_keyboard(receipt_id: str, items: list) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(keyboard)
 
 
-def build_categories_keyboard(receipt_id: str, item_index: int) -> InlineKeyboardMarkup:
-    """Construye el teclado grid de categorías (2 por fila)."""
-    categories = [
-        ("food", "Comida"),
-        ("transport", "Transporte"),
-        ("housing", "Vivienda"),
-        ("services", "Servicios"),
-        ("health", "Salud"),
-        ("education", "Educación"),
-        ("leisure", "Ocio"),
-        ("shopping", "Compras personales"),
-        ("home", "Hogar"),
-        ("other", "Otro"),
-    ]
-
+def build_categories_keyboard(receipt_id: str, item_index: int, categories: list[dict]) -> InlineKeyboardMarkup:
+    """Construye el teclado grid de categorías del usuario (2 por fila)."""
     keyboard = []
-    for i in range(0, len(categories), 2):
+
+    # Convertir categorías del usuario a tuplas (id, name)
+    cat_list = [(cat.get("id", ""), cat.get("name", "")) for cat in categories if cat.get("id")]
+
+    for i in range(0, len(cat_list), 2):
         row = []
-        for cat_id, cat_name in categories[i:i+2]:
+        for cat_id, cat_name in cat_list[i:i+2]:
             row.append(InlineKeyboardButton(cat_name, callback_data=f"set_cat:{receipt_id}:{item_index}:{cat_id}"))
         keyboard.append(row)
 
@@ -684,13 +753,20 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         await query.edit_message_text("⚠️ Esta boleta expiró. Envía la foto de nuevo.")
         return
 
-    ocr_data = pending_receipts[receipt_id]
+    receipt_info = pending_receipts[receipt_id]
+    # Soportar formato antiguo (solo data) y nuevo (data + categories)
+    if isinstance(receipt_info, dict) and "data" in receipt_info:
+        ocr_data = receipt_info["data"]
+        categories = receipt_info.get("categories", [])
+    else:
+        ocr_data = receipt_info
+        categories = []
 
     if action == "save":
         # Verificar duplicados antes de guardar
         user = query.from_user
         items = ocr_data.get("items", [])
-        date = ocr_data.get("date", "")
+        expense_date = ocr_data.get("date", "")
         vendor = ocr_data.get("vendor", "")
         total = ocr_data.get("total", 0)
 
@@ -702,7 +778,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
                     params={
                         "telegramId": user.id,
                         "vendor": vendor,
-                        "date": date,
+                        "date": expense_date,
                         "total": total
                     },
                     timeout=30.0,
@@ -741,12 +817,13 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         user = query.from_user
         await save_receipt_to_backend(query, user, receipt_id, ocr_data)
 
-    elif action == "cancel_save":
+    elif action == "cancel_save" or action == "cancel":
         # Cancelar guardado
-        del pending_receipts[receipt_id]
+        if receipt_id in pending_receipts:
+            del pending_receipts[receipt_id]
         await query.edit_message_text(
-            "❌ *Guardado cancelado*\n\n"
-            "La boleta no fue guardada.",
+            "❌ *Cancelado*\n\n"
+            "El gasto no fue guardado.",
             parse_mode="Markdown"
         )
 
@@ -754,7 +831,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         # Mostrar lista de items
         items = ocr_data.get("items", [])
         message = "*Selecciona el item a editar:*"
-        keyboard = build_items_keyboard(receipt_id, items)
+        keyboard = build_items_keyboard(receipt_id, items, categories)
         await query.edit_message_text(message, parse_mode="Markdown", reply_markup=keyboard)
 
     elif action == "edit_item":
@@ -769,7 +846,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
         item = items[item_index]
         message = f"*Selecciona la categoría para:*\n{item['description']}"
-        keyboard = build_categories_keyboard(receipt_id, item_index)
+        keyboard = build_categories_keyboard(receipt_id, item_index, categories)
         await query.edit_message_text(message, parse_mode="Markdown", reply_markup=keyboard)
 
     elif action == "set_cat":
@@ -785,12 +862,12 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
         # Volver a mostrar lista de items
         message = "*Selecciona el item a editar:*"
-        keyboard = build_items_keyboard(receipt_id, items)
+        keyboard = build_items_keyboard(receipt_id, items, categories)
         await query.edit_message_text(message, parse_mode="Markdown", reply_markup=keyboard)
 
     elif action == "back_to_summary":
         # Volver al resumen
-        message = build_summary_message(ocr_data)
+        message = build_summary_message(ocr_data, categories)
         keyboard = build_summary_keyboard(receipt_id)
         await query.edit_message_text(message, parse_mode="Markdown", reply_markup=keyboard)
 
@@ -798,7 +875,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         # Volver a lista de items
         items = ocr_data.get("items", [])
         message = "*Selecciona el item a editar:*"
-        keyboard = build_items_keyboard(receipt_id, items)
+        keyboard = build_items_keyboard(receipt_id, items, categories)
         await query.edit_message_text(message, parse_mode="Markdown", reply_markup=keyboard)
 
 

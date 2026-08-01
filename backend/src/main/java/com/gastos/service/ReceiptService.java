@@ -8,14 +8,13 @@ import com.gastos.exception.NotFoundException;
 import com.gastos.i18n.Messages;
 import com.gastos.mapper.ExpenseMapper;
 import com.gastos.mapper.ReceiptMapper;
-import com.gastos.model.Category;
 import com.gastos.model.Currency;
 import com.gastos.model.Expense;
 import com.gastos.model.Receipt;
 import com.gastos.model.ReceiptSource;
 import com.gastos.model.TelegramLink;
 import com.gastos.model.User;
-import com.gastos.repository.CategoryRepository;
+import com.gastos.model.UserCategory;
 import com.gastos.repository.ExpenseRepository;
 import com.gastos.repository.ReceiptRepository;
 import com.gastos.repository.TelegramLinkRepository;
@@ -37,7 +36,7 @@ public class ReceiptService {
 
     private final ReceiptRepository receiptRepository;
     private final ExpenseRepository expenseRepository;
-    private final CategoryRepository categoryRepository;
+    private final UserCategoryService userCategoryService;
     private final UserRepository userRepository;
     private final TelegramLinkRepository telegramLinkRepository;
     private final ReceiptMapper receiptMapper;
@@ -46,7 +45,7 @@ public class ReceiptService {
 
     public ReceiptService(ReceiptRepository receiptRepository,
                           ExpenseRepository expenseRepository,
-                          CategoryRepository categoryRepository,
+                          UserCategoryService userCategoryService,
                           UserRepository userRepository,
                           TelegramLinkRepository telegramLinkRepository,
                           ReceiptMapper receiptMapper,
@@ -54,7 +53,7 @@ public class ReceiptService {
                           Messages messages) {
         this.receiptRepository = receiptRepository;
         this.expenseRepository = expenseRepository;
-        this.categoryRepository = categoryRepository;
+        this.userCategoryService = userCategoryService;
         this.userRepository = userRepository;
         this.telegramLinkRepository = telegramLinkRepository;
         this.receiptMapper = receiptMapper;
@@ -122,7 +121,7 @@ public class ReceiptService {
         final Currency expenseCurrency = currency;
         List<Expense> expenses = request.items().stream()
                 .map(item -> {
-                    Category category = requireCategory(item.categoryId());
+                    UserCategory category = requireCategory(user.getId(), item.categoryId());
                     String description = vendor.isEmpty()
                             ? item.description()
                             : item.description() + " (" + vendor + ")";
@@ -176,8 +175,7 @@ public class ReceiptService {
                 .orElseThrow(() -> new NotFoundException(messages.get("error.receiptNotFound", receiptId)));
     }
 
-    private Category requireCategory(String categoryId) {
-        return categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new NotFoundException(messages.get("error.categoryNotFound", categoryId)));
+    private UserCategory requireCategory(String userId, String categoryId) {
+        return userCategoryService.requireOwnedCategory(userId, categoryId);
     }
 }
