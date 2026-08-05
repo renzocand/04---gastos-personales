@@ -18,6 +18,8 @@ import logging
 import uuid
 import re
 import json
+import base64
+import time
 from datetime import date
 import httpx
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
@@ -37,6 +39,28 @@ OCR_SERVICE_URL = os.getenv("OCR_SERVICE_URL", "http://localhost:8081")
 BACKEND_URL = os.getenv("GASTOS_BACKEND_URL", "http://localhost:8080")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-flash-latest")
+
+# Template del prompt para procesar imágenes de boletas (las categorías se inyectan dinámicamente)
+IMAGE_EXPENSE_PROMPT_TEMPLATE = """Analiza esta imagen de una boleta/factura peruana y extrae la información.
+
+CATEGORÍAS DEL USUARIO (usa SOLO estos IDs exactos):
+{categories_section}
+
+IMPORTANTE SOBRE LA FECHA:
+- HOY es {today}. Estamos en el año {year}.
+- NUNCA devuelvas un año anterior a 2024.
+- La fecha DEBE tener formato YYYY-MM-DD.
+- Si el año no es claro, USA EL AÑO ACTUAL: {year}.
+
+INSTRUCCIONES:
+1. Identifica el establecimiento/tienda (vendor)
+2. Extrae la fecha en formato YYYY-MM-DD. Si no es clara, usa: {today}
+3. Lista cada producto con su precio
+4. Asigna la categoría más apropiada a cada item según las categorías del usuario
+5. Calcula o extrae el total
+
+RESPONDE ÚNICAMENTE con JSON válido, sin markdown ni explicaciones:
+{{"vendor":"nombre de tienda","date":"YYYY-MM-DD","items":[{{"description":"producto","amount":0.00,"categoryId":"categoria_id"}}],"total":0.00}}"""
 
 # Template del prompt para procesar gastos de texto (las categorías se inyectan dinámicamente)
 TEXT_EXPENSE_PROMPT_TEMPLATE = """Analiza este mensaje de texto que describe uno o más gastos y extrae la información.
@@ -86,8 +110,6 @@ CATEGORIES_CACHE_TTL = 300  # 5 minutos
 
 async def get_user_categories(telegram_id: int) -> list[dict]:
     """Obtiene las categorías del usuario desde el backend."""
-    import time
-
     # Verificar cache
     cache_key = str(telegram_id)
     if cache_key in _categories_cache:
@@ -329,21 +351,11 @@ async def process_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         photo_file = await photo.get_file()
         photo_bytes = await photo_file.download_as_bytearray()
 
-        # Enviar al servicio OCR
-        async with httpx.AsyncClient(timeout=httpx.Timeout(600.0)) as client:
-            files = {"image": ("boleta.jpg", bytes(photo_bytes), "image/jpeg")}
-            ocr_response = await client.post(
-                f"{OCR_SERVICE_URL}/api/ocr/process",
-                files=files,
-            )
-
-            if ocr_response.status_code != 200:
-                await update.message.reply_text(
-                    "❌ Error procesando la imagen. Intenta con otra foto."
-                )
-                return
-
-            ocr_data = ocr_response.json()
+        # Procesar imagen con Gemini directamente usando las categorías del usuario
+        start_time = time.time()
+        ocr_data = await call_gemini_for_image(bytes(photo_bytes), categories)
+        processing_time_ms = (time.time() - start_time) * 1000
+        ocr_data["processingTimeMs"] = processing_time_ms
 
         # Generar UUID para esta boleta
         receipt_id = str(uuid.uuid4())
@@ -391,10 +403,15 @@ async def process_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     except httpx.RequestError as e:
         logger.error(f"Error processing photo: {e}")
         await update.message.reply_text(
-            "❌ Error procesando la imagen. El servicio OCR no responde."
+            "❌ Error de conexión procesando la imagen. Intenta más tarde."
+        )
+    except json.JSONDecodeError as e:
+        logger.error(f"Error parsing Gemini response: {e}")
+        await update.message.reply_text(
+            "❌ No pude procesar la imagen. Intenta con otra foto más clara."
         )
     except Exception as e:
-        logger.error(f"Unexpected error: {e}")
+        logger.error(f"Unexpected error processing photo: {type(e).__name__}: {e}", exc_info=True)
         await update.message.reply_text(
             "❌ Error inesperado. Intenta de nuevo."
         )
@@ -470,6 +487,69 @@ def extract_json_from_text(text: str) -> str:
         raise ValueError(f"No valid JSON found in response: {text}")
 
     return cleaned[start:end + 1]
+
+
+
+async def call_gemini_for_image(image_bytes: bytes, categories: list[dict], mime_type: str = "image/jpeg") -> dict:
+    """Llama a Gemini Vision para procesar una imagen de boleta con las categorías del usuario."""
+    today = date.today()
+    categories_section = build_categories_prompt_section(categories)
+    prompt = IMAGE_EXPENSE_PROMPT_TEMPLATE.format(
+        today=today.isoformat(),
+        year=today.year,
+        categories_section=categories_section
+    )
+
+    # Convertir imagen a base64
+    base64_image = base64.b64encode(image_bytes).decode('utf-8')
+
+    request_body = {
+        "contents": [
+            {
+                "parts": [
+                    {
+                        "inlineData": {
+                            "mimeType": mime_type,
+                            "data": base64_image
+                        }
+                    },
+                    {"text": prompt}
+                ]
+            }
+        ],
+        "generationConfig": {
+            "temperature": 0.1,
+            "maxOutputTokens": 4096
+        }
+    }
+
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent?key={GEMINI_API_KEY}"
+
+    async with httpx.AsyncClient(timeout=120.0) as client:
+        response = await client.post(
+            url,
+            json=request_body,
+            headers={"Content-Type": "application/json"}
+        )
+
+        if response.status_code != 200:
+            logger.error(f"Gemini Vision API error: {response.status_code} - {response.text}")
+            raise Exception(f"Gemini Vision API error: {response.status_code}")
+
+        data = response.json()
+
+        if "error" in data:
+            raise Exception(f"Gemini error: {data['error'].get('message', 'Unknown')}")
+
+        candidates = data.get("candidates", [])
+        if not candidates:
+            raise Exception("No candidates in Gemini response")
+
+        text = candidates[0]["content"]["parts"][0]["text"]
+        logger.info(f"Gemini Vision raw response: {text}")
+
+        json_str = extract_json_from_text(text)
+        return json.loads(json_str)
 
 
 async def process_text_expense(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
