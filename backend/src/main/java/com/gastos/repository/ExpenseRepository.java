@@ -54,4 +54,9 @@ public interface ExpenseRepository extends JpaRepository<Expense, String> {
      * Elimina todos los gastos asociados a un recibo.
      */
     void deleteByReceiptId(String receiptId);
+
+    /**
+     * Obtiene el primer expense de un recibo (para derivar currency).
+     */
+    Optional<Expense> findFirstByReceiptId(String receiptId);
 }

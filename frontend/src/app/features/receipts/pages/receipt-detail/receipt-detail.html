@@ -90,7 +90,7 @@
                     {{ item.description }}
                   </p>
                   <p class="text-xs text-slate-500">
-                    {{ ('categories.' + item.categoryId + '.name') | transloco }}
+                    {{ getCategoryName(item.categoryId) }}
                   </p>
                 </div>
                 <p class="flex-none text-sm font-semibold text-slate-900">

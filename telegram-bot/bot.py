@@ -41,23 +41,25 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-flash-latest")
 
 # Template del prompt para procesar imágenes de boletas (las categorías se inyectan dinámicamente)
-IMAGE_EXPENSE_PROMPT_TEMPLATE = """Analiza esta imagen de una boleta/factura peruana y extrae la información.
+IMAGE_EXPENSE_PROMPT_TEMPLATE = """Analiza esta imagen de una boleta/factura y extrae la información.
 
 CATEGORÍAS DEL USUARIO (usa SOLO estos IDs exactos):
 {categories_section}
 
-IMPORTANTE SOBRE LA FECHA:
-- HOY es {today}. Estamos en el año {year}.
-- NUNCA devuelvas un año anterior a 2024.
-- La fecha DEBE tener formato YYYY-MM-DD.
-- Si el año no es claro, USA EL AÑO ACTUAL: {year}.
+FECHA:
+- Busca la fecha REAL impresa en la boleta (usualmente cerca del encabezado o número de boleta)
+- Formato requerido: YYYY-MM-DD
+- HOY es {today}, año {year}
+- Si la boleta muestra solo día/mes (ej: "05/08"), asume el año actual {year}
+- Si NO puedes encontrar ninguna fecha en la imagen, usa la fecha de hoy: {today}
+- NUNCA inventes una fecha. Solo usa lo que ves en la boleta o la fecha de hoy como fallback
 
 INSTRUCCIONES:
 1. Identifica el establecimiento/tienda (vendor)
-2. Extrae la fecha en formato YYYY-MM-DD. Si no es clara, usa: {today}
-3. Lista cada producto con su precio
-4. Asigna la categoría más apropiada a cada item según las categorías del usuario
-5. Calcula o extrae el total
+2. Extrae la fecha REAL de la boleta. Solo usa {today} si no hay fecha visible
+3. Lista cada producto con su precio exacto como aparece en la boleta
+4. Asigna la categoría más apropiada según las categorías del usuario
+5. Extrae el total de la boleta
 
 RESPONDE ÚNICAMENTE con JSON válido, sin markdown ni explicaciones:
 {{"vendor":"nombre de tienda","date":"YYYY-MM-DD","items":[{{"description":"producto","amount":0.00,"categoryId":"categoria_id"}}],"total":0.00}}"""

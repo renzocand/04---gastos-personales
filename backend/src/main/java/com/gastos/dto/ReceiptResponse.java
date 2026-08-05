@@ -12,6 +12,7 @@ public record ReceiptResponse(
         String vendor,
         LocalDate date,
         BigDecimal total,
+        String currency,
         String source,
         String imageUrl,
         int itemCount,

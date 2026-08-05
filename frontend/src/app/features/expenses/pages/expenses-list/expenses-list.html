@@ -50,7 +50,7 @@
                   @if (cat.icon) {
                     <lucide-angular [img]="cat.icon" class="size-3.5"></lucide-angular>
                   }
-                  {{ cat.id ? (('categories.' + cat.id + '.name') | transloco) : ('expenses.list.all' | transloco) }}
+                  {{ cat.id ? cat.name : ('expenses.list.all' | transloco) }}
                 </span>
               </label>
             }

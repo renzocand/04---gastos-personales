@@ -66,10 +66,16 @@ public class ReceiptService {
      */
     public List<ReceiptResponse> findByUser(String dni) {
         return receiptRepository.findByUserDniOrderByDateDesc(dni).stream()
-                .map(receipt -> receiptMapper.toResponse(
-                        receipt,
-                        expenseRepository.countByReceiptId(receipt.getId())
-                ))
+                .map(receipt -> {
+                    String currency = expenseRepository.findFirstByReceiptId(receipt.getId())
+                            .map(e -> e.getCurrency().name())
+                            .orElse("PEN");
+                    return receiptMapper.toResponse(
+                            receipt,
+                            expenseRepository.countByReceiptId(receipt.getId()),
+                            currency
+                    );
+                })
                 .toList();
     }
 

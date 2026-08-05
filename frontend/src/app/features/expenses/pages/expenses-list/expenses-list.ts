@@ -59,10 +59,9 @@ export class ExpensesList implements OnInit{
 
   private readonly categoryOptions = this.store.selectSignal(selectCategoryOptions);
 
-  // El filtro "Todas" no tiene id; el resto lleva su id de categoría para
-  // resolver el nombre traducido en la plantilla (categories.<id>.name).
+  // El filtro "Todas" no tiene id; el resto lleva su id de categoría.
   protected readonly categoryFilters = computed(() => [
-    { id: null as string | null, icon: null, iconClass: null },
+    { id: null as string | null, name: '', icon: null, iconClass: null },
     ...this.categoryOptions(),
   ]);
 

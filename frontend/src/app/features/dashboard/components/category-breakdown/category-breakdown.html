@@ -27,7 +27,7 @@
               </span>
               <div class="min-w-0">
                 <p class="truncate text-sm font-medium text-slate-900">
-                  {{ ('categories.' + row.id + '.name') | transloco }}
+                  {{ row.label }}
                 </p>
                 <p class="text-xs text-slate-500">
                   {{ 'dashboard.breakdown.percentOfTotal' | transloco: { percent: (row.percent | number:'1.0-0') } }}

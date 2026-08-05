@@ -11,7 +11,7 @@
       {{ expense().description }}
     </p>
     <p class="text-xs text-slate-500">
-      {{ category() ? (('categories.' + category()!.id + '.name') | transloco) : '' }}
+      {{ category()?.name ?? '' }}
     </p>
   </div>
   <p class="flex-none text-sm font-semibold text-slate-900">
