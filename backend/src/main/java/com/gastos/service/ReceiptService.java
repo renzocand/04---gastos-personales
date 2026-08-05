@@ -2,6 +2,7 @@ package com.gastos.service;
 
 import com.gastos.dto.ExpenseResponse;
 import com.gastos.dto.ReceiptResponse;
+import com.gastos.dto.ReceiptUpdateRequest;
 import com.gastos.dto.ReceiptWithItemsResponse;
 import com.gastos.dto.TelegramReceiptRequest;
 import com.gastos.exception.NotFoundException;
@@ -159,6 +160,35 @@ public class ReceiptService {
     public boolean isDuplicate(String dni, String vendor, LocalDate date, BigDecimal total) {
         return receiptRepository.findByUserDniAndVendorAndDateAndTotal(dni, vendor, date, total)
                 .isPresent();
+    }
+
+    /**
+     * Actualiza un recibo y todos sus gastos asociados (cascada).
+     * Al cambiar la fecha del recibo, se actualiza la fecha de todos sus gastos.
+     */
+    @Transactional
+    public ReceiptWithItemsResponse update(String dni, String receiptId, ReceiptUpdateRequest request) {
+        Receipt receipt = requireOwnedReceipt(dni, receiptId);
+
+        // Actualizar campos del recibo
+        receipt.setDate(request.date());
+        if (request.vendor() != null) {
+            receipt.setVendor(request.vendor());
+        }
+        receiptRepository.save(receipt);
+
+        // Actualizar fecha de todos los gastos asociados (cascada)
+        List<Expense> expenses = expenseRepository.findByReceiptId(receiptId);
+        for (Expense expense : expenses) {
+            expense.setDate(request.date());
+        }
+        expenseRepository.saveAll(expenses);
+
+        // Retornar el recibo actualizado con sus items
+        List<ExpenseResponse> items = expenses.stream()
+                .map(expenseMapper::toResponse)
+                .toList();
+        return receiptMapper.toResponseWithItems(receipt, items);
     }
 
     /**

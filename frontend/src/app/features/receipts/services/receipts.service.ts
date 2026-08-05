@@ -20,6 +20,10 @@ export class ReceiptsService {
     return this.http.get<ReceiptWithItems>(`${API_URL}/${id}`);
   }
 
+  update(id: string, data: { date: string; vendor?: string }): Observable<ReceiptWithItems> {
+    return this.http.put<ReceiptWithItems>(`${API_URL}/${id}`, data);
+  }
+
   delete(id: string): Observable<string> {
     return this.http.delete<void>(`${API_URL}/${id}`).pipe(map(() => id));
   }

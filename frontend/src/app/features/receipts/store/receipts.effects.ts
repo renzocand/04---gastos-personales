@@ -39,6 +39,20 @@ export class ReceiptsEffects {
     )
   );
 
+  update$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(ReceiptsActions.update),
+      switchMap(({ id, data }) =>
+        this.service.update(id, data).pipe(
+          map((receipt) => ReceiptsActions.updateSuccess({ receipt })),
+          catchError((err: Error) =>
+            of(ReceiptsActions.updateFailure({ error: err.message }))
+          )
+        )
+      )
+    )
+  );
+
   delete$ = createEffect(() =>
     this.actions$.pipe(
       ofType(ReceiptsActions.delete),

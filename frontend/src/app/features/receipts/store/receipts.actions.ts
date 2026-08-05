@@ -1,6 +1,11 @@
 import { createActionGroup, emptyProps, props } from '@ngrx/store';
 import { Receipt, ReceiptWithItems } from '../models/receipt';
 
+export interface ReceiptUpdatePayload {
+  date: string;
+  vendor?: string;
+}
+
 export const ReceiptsActions = createActionGroup({
   source: 'Receipts',
   events: {
@@ -13,6 +18,11 @@ export const ReceiptsActions = createActionGroup({
     'Load Detail': props<{ id: string }>(),
     'Load Detail Success': props<{ receipt: ReceiptWithItems }>(),
     'Load Detail Failure': props<{ error: string }>(),
+
+    // Update
+    'Update': props<{ id: string; data: ReceiptUpdatePayload }>(),
+    'Update Success': props<{ receipt: ReceiptWithItems }>(),
+    'Update Failure': props<{ error: string }>(),
 
     // Delete
     'Delete': props<{ id: string }>(),

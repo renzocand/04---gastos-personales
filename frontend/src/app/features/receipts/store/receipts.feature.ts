@@ -54,6 +54,20 @@ export const receiptsFeature = createFeature({
       error,
     })),
 
+    // Update
+    on(ReceiptsActions.update, (state) => ({ ...state, loading: true, error: null })),
+    on(ReceiptsActions.updateSuccess, (state, { receipt }) => ({
+      ...state,
+      selectedReceipt: receipt,
+      loading: false,
+      error: null,
+    })),
+    on(ReceiptsActions.updateFailure, (state, { error }) => ({
+      ...state,
+      loading: false,
+      error,
+    })),
+
     // Delete
     on(ReceiptsActions.delete, (state) => ({ ...state, loading: true, error: null })),
     on(ReceiptsActions.deleteSuccess, (state, { id }) => ({

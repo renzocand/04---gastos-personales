@@ -16,6 +16,7 @@ export type BreakdownRow = {
   icon?: string;
   totalPEN: number;
   percent: number;
+  colorIndex: number;
 };
 
 
@@ -35,12 +36,13 @@ export const selectCategoryBreakdown = createSelector(
 
     const totalGlobal = Object.values(totalsByCategory).reduce((acc,k)=> acc + k ,0)
 
-    return categories.map<BreakdownRow>(cat=> ({
+    return categories.map<BreakdownRow>((cat, index) => ({
         id: cat.id,
         label: cat.name,
         icon: cat.icon,
         totalPEN: totalsByCategory[cat.id]??0,
-        percent: totalGlobal>0?  (totalsByCategory[cat.id]??0) /totalGlobal*100 :0
+        percent: totalGlobal>0?  (totalsByCategory[cat.id]??0) /totalGlobal*100 :0,
+        colorIndex: index,
     }))
 
   }
@@ -176,18 +178,15 @@ export type CategoryChartData = {
   colors: string[];
 };
 
-const CATEGORY_COLORS: Record<string, string> = {
-  food: '#f97316',      // orange
-  transport: '#3b82f6', // blue
-  housing: '#a855f7',   // purple
-  services: '#6366f1',  // indigo
-  health: '#ef4444',    // red
-  education: '#eab308', // yellow
-  leisure: '#ec4899',   // pink
-  shopping: '#8b5cf6',  // violet
-  home: '#14b8a6',      // teal
-  other: '#64748b',     // slate
-};
+// Array de colores para categorías (se cicla si hay más categorías que colores)
+// Misma paleta que las barras de progreso y los iconos
+const CATEGORY_COLOR_PALETTE = [
+  '#8b5cf6', // violet
+  '#6366f1', // indigo
+  '#10b981', // emerald
+  '#f59e0b', // amber
+  '#f43f5e', // rose
+];
 
 export const selectCategoryChartData = createSelector(
   selectCategoryBreakdown,
@@ -196,7 +195,7 @@ export const selectCategoryChartData = createSelector(
     return {
       labels: filtered.map(r => r.label),
       data: filtered.map(r => r.totalPEN),
-      colors: filtered.map(r => CATEGORY_COLORS[r.id] ?? '#64748b'),
+      colors: filtered.map(r => CATEGORY_COLOR_PALETTE[r.colorIndex % CATEGORY_COLOR_PALETTE.length]),
     };
   }
 );

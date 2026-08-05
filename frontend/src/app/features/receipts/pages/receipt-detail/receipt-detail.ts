@@ -7,7 +7,9 @@ import {
   input,
   OnInit,
   OnDestroy,
+  signal,
 } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Store } from '@ngrx/store';
 import {
@@ -17,6 +19,8 @@ import {
   MessageCircle,
   Globe,
   Pencil,
+  Check,
+  X,
 } from 'lucide-angular';
 import { TranslocoModule } from '@jsverse/transloco';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -39,6 +43,7 @@ import { iconFor, colorFor } from '../../../categories/ui/category-display';
     TranslocoModule,
     Skeleton,
     ErrorState,
+    FormsModule,
   ],
   templateUrl: './receipt-detail.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -54,6 +59,13 @@ export class ReceiptDetail implements OnInit, OnDestroy {
   protected readonly TelegramIcon = MessageCircle;
   protected readonly WebIcon = Globe;
   protected readonly PencilIcon = Pencil;
+  protected readonly CheckIcon = Check;
+  protected readonly XIcon = X;
+
+  // Edit state
+  protected isEditing = signal(false);
+  protected editDate = signal('');
+  protected editVendor = signal('');
 
   protected readonly receipt = toSignal(
     this.store.select(receiptsFeature.selectSelectedReceipt)
@@ -125,5 +137,31 @@ export class ReceiptDetail implements OnInit, OnDestroy {
 
   protected onDeleteConfirmed(): void {
     this.store.dispatch(ReceiptsActions.delete({ id: this.id() }));
+  }
+
+  protected startEditing(): void {
+    const r = this.receipt();
+    if (r) {
+      this.editDate.set(r.date);
+      this.editVendor.set(r.vendor);
+      this.isEditing.set(true);
+    }
+  }
+
+  protected cancelEditing(): void {
+    this.isEditing.set(false);
+  }
+
+  protected saveEditing(): void {
+    this.store.dispatch(
+      ReceiptsActions.update({
+        id: this.id(),
+        data: {
+          date: this.editDate(),
+          vendor: this.editVendor() || undefined,
+        },
+      })
+    );
+    this.isEditing.set(false);
   }
 }

@@ -5,6 +5,7 @@
     "saving": "Guardando…",
     "cancel": "Cancelar",
     "delete": "Eliminar",
+    "edit": "Editar",
     "back": "Volver",
     "optional": "(opcional)"
   },
@@ -196,6 +197,7 @@
     "detail": {
       "title": "Detalle de boleta",
       "items": "Items",
+      "vendor": "Establecimiento",
       "loadError": "No pudimos cargar el detalle de la boleta",
       "deleteDialog": {
         "title": "Eliminar boleta",

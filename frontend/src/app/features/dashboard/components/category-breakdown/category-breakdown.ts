@@ -7,22 +7,27 @@ import {
   ProgressBar,
   ProgressColor,
 } from '../../../../shared/ui/progress-bar/progress-bar';
-import { colorFor, iconFor } from '../../../categories/ui/category-display';
+import { iconFor } from '../../../categories/ui/category-display';
 import { AppCurrencyPipe } from '../../../../shared/pipes/app-currency';
 import { BreakdownRow } from '../../store/dashboard.selectors';
 
-// Color de la barra por id de categoría (paleta reusada; cae a 'violet').
-const BAR_COLORS: Record<string, ProgressColor> = {
-  food: 'violet',
-  transport: 'indigo',
-  housing: 'emerald',
-  services: 'indigo',
-  health: 'rose',
-  education: 'indigo',
-  leisure: 'amber',
-  shopping: 'violet',
-  other: 'rose',
-};
+// Paleta de colores para barras de progreso (solo los colores definidos en ProgressColor)
+const BAR_COLOR_PALETTE: ProgressColor[] = [
+  'violet',
+  'indigo',
+  'emerald',
+  'amber',
+  'rose',
+];
+
+// Paleta de clases CSS para iconos (misma paleta que las barras)
+const ICON_COLOR_PALETTE = [
+  'bg-violet-100 text-violet-700',
+  'bg-indigo-100 text-indigo-700',
+  'bg-emerald-100 text-emerald-700',
+  'bg-amber-100 text-amber-700',
+  'bg-rose-100 text-rose-700',
+];
 
 @Component({
   selector: 'app-category-breakdown',
@@ -37,8 +42,8 @@ export class CategoryBreakdown {
     this.rows().map((row) => ({
       ...row,
       icon: iconFor(row.icon),
-      iconClass: colorFor(row.id),
-      barColor: BAR_COLORS[row.id] ?? 'violet',
+      iconClass: ICON_COLOR_PALETTE[row.colorIndex % ICON_COLOR_PALETTE.length],
+      barColor: BAR_COLOR_PALETTE[row.colorIndex % BAR_COLOR_PALETTE.length],
     })),
   );
 }
