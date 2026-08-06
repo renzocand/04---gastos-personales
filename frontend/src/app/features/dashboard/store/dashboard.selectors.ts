@@ -145,7 +145,6 @@ export const selectDailySpendingTrend = createSelector(
     if (rate === null) return [];
 
     const today = new Date();
-    const daysInMonth = getDaysInMonth(today);
     const currentDay = getDate(today);
 
     // Inicializar todos los días del mes hasta hoy
@@ -171,6 +170,89 @@ export const selectDailySpendingTrend = createSelector(
   }
 );
 
+/** Datos para gráfico de tendencia diaria apilado por categoría */
+export type StackedTrendDataset = {
+  label: string;
+  data: number[];
+  backgroundColor: string;
+};
+
+export type StackedTrendData = {
+  labels: string[];
+  datasets: StackedTrendDataset[];
+};
+
+export const selectDailySpendingByCategory = createSelector(
+  selectThisMonthExpenses,
+  exchangeRateFeature.selectRate,
+  categoryFeature.selectCategories,
+  (expenses, rate, categories) => {
+    if (rate === null) return { labels: [], datasets: [] };
+
+    const today = new Date();
+    const currentDay = getDate(today);
+
+    // Crear labels para los días
+    const labels = Array.from({ length: currentDay }, (_, i) => (i + 1).toString());
+
+    // Calcular totales por categoría para determinar las top 5
+    const totalsByCategory: Record<string, number> = {};
+    for (const e of expenses) {
+      totalsByCategory[e.categoryId] = (totalsByCategory[e.categoryId] ?? 0) + toPen(e, rate);
+    }
+
+    // Ordenar categorías por gasto total y tomar las top 5
+    const sortedCategories = categories
+      .filter(cat => (totalsByCategory[cat.id] ?? 0) > 0)
+      .sort((a, b) => (totalsByCategory[b.id] ?? 0) - (totalsByCategory[a.id] ?? 0));
+
+    const topCategories = sortedCategories.slice(0, MAX_CATEGORIES);
+    const topCategoryIds = new Set(topCategories.map(c => c.id));
+    const hasOthers = sortedCategories.length > MAX_CATEGORIES;
+
+    // Inicializar datos por día para cada categoría
+    const dailyByCategory: Record<string, number[]> = {};
+    for (const cat of topCategories) {
+      dailyByCategory[cat.id] = Array(currentDay).fill(0);
+    }
+    if (hasOthers) {
+      dailyByCategory['__others__'] = Array(currentDay).fill(0);
+    }
+
+    // Distribuir gastos por día y categoría
+    for (const e of expenses) {
+      const day = getDate(parseISO(e.date));
+      if (day <= currentDay) {
+        const dayIndex = day - 1;
+        const amount = toPen(e, rate);
+
+        if (topCategoryIds.has(e.categoryId)) {
+          dailyByCategory[e.categoryId][dayIndex] += amount;
+        } else if (hasOthers) {
+          dailyByCategory['__others__'][dayIndex] += amount;
+        }
+      }
+    }
+
+    // Construir datasets para Chart.js
+    const datasets: StackedTrendDataset[] = topCategories.map((cat, index) => ({
+      label: cat.name,
+      data: dailyByCategory[cat.id],
+      backgroundColor: DONUT_COLOR_PALETTE[index],
+    }));
+
+    if (hasOthers) {
+      datasets.push({
+        label: 'Otros',
+        data: dailyByCategory['__others__'],
+        backgroundColor: DONUT_COLOR_PALETTE[MAX_CATEGORIES],
+      });
+    }
+
+    return { labels, datasets };
+  }
+);
+
 /** Datos para gráfico de dona (categorías con color) */
 export type CategoryChartData = {
   labels: string[];
@@ -178,24 +260,45 @@ export type CategoryChartData = {
   colors: string[];
 };
 
-// Array de colores para categorías (se cicla si hay más categorías que colores)
-// Misma paleta que las barras de progreso y los iconos
-const CATEGORY_COLOR_PALETTE = [
-  '#8b5cf6', // violet
-  '#6366f1', // indigo
+// Paleta de 6 colores para el gráfico de dona (máximo 5 categorías + "Otros")
+// Colores con buen contraste entre sí
+const DONUT_COLOR_PALETTE = [
+  '#8b5cf6', // violet (categoría más alta)
   '#10b981', // emerald
   '#f59e0b', // amber
+  '#3b82f6', // blue
   '#f43f5e', // rose
+  '#64748b', // slate (para "Otros")
 ];
+
+const MAX_CATEGORIES = 5;
 
 export const selectCategoryChartData = createSelector(
   selectCategoryBreakdown,
   (breakdown) => {
-    const filtered = breakdown.filter(r => r.totalPEN > 0);
+    // Filtrar categorías con gastos y ordenar de mayor a menor
+    const filtered = breakdown
+      .filter(r => r.totalPEN > 0)
+      .sort((a, b) => b.totalPEN - a.totalPEN);
+
+    // Si hay 5 o menos categorías, mostrar todas
+    if (filtered.length <= MAX_CATEGORIES) {
+      return {
+        labels: filtered.map(r => r.label),
+        data: filtered.map(r => r.totalPEN),
+        colors: filtered.map((_, i) => DONUT_COLOR_PALETTE[i]),
+      };
+    }
+
+    // Tomar las 5 principales y agrupar el resto en "Otros"
+    const top5 = filtered.slice(0, MAX_CATEGORIES);
+    const rest = filtered.slice(MAX_CATEGORIES);
+    const otherTotal = rest.reduce((sum, r) => sum + r.totalPEN, 0);
+
     return {
-      labels: filtered.map(r => r.label),
-      data: filtered.map(r => r.totalPEN),
-      colors: filtered.map(r => CATEGORY_COLOR_PALETTE[r.colorIndex % CATEGORY_COLOR_PALETTE.length]),
+      labels: [...top5.map(r => r.label), 'Otros'],
+      data: [...top5.map(r => r.totalPEN), otherTotal],
+      colors: DONUT_COLOR_PALETTE.slice(0, MAX_CATEGORIES + 1),
     };
   }
 );

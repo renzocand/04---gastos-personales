@@ -10,7 +10,7 @@ import { Store } from '@ngrx/store';
 import { TranslocoModule } from '@jsverse/transloco';
 import { Chart, registerables } from 'chart.js';
 import { Card } from '../../../../shared/ui/card/card';
-import { selectDailySpendingTrend } from '../../store/dashboard.selectors';
+import { selectDailySpendingByCategory } from '../../store/dashboard.selectors';
 
 Chart.register(...registerables);
 
@@ -39,13 +39,13 @@ export class SpendingTrendChart {
   private readonly chartCanvas = viewChild<ElementRef<HTMLCanvasElement>>('chartCanvas');
   private chart: Chart | null = null;
 
-  private readonly data = this.store.selectSignal(selectDailySpendingTrend);
+  private readonly data = this.store.selectSignal(selectDailySpendingByCategory);
 
   constructor() {
     effect(() => {
       const canvas = this.chartCanvas();
       const data = this.data();
-      if (!canvas || data.length === 0) return;
+      if (!canvas || data.labels.length === 0) return;
 
       if (this.chart) {
         this.chart.destroy();
@@ -54,30 +54,36 @@ export class SpendingTrendChart {
       this.chart = new Chart(canvas.nativeElement, {
         type: 'bar',
         data: {
-          labels: data.map(d => d.label),
-          datasets: [
-            {
-              data: data.map(d => d.amount),
-              backgroundColor: 'rgba(139, 92, 246, 0.7)',
-              borderColor: 'rgb(139, 92, 246)',
-              borderWidth: 1,
-              borderRadius: 4,
-            },
-          ],
+          labels: data.labels,
+          datasets: data.datasets.map(ds => ({
+            label: ds.label,
+            data: ds.data,
+            backgroundColor: ds.backgroundColor,
+            borderRadius: 2,
+          })),
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            legend: { display: false },
+            legend: {
+              display: true,
+              position: 'bottom',
+              labels: {
+                boxWidth: 12,
+                padding: 8,
+                font: { size: 10 },
+              },
+            },
             tooltip: {
               callbacks: {
-                label: (ctx) => `S/ ${(ctx.parsed.y ?? 0).toFixed(2)}`,
+                label: (ctx) => `${ctx.dataset.label}: S/ ${(ctx.parsed.y ?? 0).toFixed(2)}`,
               },
             },
           },
           scales: {
             x: {
+              stacked: true,
               grid: { display: false },
               ticks: {
                 maxRotation: 0,
@@ -86,6 +92,7 @@ export class SpendingTrendChart {
               },
             },
             y: {
+              stacked: true,
               beginAtZero: true,
               ticks: {
                 callback: (value) => `S/ ${value}`,

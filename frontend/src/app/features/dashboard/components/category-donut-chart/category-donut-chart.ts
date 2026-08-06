@@ -27,7 +27,7 @@ Chart.register(...registerables);
           {{ 'dashboard.breakdown.subtitle' | transloco }}
         </p>
         <div class="mt-4 flex items-center justify-center">
-          <div class="h-56 w-56">
+          <div class="h-72 w-full max-w-sm sm:h-80 sm:w-80 lg:h-96 lg:w-96">
             <canvas #chartCanvas></canvas>
           </div>
         </div>
