@@ -42,6 +42,10 @@ public class UserCategory {
     @Column(length = 50)
     private String icon;
 
+    /** Color hex para gráficos (ej: "#8b5cf6"). */
+    @Column(length = 7)
+    private String color;
+
     /** Descripción/contexto para que la IA entienda cuándo usar esta categoría. */
     @Column(length = 500)
     private String description;
@@ -66,10 +70,11 @@ public class UserCategory {
         }
     }
 
-    public UserCategory(User user, String name, String icon, String description, Integer sortOrder) {
+    public UserCategory(User user, String name, String icon, String color, String description, Integer sortOrder) {
         this.user = user;
         this.name = name;
         this.icon = icon;
+        this.color = color;
         this.description = description;
         this.sortOrder = sortOrder;
         this.active = true;

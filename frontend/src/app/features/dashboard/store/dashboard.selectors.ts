@@ -3,7 +3,8 @@ import { expensesFeature } from "../../expenses/store/expenses.feature";
 import { exchangeRateFeature } from "../../exchange-rate/store/exchange-rate.feature";
 import { categoryFeature } from "../../categories/store/category.feature";
 import { Expense } from "../../expenses/models/expense";
-import { parseISO, isThisMonth, format, getDaysInMonth, getDate, subMonths, isSameMonth } from "date-fns";
+import { getColorHex } from "../../categories/ui/category-display";
+import { parseISO, isThisMonth, getDaysInMonth, getDate, subMonths, isSameMonth } from "date-fns";
 
 
 function toPen(expense:Expense, rate:number):number{
@@ -14,6 +15,7 @@ export type BreakdownRow = {
   id: string;
   label: string;
   icon?: string;
+  color: string;
   totalPEN: number;
   percent: number;
   colorIndex: number;
@@ -40,6 +42,7 @@ export const selectCategoryBreakdown = createSelector(
         id: cat.id,
         label: cat.name,
         icon: cat.icon,
+        color: getColorHex(cat.color),
         totalPEN: totalsByCategory[cat.id]??0,
         percent: totalGlobal>0?  (totalsByCategory[cat.id]??0) /totalGlobal*100 :0,
         colorIndex: index,
@@ -58,7 +61,7 @@ export const selectRecentExpenses = createSelector(
 // ─────────────────────────────────────────────────────────────
 
 /** Gastos del mes actual filtrados */
-const selectThisMonthExpenses = createSelector(
+export const selectThisMonthExpenses = createSelector(
   expensesFeature.selectExpenses,
   (expenses) => expenses.filter(e => isThisMonth(parseISO(e.date)))
 );
@@ -182,6 +185,9 @@ export type StackedTrendData = {
   datasets: StackedTrendDataset[];
 };
 
+const MAX_CATEGORIES = 5;
+const OTHERS_COLOR = '#64748b'; // slate para "Otros"
+
 export const selectDailySpendingByCategory = createSelector(
   selectThisMonthExpenses,
   exchangeRateFeature.selectRate,
@@ -234,18 +240,18 @@ export const selectDailySpendingByCategory = createSelector(
       }
     }
 
-    // Construir datasets para Chart.js
-    const datasets: StackedTrendDataset[] = topCategories.map((cat, index) => ({
+    // Construir datasets para Chart.js usando colores de BD
+    const datasets: StackedTrendDataset[] = topCategories.map((cat) => ({
       label: cat.name,
       data: dailyByCategory[cat.id],
-      backgroundColor: DONUT_COLOR_PALETTE[index],
+      backgroundColor: getColorHex(cat.color),
     }));
 
     if (hasOthers) {
       datasets.push({
         label: 'Otros',
         data: dailyByCategory['__others__'],
-        backgroundColor: DONUT_COLOR_PALETTE[MAX_CATEGORIES],
+        backgroundColor: OTHERS_COLOR,
       });
     }
 
@@ -255,23 +261,11 @@ export const selectDailySpendingByCategory = createSelector(
 
 /** Datos para gráfico de dona (categorías con color) */
 export type CategoryChartData = {
+  ids: (string | null)[]; // null para "Otros"
   labels: string[];
   data: number[];
   colors: string[];
 };
-
-// Paleta de 6 colores para el gráfico de dona (máximo 5 categorías + "Otros")
-// Colores con buen contraste entre sí
-const DONUT_COLOR_PALETTE = [
-  '#8b5cf6', // violet (categoría más alta)
-  '#10b981', // emerald
-  '#f59e0b', // amber
-  '#3b82f6', // blue
-  '#f43f5e', // rose
-  '#64748b', // slate (para "Otros")
-];
-
-const MAX_CATEGORIES = 5;
 
 export const selectCategoryChartData = createSelector(
   selectCategoryBreakdown,
@@ -281,12 +275,13 @@ export const selectCategoryChartData = createSelector(
       .filter(r => r.totalPEN > 0)
       .sort((a, b) => b.totalPEN - a.totalPEN);
 
-    // Si hay 5 o menos categorías, mostrar todas
+    // Si hay 5 o menos categorías, mostrar todas con sus colores de BD
     if (filtered.length <= MAX_CATEGORIES) {
       return {
+        ids: filtered.map(r => r.id),
         labels: filtered.map(r => r.label),
         data: filtered.map(r => r.totalPEN),
-        colors: filtered.map((_, i) => DONUT_COLOR_PALETTE[i]),
+        colors: filtered.map(r => r.color),
       };
     }
 
@@ -296,9 +291,10 @@ export const selectCategoryChartData = createSelector(
     const otherTotal = rest.reduce((sum, r) => sum + r.totalPEN, 0);
 
     return {
+      ids: [...top5.map(r => r.id), null], // null para "Otros"
       labels: [...top5.map(r => r.label), 'Otros'],
       data: [...top5.map(r => r.totalPEN), otherTotal],
-      colors: DONUT_COLOR_PALETTE.slice(0, MAX_CATEGORIES + 1),
+      colors: [...top5.map(r => r.color), OTHERS_COLOR],
     };
   }
 );

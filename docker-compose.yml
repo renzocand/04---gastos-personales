@@ -72,6 +72,8 @@ services:
       GASTOS_BACKEND_URL: http://backend:8080
       GEMINI_API_KEY: ${GEMINI_API_KEY}
       GEMINI_MODEL: ${GEMINI_MODEL:-gemini-flash-latest}
+    volumes:
+      - ./telegram-bot/bot.py:/app/bot.py:ro  # Hot reload: cambios sin rebuild
     depends_on:
       - backend
       - ocr-service

@@ -88,6 +88,7 @@ public class UserCategoryService {
                 user,
                 request.name(),
                 request.icon(),
+                request.color(),
                 request.description(),
                 request.sortOrder() != null ? request.sortOrder() : nextOrder
         );
@@ -113,6 +114,7 @@ public class UserCategoryService {
 
         category.setName(request.name());
         category.setIcon(request.icon());
+        category.setColor(request.color());
         category.setDescription(request.description());
         if (request.sortOrder() != null) {
             category.setSortOrder(request.sortOrder());
@@ -143,13 +145,14 @@ public class UserCategoryService {
             return;
         }
 
-        // Copiar categorías globales
+        // Copiar categorías globales (color se asigna en frontend)
         List<Category> globalCategories = categoryRepository.findAll(Sort.by("sortOrder"));
         for (Category global : globalCategories) {
             UserCategory userCategory = new UserCategory(
                     user,
                     global.getName(),
                     global.getIcon(),
+                    null,
                     global.getDescription(),
                     global.getSortOrder()
             );
@@ -183,6 +186,7 @@ public class UserCategoryService {
                 category.getId(),
                 category.getName(),
                 category.getIcon(),
+                category.getColor(),
                 category.getDescription(),
                 category.getSortOrder(),
                 category.isActive()

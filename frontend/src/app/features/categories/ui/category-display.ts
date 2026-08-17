@@ -15,12 +15,14 @@ import {
   UtensilsCrossed,
   Zap,
 } from 'lucide-angular';
+import { CdnIcon } from '../../../shared/ui/cdn-icon/cdn-icon';
+import { SYSTEM_COLOR_PALETTE } from '../models/category';
 
 type LucideIcon = typeof Package;
 
 /**
- * Mapa nombre-de-icono (tal como lo guarda la BD en category.icon) → componente
- * lucide. Si la BD trae un icono que no está acá, se cae a `Package`.
+ * Mapa de iconos bundled para componentes que aún usan iconFor().
+ * Para nuevos componentes, usar CdnIcon directamente.
  */
 const CATEGORY_ICONS: Record<string, LucideIcon> = {
   UtensilsCrossed,
@@ -38,28 +40,31 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
   Tag,
 };
 
+/**
+ * Resuelve el nombre de icono a un componente Lucide.
+ * @deprecated Usar CdnIcon para iconos dinámicos
+ */
 export function iconFor(name?: string): LucideIcon {
   return (name && CATEGORY_ICONS[name]) || Package;
 }
 
 /**
- * Componente que muestra el icono de una categoría dado su nombre.
+ * Componente que muestra el icono de una categoría cargado desde CDN.
  */
 @Component({
   selector: 'app-category-icon',
   standalone: true,
-  imports: [LucideAngularModule],
-  template: `<lucide-angular [img]="icon()" class="size-full"></lucide-angular>`,
+  imports: [CdnIcon],
+  template: `<app-cdn-icon [name]="iconName() || 'Package'" class="size-full" />`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CategoryIconDisplay {
   iconName = input<string | undefined>();
-  icon = computed(() => iconFor(this.iconName()));
 }
 
 /**
- * Color (clases Tailwind) por id de categoría. Es detalle de presentación, por
- * eso vive en el front. Ids desconocidos caen a un gris neutro.
+ * Clases Tailwind para colores de categoría.
+ * @deprecated Usar getColorHex() para colores dinámicos de BD
  */
 const CATEGORY_COLORS: Record<string, string> = {
   food: 'bg-violet-100 text-violet-700',
@@ -74,6 +79,24 @@ const CATEGORY_COLORS: Record<string, string> = {
   other: 'bg-slate-100 text-slate-700',
 };
 
+/**
+ * Obtiene clases Tailwind para el color de una categoría (legacy).
+ * @deprecated Usar getColorHex() para colores dinámicos de BD
+ */
 export function colorFor(id: string): string {
   return CATEGORY_COLORS[id] ?? 'bg-slate-100 text-slate-700';
 }
+
+/** Color gris por defecto para categorías sin color configurado */
+const DEFAULT_COLOR = '#94a3b8'; // slate-400
+
+/**
+ * Obtiene el color hex de una categoría.
+ * Si no tiene color asignado, retorna gris para indicar que falta configurar.
+ */
+export function getColorHex(color: string | undefined | null): string {
+  return color || DEFAULT_COLOR;
+}
+
+// Re-export para uso en otros módulos
+export { CdnIcon };

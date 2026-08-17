@@ -20,8 +20,13 @@ import re
 import json
 import base64
 import time
+import asyncio
 from datetime import date
 import httpx
+
+# Configuración de reintentos
+MAX_RETRIES = 3
+RETRY_DELAY_BASE = 2  # segundos (backoff exponencial: 2, 4, 8)
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     Application,
@@ -405,18 +410,118 @@ async def process_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     except httpx.RequestError as e:
         logger.error(f"Error processing photo: {e}")
         await update.message.reply_text(
-            "❌ Error de conexión procesando la imagen. Intenta más tarde."
+            f"❌ *Error de conexión*\n\n"
+            f"Causa: {str(e)[:100]}\n\n"
+            f"Intenta más tarde.",
+            parse_mode="Markdown"
         )
     except json.JSONDecodeError as e:
-        logger.error(f"Error parsing Gemini response: {e}")
+        logger.error(f"Error parsing Gemini response: {e}. This usually means the response was truncated.")
         await update.message.reply_text(
-            "❌ No pude procesar la imagen. Intenta con otra foto más clara."
+            "❌ *Error al procesar boleta*\n\n"
+            "Causa: La respuesta del OCR fue incompleta (posible boleta muy larga).\n\n"
+            "Intenta de nuevo o envía una foto más nítida.",
+            parse_mode="Markdown"
+        )
+    except GeminiAPIError as e:
+        logger.error(f"Gemini API error processing photo: {e}", exc_info=True)
+        user_msg = e.get_user_message()
+        await update.message.reply_text(
+            f"❌ *Error al procesar boleta*\n\n"
+            f"Causa: {user_msg}\n\n"
+            f"Intenta de nuevo en unos segundos.",
+            parse_mode="Markdown"
         )
     except Exception as e:
         logger.error(f"Unexpected error processing photo: {type(e).__name__}: {e}", exc_info=True)
         await update.message.reply_text(
-            "❌ Error inesperado. Intenta de nuevo."
+            f"❌ *Error inesperado*\n\n"
+            f"Causa: {type(e).__name__}: {str(e)[:100]}\n\n"
+            f"Intenta de nuevo.",
+            parse_mode="Markdown"
         )
+
+
+class GeminiAPIError(Exception):
+    """Error específico de la API de Gemini con detalles."""
+    def __init__(self, status_code: int, message: str):
+        self.status_code = status_code
+        self.message = message
+        super().__init__(f"Gemini API error {status_code}: {message}")
+
+    def get_user_message(self) -> str:
+        """Retorna un mensaje amigable para el usuario."""
+        if self.status_code == 503:
+            return "El servicio de IA está temporalmente sobrecargado"
+        elif self.status_code == 429:
+            return "Se excedió el límite de solicitudes a la IA"
+        elif self.status_code == 500:
+            return "Error interno del servicio de IA"
+        elif self.status_code == 400:
+            return f"Solicitud inválida: {self.message}"
+        elif self.status_code == 401 or self.status_code == 403:
+            return "Error de autenticación con el servicio de IA"
+        else:
+            return f"Error del servicio de IA (código {self.status_code})"
+
+
+async def call_gemini_with_retry(request_body: dict, timeout: float = 60.0) -> dict:
+    """Llama a Gemini con reintentos automáticos para errores transitorios."""
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent?key={GEMINI_API_KEY}"
+
+    last_error = None
+    for attempt in range(MAX_RETRIES):
+        try:
+            async with httpx.AsyncClient(timeout=timeout) as client:
+                response = await client.post(
+                    url,
+                    json=request_body,
+                    headers={"Content-Type": "application/json"}
+                )
+
+                if response.status_code == 200:
+                    data = response.json()
+                    if "error" in data:
+                        error_msg = data['error'].get('message', 'Unknown error')
+                        raise GeminiAPIError(500, error_msg)
+                    return data
+
+                # Errores que merecen reintento (transitorios)
+                if response.status_code in (503, 429, 500, 502, 504):
+                    error_text = response.text[:200]  # Limitar texto de error
+                    logger.warning(f"Gemini API error {response.status_code} (attempt {attempt + 1}/{MAX_RETRIES}): {error_text}")
+                    last_error = GeminiAPIError(response.status_code, error_text)
+
+                    if attempt < MAX_RETRIES - 1:
+                        delay = RETRY_DELAY_BASE * (2 ** attempt)  # Backoff exponencial
+                        logger.info(f"Retrying in {delay} seconds...")
+                        await asyncio.sleep(delay)
+                        continue
+                else:
+                    # Error no recuperable
+                    error_text = response.text[:200]
+                    logger.error(f"Gemini API error: {response.status_code} - {error_text}")
+                    raise GeminiAPIError(response.status_code, error_text)
+
+        except httpx.TimeoutException as e:
+            logger.warning(f"Gemini timeout (attempt {attempt + 1}/{MAX_RETRIES}): {e}")
+            last_error = GeminiAPIError(504, "Timeout en la solicitud")
+            if attempt < MAX_RETRIES - 1:
+                delay = RETRY_DELAY_BASE * (2 ** attempt)
+                await asyncio.sleep(delay)
+                continue
+        except GeminiAPIError:
+            raise
+        except httpx.RequestError as e:
+            logger.warning(f"Gemini request error (attempt {attempt + 1}/{MAX_RETRIES}): {e}")
+            last_error = GeminiAPIError(0, str(e))
+            if attempt < MAX_RETRIES - 1:
+                delay = RETRY_DELAY_BASE * (2 ** attempt)
+                await asyncio.sleep(delay)
+                continue
+
+    # Si llegamos aquí, agotamos los reintentos
+    raise last_error
 
 
 async def call_gemini_for_text(message_text: str, categories: list[dict]) -> dict:
@@ -439,40 +544,23 @@ async def call_gemini_for_text(message_text: str, categories: list[dict]) -> dic
         ],
         "generationConfig": {
             "temperature": 0.1,
-            "maxOutputTokens": 2048
+            "maxOutputTokens": 65536
         }
     }
 
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent?key={GEMINI_API_KEY}"
+    data = await call_gemini_with_retry(request_body, timeout=60.0)
 
-    async with httpx.AsyncClient(timeout=60.0) as client:
-        response = await client.post(
-            url,
-            json=request_body,
-            headers={"Content-Type": "application/json"}
-        )
+    # Extraer texto de respuesta
+    candidates = data.get("candidates", [])
+    if not candidates:
+        raise GeminiAPIError(500, "No candidates in Gemini response")
 
-        if response.status_code != 200:
-            logger.error(f"Gemini API error: {response.status_code} - {response.text}")
-            raise Exception(f"Gemini API error: {response.status_code}")
+    text = candidates[0]["content"]["parts"][0]["text"]
+    logger.info(f"Gemini raw response for text expense: {text}")
 
-        data = response.json()
-
-        # Verificar errores
-        if "error" in data:
-            raise Exception(f"Gemini error: {data['error'].get('message', 'Unknown')}")
-
-        # Extraer texto de respuesta
-        candidates = data.get("candidates", [])
-        if not candidates:
-            raise Exception("No candidates in Gemini response")
-
-        text = candidates[0]["content"]["parts"][0]["text"]
-        logger.info(f"Gemini raw response for text expense: {text}")
-
-        # Extraer JSON de la respuesta
-        json_str = extract_json_from_text(text)
-        return json.loads(json_str)
+    # Extraer JSON de la respuesta
+    json_str = extract_json_from_text(text)
+    return json.loads(json_str)
 
 
 def extract_json_from_text(text: str) -> str:
@@ -486,9 +574,22 @@ def extract_json_from_text(text: str) -> str:
     end = cleaned.rfind('}')
 
     if start == -1 or end == -1 or end < start:
-        raise ValueError(f"No valid JSON found in response: {text}")
+        logger.error(f"No valid JSON structure found. Raw response: {text}")
+        raise ValueError(f"No valid JSON found in response")
 
-    return cleaned[start:end + 1]
+    json_str = cleaned[start:end + 1]
+
+    # Verificar balance de llaves para detectar truncamiento
+    open_braces = json_str.count('{')
+    close_braces = json_str.count('}')
+    open_brackets = json_str.count('[')
+    close_brackets = json_str.count(']')
+
+    if open_braces != close_braces or open_brackets != close_brackets:
+        logger.error(f"Truncated JSON detected (braces: {open_braces}/{close_braces}, brackets: {open_brackets}/{close_brackets}). Raw response: {text}")
+        raise ValueError(f"JSON appears to be truncated")
+
+    return json_str
 
 
 
@@ -521,37 +622,21 @@ async def call_gemini_for_image(image_bytes: bytes, categories: list[dict], mime
         ],
         "generationConfig": {
             "temperature": 0.1,
-            "maxOutputTokens": 4096
+            "maxOutputTokens": 65536
         }
     }
 
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent?key={GEMINI_API_KEY}"
+    data = await call_gemini_with_retry(request_body, timeout=180.0)
 
-    async with httpx.AsyncClient(timeout=120.0) as client:
-        response = await client.post(
-            url,
-            json=request_body,
-            headers={"Content-Type": "application/json"}
-        )
+    candidates = data.get("candidates", [])
+    if not candidates:
+        raise GeminiAPIError(500, "No candidates in Gemini response")
 
-        if response.status_code != 200:
-            logger.error(f"Gemini Vision API error: {response.status_code} - {response.text}")
-            raise Exception(f"Gemini Vision API error: {response.status_code}")
+    text = candidates[0]["content"]["parts"][0]["text"]
+    logger.info(f"Gemini Vision raw response: {text}")
 
-        data = response.json()
-
-        if "error" in data:
-            raise Exception(f"Gemini error: {data['error'].get('message', 'Unknown')}")
-
-        candidates = data.get("candidates", [])
-        if not candidates:
-            raise Exception("No candidates in Gemini response")
-
-        text = candidates[0]["content"]["parts"][0]["text"]
-        logger.info(f"Gemini Vision raw response: {text}")
-
-        json_str = extract_json_from_text(text)
-        return json.loads(json_str)
+    json_str = extract_json_from_text(text)
+    return json.loads(json_str)
 
 
 async def process_text_expense(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -689,10 +774,22 @@ async def process_text_expense(update: Update, context: ContextTypes.DEFAULT_TYP
             "Intenta con un formato más claro: `237 mantenimiento`",
             parse_mode="Markdown"
         )
+    except GeminiAPIError as e:
+        logger.error(f"Gemini API error processing text expense: {e}", exc_info=True)
+        user_msg = e.get_user_message()
+        await update.message.reply_text(
+            f"❌ *Error al procesar gasto*\n\n"
+            f"Causa: {user_msg}\n\n"
+            f"Intenta de nuevo en unos segundos.",
+            parse_mode="Markdown"
+        )
     except Exception as e:
         logger.error(f"Error processing text expense: {type(e).__name__}: {e}", exc_info=True)
         await update.message.reply_text(
-            "❌ Error procesando el mensaje. Intenta de nuevo."
+            f"❌ *Error procesando el mensaje*\n\n"
+            f"Causa: {type(e).__name__}: {str(e)[:100]}\n\n"
+            f"Intenta de nuevo.",
+            parse_mode="Markdown"
         )
 
 

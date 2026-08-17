@@ -23,25 +23,14 @@
         </div>
       </ui-card>
     </div>
-    <div class="grid gap-5 sm:gap-6 lg:grid-cols-5">
-      <ui-card class="lg:col-span-2">
+    <div class="grid gap-5 sm:gap-6 lg:grid-cols-2">
+      <ui-card>
         <div class="space-y-4 p-5 sm:p-6">
           <ui-skeleton class="h-4 w-32" />
-          @for (i of [1, 2, 3, 4]; track i) {
-            <div>
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                  <ui-skeleton class="h-9 w-9 rounded-lg" />
-                  <ui-skeleton class="h-4 w-20" />
-                </div>
-                <ui-skeleton class="h-4 w-14" />
-              </div>
-              <ui-skeleton class="mt-2 h-2 w-full" />
-            </div>
-          }
+          <ui-skeleton class="mx-auto h-64 w-64 rounded-full" />
         </div>
       </ui-card>
-      <ui-card class="lg:col-span-3">
+      <ui-card>
         <div class="space-y-3 p-5 sm:p-6">
           @for (i of [1, 2, 3, 4, 5]; track i) {
             <div class="flex items-center gap-3">
@@ -95,14 +84,17 @@
     <!-- Gráfico de tendencia diaria -->
     <app-spending-trend-chart />
 
-    <!-- Gráficos y listas -->
-    <div class="grid gap-5 sm:gap-6 lg:grid-cols-5">
-      <div class="lg:col-span-2">
-        <app-category-donut-chart />
-      </div>
-      <div class="lg:col-span-3">
-        <app-recent-expenses [items]="recentExpenses()" />
-      </div>
+    <!-- Gráfico de dona + Tabla de gastos del mes -->
+    <div class="grid gap-5 sm:gap-6 lg:grid-cols-2">
+      <app-category-donut-chart
+        [selectedCategoryId]="selectedCategoryId()"
+        (categoryClick)="onCategoryClick($event)"
+      />
+      <app-month-expenses-table
+        [expenses]="monthExpenses()"
+        [selectedCategoryId]="selectedCategoryId()"
+        (clearFilter)="clearCategoryFilter()"
+      />
     </div>
   }
 </div>

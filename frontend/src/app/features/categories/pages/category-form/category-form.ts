@@ -1,45 +1,29 @@
 import { Location } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { ArrowLeft, LucideAngularModule, Trash2 } from 'lucide-angular';
+import { ArrowLeft, LucideAngularModule, RefreshCw, Trash2 } from 'lucide-angular';
 import { TranslocoModule } from '@jsverse/transloco';
 import { Card } from '../../../../shared/ui/card/card';
 import { ConfirmDialog } from '../../../../shared/ui/confirm-dialog/confirm-dialog';
+import { CdnIcon } from '../../../../shared/ui/cdn-icon/cdn-icon';
+import { IconPicker } from '../../../../shared/ui/icon-picker/icon-picker';
 import { categoryFeature } from '../../store/category.feature';
 import { CategoriesActions } from '../../store/category.actions';
-import { CategoryRequest } from '../../models/category';
-import { CategoryIconDisplay, iconFor } from '../../ui/category-display';
+import { CategoryRequest, SYSTEM_COLOR_PALETTE, generateRandomColor } from '../../models/category';
 
 export type CategoryFormMode = 'create' | 'edit';
-
-// Iconos disponibles para categorías
-const AVAILABLE_ICONS = [
-  { id: 'UtensilsCrossed', name: 'Cubiertos' },
-  { id: 'Utensils', name: 'Restaurante' },
-  { id: 'Home', name: 'Casa' },
-  { id: 'Bus', name: 'Transporte' },
-  { id: 'CreditCard', name: 'Tarjeta' },
-  { id: 'Sparkles', name: 'Limpieza' },
-  { id: 'ShoppingBag', name: 'Compras' },
-  { id: 'HeartPulse', name: 'Salud' },
-  { id: 'GraduationCap', name: 'Educacion' },
-  { id: 'Gamepad2', name: 'Ocio' },
-  { id: 'Zap', name: 'Servicios' },
-  { id: 'Package', name: 'Otros' },
-];
 
 @Component({
   selector: 'app-category-form',
   imports: [
     Card,
-    RouterLink,
     LucideAngularModule,
     ConfirmDialog,
     ReactiveFormsModule,
     TranslocoModule,
-    CategoryIconDisplay,
+    CdnIcon,
+    IconPicker,
   ],
   templateUrl: './category-form.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -54,10 +38,11 @@ export class CategoryForm {
 
   protected readonly ArrowLeftIcon = ArrowLeft;
   protected readonly TrashIcon = Trash2;
-  protected readonly availableIcons = AVAILABLE_ICONS;
-  protected readonly iconFor = iconFor;
+  protected readonly RefreshIcon = RefreshCw;
+  protected readonly systemColors = SYSTEM_COLOR_PALETTE;
 
   protected readonly isEdit = computed(() => this.mode() === 'edit');
+  protected showIconPicker = signal(false);
 
   private readonly categories = this.store.selectSignal(categoryFeature.selectCategories);
   protected readonly saving = this.store.selectSignal(categoryFeature.selectSaving);
@@ -72,8 +57,22 @@ export class CategoryForm {
   protected readonly form = this.fb.group({
     name: ['', [Validators.required, Validators.maxLength(50)]],
     icon: ['Package'],
+    color: [this.getDefaultColor()],
     description: ['', [Validators.maxLength(500)]],
   });
+
+  /** Obtiene el siguiente color de la paleta o genera uno aleatorio */
+  private getDefaultColor(): string {
+    const usedColors = new Set(this.categories().map((c) => c.color).filter(Boolean));
+    // Buscar el primer color de la paleta que no esté usado
+    for (const color of SYSTEM_COLOR_PALETTE) {
+      if (!usedColors.has(color)) {
+        return color;
+      }
+    }
+    // Si todos están usados, generar aleatorio
+    return generateRandomColor();
+  }
 
   private readonly syncForm = effect(() => {
     const category = this.currentCategory();
@@ -82,9 +81,23 @@ export class CategoryForm {
     this.form.patchValue({
       name: category.name,
       icon: category.icon || 'Package',
+      color: category.color || this.getDefaultColor(),
       description: category.description || '',
     });
   });
+
+  protected onIconSelected(iconName: string): void {
+    this.form.controls.icon.setValue(iconName);
+    this.showIconPicker.set(false);
+  }
+
+  protected onColorSelected(color: string): void {
+    this.form.controls.color.setValue(color);
+  }
+
+  protected generateNewColor(): void {
+    this.form.controls.color.setValue(generateRandomColor());
+  }
 
   protected onSubmit(): void {
     if (this.form.invalid) {
@@ -92,10 +105,11 @@ export class CategoryForm {
       return;
     }
 
-    const { name, icon, description } = this.form.getRawValue();
+    const { name, icon, color, description } = this.form.getRawValue();
     const request: CategoryRequest = {
       name,
       icon,
+      color,
       description: description || undefined,
     };
 

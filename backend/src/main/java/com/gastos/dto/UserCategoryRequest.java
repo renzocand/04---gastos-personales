@@ -15,6 +15,9 @@ public record UserCategoryRequest(
         @Size(max = 50, message = "{category.icon.size}")
         String icon,
 
+        @Size(max = 7, message = "{category.color.size}")
+        String color,
+
         @Size(max = 500, message = "{category.description.size}")
         String description,
 

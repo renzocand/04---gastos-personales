@@ -8,6 +8,7 @@ public record UserCategoryResponse(
         String id,
         String name,
         String icon,
+        String color,
         String description,
         Integer sortOrder,
         boolean active
